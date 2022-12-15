@@ -10,7 +10,6 @@ import {
   View,
 } from 'react-native';
 import {TextField} from 'rn-material-ui-textfield';
-import {Dimensions} from 'react-native';
 import OutlinedButton from '../components/OutlinedButton';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {Formik} from 'formik';
@@ -19,6 +18,7 @@ import * as yup from 'yup';
 const LoginScreen = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
+
   const loginValidationSchema = yup.object().shape({
     email: yup
       .string()
@@ -33,6 +33,14 @@ const LoginScreen = ({navigation}) => {
   const handleForgotPasssword = () => {
     navigation.navigate('ForgotPassword');
   };
+
+  const handleCreateAccount = () => {
+    navigation.navigate('Register');
+  };
+
+  const handleSkip = () => {
+    navigation.navigate('HomeScreen');
+  };
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -46,6 +54,7 @@ const LoginScreen = ({navigation}) => {
               initialValues={{email: '', password: ''}}
               onSubmit={values => {
                 console.log(values);
+                navigation.navigate('HomeScreen');
               }}>
               {({
                 handleChange,
@@ -57,7 +66,7 @@ const LoginScreen = ({navigation}) => {
                 touched,
               }) => (
                 <>
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={handleSkip}>
                     <Text style={styles.skip}>Skip ></Text>
                   </TouchableOpacity>
                   <View>
@@ -168,7 +177,7 @@ const LoginScreen = ({navigation}) => {
                   <View style={styles.loginButtonContainer}>
                     <OutlinedButton text="Login" onPress={handleSubmit} />
                   </View>
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={handleCreateAccount}>
                     <Text style={styles.createAccText}>Create Account</Text>
                   </TouchableOpacity>
                 </>

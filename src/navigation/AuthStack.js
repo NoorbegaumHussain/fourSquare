@@ -8,7 +8,8 @@ import {NavigationContainer} from '@react-navigation/native';
 import LoginScreen from '../screens/LoginScreen';
 import ForgotPassword from '../screens/ForgotPassword';
 import ConfirmPassword from '../screens/ConfirmPassword';
-
+import Register from '../screens/Register';
+import HomeScreen from '../screens/HomeScreen';
 const Stack = createStackNavigator();
 
 const AuthStack = () => {
@@ -34,6 +35,22 @@ const AuthStack = () => {
         <Stack.Screen
           name="ConfirmPassword"
           component={ConfirmPassword}
+          options={{
+            headerShown: false,
+            // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={Register}
+          options={{
+            headerShown: false,
+            // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          }}
+        />
+        <Stack.Screen
+          name="HomeScreen"
+          component={HomeScreen}
           options={{
             headerShown: false,
             // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,

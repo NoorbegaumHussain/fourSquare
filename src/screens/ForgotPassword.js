@@ -18,8 +18,10 @@ const ForgotPassword = ({navigation}) => {
   const width1 = width < height ? 11.5 : 20;
   const [otp, setOtp] = useState('');
   const handleGetIn = () => {
-    if(otp !== ''){
-        navigation.navigate('ConfirmPassword')
+    if (otp !== '') {
+      navigation.navigate('ConfirmPassword');
+    } else {
+      console.log('Please enter otp');
     }
   };
   return (
