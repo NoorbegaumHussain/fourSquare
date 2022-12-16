@@ -55,7 +55,7 @@ const LoginScreen = ({navigation}) => {
               initialValues={{email: '', password: ''}}
               onSubmit={values => {
                 console.log(values);
-                navigation.navigate('HomeScreen');
+                navigation.navigate('AppStack');
               }}>
               {({
                 handleChange,

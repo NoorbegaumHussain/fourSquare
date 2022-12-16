@@ -4,6 +4,14 @@
     {
       "path": "assets/fonts/Avenir Book.ttf",
       "sha1": "3ba0a3cdf9bc77b1e798b42b327b450a3df63349"
+    },
+    {
+      "path": "assets/fonts/Avenir Light.ttf",
+      "sha1": "e0be597a57a5e2d276f6af0bcbef987d097e5ab5"
+    },
+    {
+      "path": "assets/fonts/Avenir Medium.ttf",
+      "sha1": "6add21b119dcbd7ae3e76440885e417d10d2b67d"
     }
   ]
 }

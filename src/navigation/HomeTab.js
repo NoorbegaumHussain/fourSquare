@@ -5,11 +5,13 @@ import TopPick from '../screens/HomeTabScreens/TopPick';
 import Popular from '../screens/HomeTabScreens/Popular';
 import Lunch from '../screens/HomeTabScreens/Lunch';
 import Coffee from '../screens/HomeTabScreens/Coffee';
-import {NavigationContainer} from '@react-navigation/native';
-import {View} from 'react-native';
+import {useWindowDimensions} from 'react-native';
 const Tab = createMaterialTopTabNavigator();
 
 const HomeTab = () => {
+  const {width, height} = useWindowDimensions();
+  const width1 = width < height ? 'auto' : '100%';
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -19,16 +21,17 @@ const HomeTab = () => {
         tabBarStyle: {
           backgroundColor: '#370F24',
         },
-        tabBarItemStyle: {width: 'auto'},
+        tabBarItemStyle: {width: '100%'},
         tabBarLabelStyle: {
           fontSize: 16,
           fontFamily: 'Avenir Medium',
           textTransform: 'none',
           fontWeight: '600',
+          paddingLeft: 10,
         },
         tabBarContentContainerStyle: {
           justifyContent: 'center',
-          width: '100%',
+          width: width1,
         },
         tabBarIndicatorStyle: {
           borderBottomColor: '#370F24',

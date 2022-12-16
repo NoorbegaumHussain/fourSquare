@@ -65,7 +65,7 @@ const Register = ({navigation}) => {
                 const response = await registerUser(obj);
                 if (response?.data?.status) {
                   console.log(response?.data?.message);
-                  navigation.navigate('HomeScreen');
+                  navigation.navigate('AppStack');
                 } else {
                   console.log(response);
                 }
