@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
+  Platform
 } from 'react-native';
 import {TextField} from 'rn-material-ui-textfield';
 import OutlinedButton from '../components/OutlinedButton';
@@ -111,7 +112,7 @@ const LoginScreen = ({navigation}) => {
                           //   borderWidth: 1,
                           //   alignSelf: 'center',
                           height: 50,
-                          paddingTop: 2,
+                          paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
                         }}
                         containerStyle={
                           {
@@ -157,7 +158,7 @@ const LoginScreen = ({navigation}) => {
                           fontFamily: 'Avenir Book',
                           alignSelf: 'center',
                           height: 50,
-                          paddingTop: 2,
+                          paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
                         }}
                         containerStyle={
                           {
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir Book',
     fontSize: 22,
     color: '#FFFFFF',
-    marginTop: 25,
+    marginTop: 15,
     textAlign: 'right',
     marginRight: 28,
   },
@@ -282,6 +283,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 35,
+    marginBottom:20,
   },
   facebook: {
     // height: 53,

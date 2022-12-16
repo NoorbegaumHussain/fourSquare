@@ -116,7 +116,7 @@ const Register = ({navigation}) => {
                           fontFamily: 'Avenir Book',
                           alignSelf: 'center',
                           height: 50,
-                          paddingTop: 0,
+                          paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
                         }}
                         containerStyle={
                           {
@@ -161,7 +161,7 @@ const Register = ({navigation}) => {
                           fontFamily: 'Avenir Book',
                           alignSelf: 'center',
                           height: 50,
-                          paddingTop: 2,
+                          paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
                         }}
                         containerStyle={
                           {
@@ -207,7 +207,7 @@ const Register = ({navigation}) => {
                           fontFamily: 'Avenir Book',
                           alignSelf: 'center',
                           height: 50,
-                          paddingTop: 2,
+                          paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
                         }}
                         containerStyle={
                           {
@@ -253,7 +253,7 @@ const Register = ({navigation}) => {
                           fontFamily: 'Avenir Book',
                           alignSelf: 'center',
                           height: 50,
-                          paddingTop: 2,
+                          paddingTop: Platform.OS === 'ios' ? 2 : 4.5,
                         }}
                         containerStyle={
                           {
