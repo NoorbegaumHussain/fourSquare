@@ -7,7 +7,6 @@ const CustomAppBar = ({name, leftIcon, rightIcon}) => {
       <TouchableOpacity>
         <Image source={require('../../assets/images/back_icon.png')} />
       </TouchableOpacity>
-
       <Text style={styles.text}>{name}</Text>
       <TouchableOpacity>{rightIcon}</TouchableOpacity>
     </View>

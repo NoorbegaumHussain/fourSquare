@@ -83,7 +83,10 @@ const RestaurantDetailScreen = ({navigation}) => {
             />
             <Text style={styles.ratingText}>Photos</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.individualIconContainer}>
+          <TouchableOpacity
+            style={styles.individualIconContainer}
+            // onPress={navigation.navigate('ReviewList')}
+            >
             <Image
               source={require('../../assets/images/review_icon.png')}
               style={styles.ratingIcon}

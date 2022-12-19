@@ -5,9 +5,10 @@ import {
 } from '@react-navigation/stack';
 import HomeScreen from '../screens/HomeScreen';
 import RestaurantDetailScreen from '../screens/RestaurantDetailScreen';
-import AddReview from '../screens/AddReview';
 import PhotoGallery from '../screens/PhotoGallery';
 import PhotoDetails from '../screens/PhotoDetails';
+import ReviewList from '../screens/ReviewList';
+import AddReview from '../screens/AddReview';
 const Stack = createStackNavigator();
 
 const AppStack = () => {
@@ -30,8 +31,8 @@ const AppStack = () => {
         }}
       />
       <Stack.Screen
-        name="AddReview"
-        component={AddReview}
+        name="ReviewList"
+        component={ReviewList}
         options={{
           headerShown: false,
           // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
@@ -48,6 +49,14 @@ const AppStack = () => {
       <Stack.Screen
         name="PhotoDetails"
         component={PhotoDetails}
+        options={{
+          headerShown: false,
+          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Stack.Screen
+        name="AddReview"
+        component={AddReview}
         options={{
           headerShown: false,
           // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
