@@ -11,7 +11,7 @@ import React from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/AntDesign';
 import LinearGradient from 'react-native-linear-gradient';
-const PhotoDetails = () => {
+const PhotoDetails = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   return (
     <View style={styles.container}>
@@ -28,7 +28,12 @@ const PhotoDetails = () => {
           <View style={{flex: width > height ? 0.8 : 0.88}}>
             <SafeAreaView>
               <View style={styles.header}>
-                <Icon name="close" size={30} color="#FFFFFF" />
+                <Icon
+                  name="close"
+                  size={30}
+                  color="#FFFFFF"
+                  onPress={() => navigation.goBack()}
+                />
                 <Text style={styles.text}>Attil</Text>
                 <Image
                   source={require('../../assets/images/share_icon.png')}

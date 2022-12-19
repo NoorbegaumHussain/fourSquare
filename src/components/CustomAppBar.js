@@ -1,11 +1,14 @@
 import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import React from 'react';
 
-const CustomAppBar = ({name, leftIcon, rightIcon}) => {
+const CustomAppBar = ({name, leftIcon, rightIcon, navigation}) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity>
-        <Image source={require('../../assets/images/back_icon.png')} />
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Image
+          source={require('../../assets/images/back_icon.png')}
+          style={styles.backIcon}
+        />
       </TouchableOpacity>
       <Text style={styles.text}>{name}</Text>
       <TouchableOpacity>{rightIcon}</TouchableOpacity>
@@ -28,5 +31,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Avenir Medium',
     fontSize: 24.5,
     fontWeight: '500',
+  },
+  backIcon: {
+    height: 24,
+    width: 24,
   },
 });

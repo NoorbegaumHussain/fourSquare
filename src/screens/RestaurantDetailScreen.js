@@ -34,7 +34,7 @@ const RestaurantDetailScreen = ({navigation}) => {
             colors={['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.0)', 'rgba(0,0,0,0.8)']}>
             <SafeAreaView>
               <View style={styles.header}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
                   <Image
                     source={require('../../assets/images/back_icon.png')}
                     style={styles.backIcon}
@@ -85,8 +85,7 @@ const RestaurantDetailScreen = ({navigation}) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.individualIconContainer}
-            // onPress={navigation.navigate('ReviewList')}
-            >
+            onPress={() => navigation.navigate('ReviewList')}>
             <Image
               source={require('../../assets/images/review_icon.png')}
               style={styles.ratingIcon}

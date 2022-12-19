@@ -25,6 +25,7 @@ const PhotoGallery = ({navigation}) => {
       <View style={styles.backgroundBeyoundSafeArea}>
         <SafeAreaView>
           <CustomAppBar
+            navigation={navigation}
             name="Atil"
             rightIcon={
               <Icon

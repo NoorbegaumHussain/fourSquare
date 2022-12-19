@@ -80,7 +80,7 @@ const renderItem = ({item}) => {
     </Pressable>
   );
 };
-const ReviewList = () => {
+const ReviewList = ({navigation}) => {
   return (
     <View style={styles.container}>
       <StatusBar
@@ -91,6 +91,7 @@ const ReviewList = () => {
       <View style={styles.backgroundBeyoundSafeArea}>
         <SafeAreaView>
           <CustomAppBar
+            navigation={navigation}
             name="Atil"
             rightIcon={<Icon name="addfile" size={24} color="#FFFFFF" />}
           />

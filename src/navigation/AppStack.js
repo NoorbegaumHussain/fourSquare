@@ -9,6 +9,7 @@ import PhotoGallery from '../screens/PhotoGallery';
 import PhotoDetails from '../screens/PhotoDetails';
 import ReviewList from '../screens/ReviewList';
 import AddReview from '../screens/AddReview';
+import SearchScreen from '../screens/SearchScreen';
 const Stack = createStackNavigator();
 
 const AppStack = () => {
@@ -57,6 +58,14 @@ const AppStack = () => {
       <Stack.Screen
         name="AddReview"
         component={AddReview}
+        options={{
+          headerShown: false,
+          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+      />
+      <Stack.Screen
+        name="SearchScreen"
+        component={SearchScreen}
         options={{
           headerShown: false,
           // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,

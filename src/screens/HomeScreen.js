@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   StyleSheet,
   SafeAreaView,
   Image,
@@ -50,7 +49,8 @@ const HomeScreen = ({navigation}) => {
                   style={styles.filter}
                 />
               </TouchableOpacity>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('SearchScreen')}>
                 <Icon
                   name="search"
                   size={25}

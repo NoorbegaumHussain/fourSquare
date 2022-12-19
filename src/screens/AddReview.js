@@ -13,6 +13,7 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 import PrimaryButton from '../components/PrimaryButton';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import ImagePickerComponent from '../components/ImagePickerComponent';
 const AddReview = ({navigation}) => {
   return (
     <View style={styles.container}>
@@ -25,8 +26,11 @@ const AddReview = ({navigation}) => {
         <View style={styles.backgroundBeyoundSafeArea}>
           <SafeAreaView>
             <View style={styles.headerContainer}>
-              <TouchableOpacity>
-                <Image source={require('../../assets/images/back_icon.png')} />
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Image
+                  source={require('../../assets/images/back_icon.png')}
+                  style={styles.backIcon}
+                />
               </TouchableOpacity>
               <View style={styles.textContainer}>
                 <Text style={styles.text}>Add Review</Text>
@@ -44,25 +48,13 @@ const AddReview = ({navigation}) => {
               // value={text}
             />
             <Text style={styles.photoText}>Add a photos to your review</Text>
-            <View style={styles.imageContainer}>
-              <Image
-                source={require('../../assets/images/restaurant.png')}
-                style={styles.image}
-              />
-              <TouchableOpacity onPress={() => console.log('pick image')}>
-                <View style={styles.addImageContainer}>
-                  <Icon name="camera-plus-outline" size={34} />
-                </View>
-              </TouchableOpacity>
-            </View>
+
+            <ImagePickerComponent />
           </KeyboardAwareScrollView>
         </View>
       </View>
       <View style={styles.primaryButtonContainer}>
-        <PrimaryButton
-          text="Submit"
-          onPress={() => navigation.navigate('AddReview')}
-        />
+        <PrimaryButton text="Submit" onPress={() => navigation.navigate('')} />
       </View>
     </View>
   );
@@ -86,7 +78,7 @@ const styles = StyleSheet.create({
   text: {
     color: '#FFFFFF',
     fontFamily: 'Avenir Medium',
-    fontSize: 24.5,
+    fontSize: 23,
     fontWeight: '500',
     // marginLeft:'23%',
   },
@@ -129,21 +121,15 @@ const styles = StyleSheet.create({
     color: '#351347',
     marginBottom: 10,
     marginTop: 13,
+    fontWeight: '300',
   },
   primaryButtonContainer: {
-    justifyContent: 'flex-end',
+    // justifyContent: 'flex-end',
     marginBottom: Platform.OS === 'ios' ? 15 : 0,
   },
-  imageContainer: {
-    flexDirection: 'row',
-  },
-  addImageContainer: {
-    height: 65,
-    width: 65,
-    borderRadius: 5,
-    marginRight: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#CCCCCC',
+  backIcon: {
+    height: 22,
+    width: 22,
+    marginLeft: 6,
   },
 });
