@@ -15,6 +15,7 @@ const DrawerNavigator = () => {
       screenOptions={{
         headerShown: false,
         overlayColor: 0,
+        swipeEdgeWidth: 0,
         sceneContainerStyle: {
           backgroundColor: '#FFFFFF',
         },

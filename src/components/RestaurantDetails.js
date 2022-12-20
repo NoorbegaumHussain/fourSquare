@@ -39,6 +39,7 @@ export default RestaurantDetails;
 const styles = StyleSheet.create({
   image: {height: 125, width: 119},
   cardContainer: {
+    width: '100%',
     flexDirection: 'row',
     marginHorizontal: 6,
     marginTop: 7.5,

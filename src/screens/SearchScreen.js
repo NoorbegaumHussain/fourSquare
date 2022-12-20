@@ -9,12 +9,23 @@ import {
   TextInput,
   FlatList,
   useWindowDimensions,
+  Pressable,
+  Platform,
+  PermissionsAndroid,
+  Animated,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import Icon from 'react-native-vector-icons/Feather';
 import CompassIcon from 'react-native-vector-icons/Ionicons';
 import {TextField} from 'rn-material-ui-textfield';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import RestaurantDetails from '../components/RestaurantDetails';
+import OutlinedButton from '../components/OutlinedButton';
+import PrimaryButton from '../components/PrimaryButton';
+import {ScrollView} from 'react-native-gesture-handler';
+import Geolocation from '@react-native-community/geolocation';
+import MapView, {Marker} from 'react-native-maps';
+import {isMap} from 'immer/dist/internal';
 const DATA = [
   {
     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -39,7 +50,6 @@ const SearchScreen = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
   const [filterClicked, setFilterClicked] = useState(false);
-  const [search, setSearch] = useState('');
   const [nearme, setNearme] = useState('');
   const [focus, setFocus] = useState({
     search: {hasfocus: false},
@@ -66,8 +76,88 @@ const SearchScreen = ({navigation}) => {
     parking: false,
     wifi: false,
   });
+  const [place, setPlace] = useState({
+    isSet: false,
+    placeString: '',
+  });
+  const [mapView, setMapView] = useState(false);
+  console.log(place.isSet, place.placeString);
   const handleCardClick = () => {
-    console.log('card Clicked');
+    console.log('card Clicked ys');
+  };
+  const mapHeight = width < height ? '28%' : '50%';
+  const [currentLongitude, setCurrentLongitude] = useState('');
+  const [currentLatitude, setCurrentLatitude] = useState('');
+  const [locationStatus, setLocationStatus] = useState('');
+  const mapRef = useRef(null);
+
+  useEffect(() => {
+    const requestLocationPermission = async () => {
+      if (Platform.OS === 'ios') {
+        getOneTimeLocation();
+      } else {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              title: 'Location Access Required',
+              message: 'This App needs to Access your location',
+            },
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            getOneTimeLocation();
+          } else {
+            setLocationStatus('Permission Denied');
+          }
+        } catch (err) {
+          console.warn(err);
+        }
+      }
+    };
+    if (mapView) {
+      requestLocationPermission();
+    }
+  }, [mapView]);
+
+  const getOneTimeLocation = () => {
+    setLocationStatus('Getting Location ...');
+    Geolocation.getCurrentPosition(
+      position => {
+        setTimeout(() => {
+          try {
+            mapRef.current.animateToRegion(
+              {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.2,
+              },
+              3 * 1000,
+            );
+            // setLoading(false);
+          } catch (error) {
+            console.log('Failed to animate direction');
+          }
+        }, 500);
+        setLocationStatus('You are Here');
+
+        const currentLongitude = position.coords.longitude;
+
+        const currentLatitude = position.coords.latitude;
+
+        setCurrentLongitude(currentLongitude);
+
+        setCurrentLatitude(currentLatitude);
+      },
+      error => {
+        setLocationStatus(error.message);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 30000,
+        maximumAge: 1000,
+      },
+    );
   };
   const renderItem = ({item}) => {
     return (
@@ -91,6 +181,49 @@ const SearchScreen = ({navigation}) => {
       </TouchableOpacity>
     );
   };
+  const searchData = [
+    {
+      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+      title: 'First Item',
+    },
+    {
+      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+      title: 'Second Item',
+    },
+    {
+      id: '58694a0f-3da1-471f-bd96-145571sdse29d72',
+      title: 'Third Item',
+    },
+  ];
+
+  const renderSearch = ({item}) => {
+    return (
+      <View style={{flex: 1,marginLeft:20}}>
+        <Pressable onPress={handleCardClick}>
+          <RestaurantDetails
+            image={
+              <Image
+                source={require('../../assets/images/favourite_icon.png')}
+                style={styles.favIcon}
+              />
+            }
+          />
+          <Text>{item.title}</Text>
+        </Pressable>
+      </View>
+    );
+  };
+
+  const [currentIndex, setCurrentIndex] = useState([]);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const viewableItemsChanged = useRef(({viewableItems}) => {
+    setCurrentIndex(viewableItems[0]?.index);
+  }).current;
+  const slidesRef = useRef(null);
+  const viewConfig = useRef({
+    waitForInteraction: true,
+    viewAreaCoveragePercentThreshold: 0,
+  }).current;
   return (
     <View
       style={[
@@ -140,11 +273,26 @@ const SearchScreen = ({navigation}) => {
                     }))
                   }
                   onChangeText={searchString => {
-                    if(searchString.length > 2){
-                      console.log("I am greater tha n 2");
-                      
+                    if (searchString.length > 2) {
+                      setPlace(() => ({
+                        isSet: true,
+                        placeString: searchString,
+                      }));
+                      setFocus(prev => ({
+                        nearme: {hasfocus: false},
+                        search: {hasfocus: false},
+                      }));
+                    } else {
+                      setPlace(() => ({
+                        isSet: false,
+                        placeString: '',
+                      }));
+                      setFocus(prev => ({
+                        nearme: {hasfocus: false},
+                        search: {hasfocus: true},
+                      }));
                     }
-                    setSearch({searchString});
+                    // setSearch({searchString});
                   }}
                   underlineColorAndroid="transparent"
                 />
@@ -193,7 +341,7 @@ const SearchScreen = ({navigation}) => {
         </SafeAreaView>
       </View>
       {!filterClicked && focus.search.hasfocus && (
-        <>
+        <ScrollView>
           <View style={styles.nearbyPlacesContainer}>
             <Text style={styles.nearbyPlacesText}>Near by places</Text>
           </View>
@@ -214,7 +362,66 @@ const SearchScreen = ({navigation}) => {
               renderItem={renderSuggestions}
             />
           </View>
-        </>
+        </ScrollView>
+      )}
+      {place.isSet && !mapView && (
+        <View style={{flex: 1}}>
+          <FlatList
+            data={searchData}
+            keyExtractor={item => item.id}
+            renderItem={renderSearch}
+          />
+          <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+            <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
+          </View>
+        </View>
+      )}
+      {place.isSet && mapView && (
+        <View style={{flex: 1}}>
+          <View style={styles.mainContainer}>
+            <View style={[styles.mapContainer, {height: '103.5%'}]}>
+              {currentLatitude && currentLongitude !== '' ? (
+                <MapView
+                  style={styles.mapStyle}
+                  customMapStyle={mapStyle}
+                  ref={mapRef}>
+                  <Marker
+                    draggable
+                    coordinate={{
+                      latitude: currentLatitude,
+                      longitude: currentLongitude,
+                    }}
+                    onDragEnd={e =>
+                      alert(JSON.stringify(e.nativeEvent.coordinate))
+                    }
+                    title={'Test Marker'}
+                    description={'This is a description of the marker'}
+                  />
+                </MapView>
+              ) : null}
+            </View>
+
+            <FlatList
+              data={searchData}
+              keyExtractor={item => item.id}
+              renderItem={renderSearch}
+              pagingEnabled={true}
+              horizontal
+              bounces={false}
+              onScroll={Animated.event(
+                [{nativeEvent: {contentOffset: {x: scrollX}}}],
+                {useNativeDriver: false},
+              )}
+              onViewableItemsChanged={viewableItemsChanged}
+              viewabilityConfig={viewConfig}
+              scrollEventThrottle={32}
+              ref={slidesRef}
+            />
+          </View>
+          <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+            <PrimaryButton text="List View" onPress={() => setMapView(false)} />
+          </View>
+        </View>
       )}
       {!filterClicked && focus.nearme.hasfocus && (
         <View>
@@ -745,7 +952,221 @@ const SearchScreen = ({navigation}) => {
     </View>
   );
 };
-
+const mapStyle = [
+  {
+    elementType: 'geometry',
+    stylers: [
+      {
+        color: '#ebe3cd',
+      },
+    ],
+  },
+  {
+    elementType: 'labels.text.fill',
+    stylers: [
+      {
+        color: '#523735',
+      },
+    ],
+  },
+  {
+    elementType: 'labels.text.stroke',
+    stylers: [
+      {
+        color: '#f5f1e6',
+      },
+    ],
+  },
+  {
+    featureType: 'administrative',
+    elementType: 'geometry.stroke',
+    stylers: [
+      {
+        color: '#c9b2a6',
+      },
+    ],
+  },
+  {
+    featureType: 'administrative.land_parcel',
+    elementType: 'geometry.stroke',
+    stylers: [
+      {
+        color: '#dcd2be',
+      },
+    ],
+  },
+  {
+    featureType: 'administrative.land_parcel',
+    elementType: 'labels.text.fill',
+    stylers: [
+      {
+        color: '#ae9e90',
+      },
+    ],
+  },
+  {
+    featureType: 'landscape.natural',
+    elementType: 'geometry',
+    stylers: [
+      {
+        color: '#dfd2ae',
+      },
+    ],
+  },
+  {
+    featureType: 'poi',
+    elementType: 'geometry',
+    stylers: [
+      {
+        color: '#dfd2ae',
+      },
+    ],
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels.text.fill',
+    stylers: [
+      {
+        color: '#93817c',
+      },
+    ],
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry.fill',
+    stylers: [
+      {
+        color: '#a5b076',
+      },
+    ],
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'labels.text.fill',
+    stylers: [
+      {
+        color: '#447530',
+      },
+    ],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [
+      {
+        color: '#f5f1e6',
+      },
+    ],
+  },
+  {
+    featureType: 'road.arterial',
+    elementType: 'geometry',
+    stylers: [
+      {
+        color: '#fdfcf8',
+      },
+    ],
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry',
+    stylers: [
+      {
+        color: '#f8c967',
+      },
+    ],
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry.stroke',
+    stylers: [
+      {
+        color: '#e9bc62',
+      },
+    ],
+  },
+  {
+    featureType: 'road.highway.controlled_access',
+    elementType: 'geometry',
+    stylers: [
+      {
+        color: '#e98d58',
+      },
+    ],
+  },
+  {
+    featureType: 'road.highway.controlled_access',
+    elementType: 'geometry.stroke',
+    stylers: [
+      {
+        color: '#db8555',
+      },
+    ],
+  },
+  {
+    featureType: 'road.local',
+    elementType: 'labels.text.fill',
+    stylers: [
+      {
+        color: '#806b63',
+      },
+    ],
+  },
+  {
+    featureType: 'transit.line',
+    elementType: 'geometry',
+    stylers: [
+      {
+        color: '#dfd2ae',
+      },
+    ],
+  },
+  {
+    featureType: 'transit.line',
+    elementType: 'labels.text.fill',
+    stylers: [
+      {
+        color: '#8f7d77',
+      },
+    ],
+  },
+  {
+    featureType: 'transit.line',
+    elementType: 'labels.text.stroke',
+    stylers: [
+      {
+        color: '#ebe3cd',
+      },
+    ],
+  },
+  {
+    featureType: 'transit.station',
+    elementType: 'geometry',
+    stylers: [
+      {
+        color: '#dfd2ae',
+      },
+    ],
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry.fill',
+    stylers: [
+      {
+        color: '#b9d3c2',
+      },
+    ],
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.fill',
+    stylers: [
+      {
+        color: '#92998d',
+      },
+    ],
+  },
+];
 export default SearchScreen;
 const styles = StyleSheet.create({
   container: {
@@ -936,5 +1357,32 @@ const styles = StyleSheet.create({
   featureText: {
     fontFamily: 'Avenir Book',
     fontSize: 18,
+  },
+  favIcon: {
+    height: 25,
+    resizeMode: 'contain',
+    width: 25,
+    marginTop: 8,
+  },
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#E5E5E5',
+    marginBottom: 20,
+  },
+  mapContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  mapStyle: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
 });

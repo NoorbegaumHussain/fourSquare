@@ -21,7 +21,7 @@ const NearYou = ({navigation}) => {
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
   const mapRef = useRef(null);
-  
+
   useEffect(() => {
     const requestLocationPermission = async () => {
       if (Platform.OS === 'ios') {
@@ -133,34 +133,32 @@ const NearYou = ({navigation}) => {
     );
   };
   return (
-    <ScrollView contentContainerStyle={{flex: 1}}>
-      <View style={styles.container}>
-        <View style={[styles.mapContainer, {height: mapHeight}]}>
-          {currentLatitude && currentLongitude !== '' ? (
-            <MapView
-              style={styles.mapStyle}
-              customMapStyle={mapStyle}
-              ref={mapRef}>
-              <Marker
-                draggable
-                coordinate={{
-                  latitude: currentLatitude,
-                  longitude: currentLongitude,
-                }}
-                onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
-                title={'Test Marker'}
-                description={'This is a description of the marker'}
-              />
-            </MapView>
-          ) : null}
-        </View>
-        <FlatList
-          data={DATA}
-          keyExtractor={item => item.id}
-          renderItem={renderItem}
-        />
+    <View style={styles.container}>
+      <View style={[styles.mapContainer, {height: mapHeight}]}>
+        {currentLatitude && currentLongitude !== '' ? (
+          <MapView
+            style={styles.mapStyle}
+            customMapStyle={mapStyle}
+            ref={mapRef}>
+            <Marker
+              draggable
+              coordinate={{
+                latitude: currentLatitude,
+                longitude: currentLongitude,
+              }}
+              onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
+              title={'Test Marker'}
+              description={'This is a description of the marker'}
+            />
+          </MapView>
+        ) : null}
       </View>
-    </ScrollView>
+      <FlatList
+        data={DATA}
+        keyExtractor={item => item.id}
+        renderItem={renderItem}
+      />
+    </View>
   );
 };
 
@@ -408,11 +406,10 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  favIcon:{
-    height:25,
-    resizeMode:'contain',
-    width:25,
-    marginTop:8,
-
-  }
+  favIcon: {
+    height: 25,
+    resizeMode: 'contain',
+    width: 25,
+    marginTop: 8,
+  },
 });
