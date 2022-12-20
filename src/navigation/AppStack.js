@@ -10,8 +10,7 @@ import PhotoDetails from '../screens/PhotoDetails';
 import ReviewList from '../screens/ReviewList';
 import AddReview from '../screens/AddReview';
 import SearchScreen from '../screens/SearchScreen';
-import DrawerNavigator from './DrawerNavigator';
-// import DrawerNavigator from './DrawerNavigator';
+
 const Stack = createStackNavigator();
 
 const AppStack = () => {

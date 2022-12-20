@@ -140,6 +140,10 @@ const SearchScreen = ({navigation}) => {
                     }))
                   }
                   onChangeText={searchString => {
+                    if(searchString.length > 2){
+                      console.log("I am greater tha n 2");
+                      
+                    }
                     setSearch({searchString});
                   }}
                   underlineColorAndroid="transparent"
