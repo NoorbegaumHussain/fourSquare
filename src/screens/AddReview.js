@@ -44,6 +44,7 @@ const AddReview = ({navigation}) => {
             <TextInput
               multiline={true}
               style={styles.input}
+              textAlignVertical="top"
               // onChangeText={onChangeText}
               // value={text}
             />

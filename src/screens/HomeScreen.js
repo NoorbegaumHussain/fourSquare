@@ -15,7 +15,9 @@ const HomeScreen = ({navigation}) => {
   const width1 = width < height ? '37%' : '30%';
   const height1 = width < height ? '62%' : '100%';
 
-  const handleDrawer = () => {};
+  const handleDrawer = () => {
+    navigation.openDrawer();
+  };
 
   return (
     <View style={styles.container}>

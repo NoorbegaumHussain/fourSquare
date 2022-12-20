@@ -11,6 +11,7 @@ import ConfirmPassword from '../screens/ConfirmPassword';
 import Register from '../screens/Register';
 import HomeScreen from '../screens/HomeScreen';
 import AppStack from './AppStack';
+import DrawerNavigator from './DrawerNavigator';
 const Stack = createStackNavigator();
 
 const AuthStack = () => {
@@ -50,8 +51,8 @@ const AuthStack = () => {
           }}
         />
         <Stack.Screen
-          name="AppStack"
-          component={AppStack}
+          name="DrawerNavigator"
+          component={DrawerNavigator}
           options={{
             headerShown: false,
             // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
