@@ -1,7 +1,7 @@
 import {View, Text, Image, StyleSheet, useWindowDimensions} from 'react-native';
 import React from 'react';
 
-const RestaurantDetails = () => {
+const RestaurantDetails = ({image}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? '60%' : '65%';
   return (
@@ -13,10 +13,7 @@ const RestaurantDetails = () => {
       <View>
         <View style={[styles.favContainer, {width: width1}]}>
           <Text style={styles.restaurantName}>Attil</Text>
-          <Image
-            source={require('../../assets/images/favourite_icon.png')}
-            style={styles.favIcon}
-          />
+          {image}
         </View>
         <View style={styles.restaurantInfo}>
           <View>
@@ -44,13 +41,13 @@ const styles = StyleSheet.create({
   cardContainer: {
     flexDirection: 'row',
     marginHorizontal: 6,
-    marginTop:7.5,
+    marginTop: 7.5,
     backgroundColor: '#FFFFFF',
     shadowColor: '#171717',
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    elevation:5,
+    elevation: 5,
   },
   dotContainer: {
     // borderWidth: 1,
@@ -65,13 +62,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginLeft: 10,
   },
-  favIcon: {
-    // paddingLeft: 10,
-    marginTop: 7,
-    resizeMode: 'contain',
-    width: 30,
-    height: 25,
-  },
+
   ratingBackground: {
     backgroundColor: '#74d434',
     width: 24,

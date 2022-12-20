@@ -15,6 +15,8 @@ const HomeScreen = ({navigation}) => {
   const width1 = width < height ? '37%' : '30%';
   const height1 = width < height ? '62%' : '100%';
 
+  const handleDrawer = () => {};
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -25,7 +27,7 @@ const HomeScreen = ({navigation}) => {
       <View style={styles.backgroundBeyoundSafeArea}>
         <SafeAreaView>
           <View style={styles.headerContainer}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleDrawer}>
               <Icon
                 name="menu"
                 size={32}

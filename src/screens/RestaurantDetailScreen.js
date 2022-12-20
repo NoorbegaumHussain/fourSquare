@@ -9,15 +9,23 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
 import MapView, {Marker} from 'react-native-maps';
 import PrimaryButton from '../components/PrimaryButton';
 import LinearGradient from 'react-native-linear-gradient';
+import {Rating, AirbnbRating} from 'react-native-ratings';
+import CustomModal from '../components/CustomModal';
 
 const RestaurantDetailScreen = ({navigation}) => {
-  const {width, height} = useWindowDimensions();
+  const [modal, setModal] = useState(false);
+  const [visible, setVisible] = useState(false);
 
+  const {width, height} = useWindowDimensions();
+  const handleRatingPress = () => {
+    setVisible(true);
+    setModal(true);
+  };
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -61,12 +69,22 @@ const RestaurantDetailScreen = ({navigation}) => {
                   Restaurant.
                 </Text>
               </View>
+              <AirbnbRating
+                size={15}
+                showRating={false}
+                defaultRating={0}
+                style={styles.ratings}
+                // isDisabled={false}
+                // onFinishRating={rating => ratingCompleted(rating)}
+              />
             </SafeAreaView>
           </LinearGradient>
         </ImageBackground>
 
         <View style={styles.iconContainer}>
-          <TouchableOpacity style={styles.individualIconContainer}>
+          <TouchableOpacity
+            style={styles.individualIconContainer}
+            onPress={handleRatingPress}>
             <Image
               source={require('../../assets/images/rating_icon.png')}
               style={styles.ratingIcon}
@@ -149,6 +167,47 @@ const RestaurantDetailScreen = ({navigation}) => {
           />
         </View>
       </ScrollView>
+      {modal && (
+        <CustomModal
+          visible={visible}
+          onPress={() => {
+            setVisible(false);
+            setModal(false);
+          }}>
+          <View>
+            <Text
+              style={[
+                styles.overallrating,
+                {marginTop: Platform.OS === 'ios' ? 10 : 0},
+              ]}>
+              Overall Rating
+            </Text>
+            <Text style={styles.ratingInNumber}>4.5</Text>
+            <Text
+              style={[
+                styles.experience,
+                {marginTop: Platform.OS === 'ios' ? 65 : 26},
+              ]}>
+              How would you rate your {'\n'} experience ?
+            </Text>
+            <AirbnbRating
+              size={30}
+              showRating={false}
+              defaultRating={5}
+              isDisabled={false}
+              starContainerStyle={{
+                width: '70%',
+                justifyContent: 'space-around',
+                marginTop: 40,
+              }}
+              // onFinishRating={rating => ratingCompleted(rating)}
+            />
+            <TouchableOpacity style={styles.submitButton}>
+              <Text style={styles.submitText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        </CustomModal>
+      )}
     </View>
   );
 };
@@ -405,7 +464,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   textContainer: {
-    marginTop: Platform.OS === 'ios' ? 165 : 185,
+    marginTop: Platform.OS === 'ios' ? 155 : 175,
   },
   iconContainer: {
     flexDirection: 'row',
@@ -498,5 +557,48 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     fontWeight: '600',
     marginTop: 9.8,
+  },
+  ratings: {
+    marginBottom: 10,
+  },
+  submitButton: {
+    width: '100%',
+    borderTopWidth: 1,
+    borderColor: '#A0A0A0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 54,
+    marginTop: 64,
+  },
+  submitText: {
+    fontFamily: 'Avenir Medium',
+    fontSize: 20,
+    color: '#351547',
+    fontWeight: '500',
+  },
+  overallrating: {
+    color: '#000000',
+    fontFamily: 'Avenir Medium',
+    fontSize: 25,
+    textAlign: 'center',
+    fontWeight: '500',
+    marginTop: 30,
+  },
+  ratingInNumber: {
+    textAlign: 'center',
+    color: '#36B000',
+    fontSize: 37,
+    fontWeight: '900',
+    fontFamily: 'Avenir Book',
+    marginTop: 16,
+  },
+  experience: {
+    fontFamily: 'Avenir Book',
+    fontWeight: '400',
+    color: '#000000',
+    lineHeight: 30,
+    fontSize: 24,
+    textAlign: 'center',
+    marginTop: 40,
   },
 });

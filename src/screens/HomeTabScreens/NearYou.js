@@ -7,6 +7,7 @@ import {
   PermissionsAndroid,
   Pressable,
   Platform,
+  Image,
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 
@@ -20,7 +21,7 @@ const NearYou = ({navigation}) => {
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
   const mapRef = useRef(null);
-  console.warn(currentLongitude, currentLatitude);
+  
   useEffect(() => {
     const requestLocationPermission = async () => {
       if (Platform.OS === 'ios') {
@@ -120,7 +121,14 @@ const NearYou = ({navigation}) => {
   const renderItem = ({item}) => {
     return (
       <Pressable onPress={handleCardClick}>
-        <RestaurantDetails />
+        <RestaurantDetails
+          image={
+            <Image
+              source={require('../../../assets/images/favourite_icon.png')}
+              style={styles.favIcon}
+            />
+          }
+        />
       </Pressable>
     );
   };
