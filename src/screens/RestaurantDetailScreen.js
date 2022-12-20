@@ -18,7 +18,6 @@ import LinearGradient from 'react-native-linear-gradient';
 const RestaurantDetailScreen = ({navigation}) => {
   const {width, height} = useWindowDimensions();
 
-  console.log(height);
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>

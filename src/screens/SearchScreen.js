@@ -9,14 +9,12 @@ import {
   TextInput,
   FlatList,
   useWindowDimensions,
-  KeyboardAvoidingView,
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/Feather';
 import CompassIcon from 'react-native-vector-icons/Ionicons';
-import {set} from 'immer/dist/internal';
 import {TextField} from 'rn-material-ui-textfield';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 const DATA = [
   {
     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -58,6 +56,16 @@ const SearchScreen = ({navigation}) => {
     threerupee: {isClicked: false},
     fourrupee: {isClicked: false},
   });
+  const [features, setFeatures] = useState({
+    creditCard: false,
+    delivery: false,
+    dogFriendly: false,
+    familyFriendly: false,
+    walkingDistance: false,
+    outdoorSeating: false,
+    parking: false,
+    wifi: false,
+  });
   const handleCardClick = () => {
     console.log('card Clicked');
   };
@@ -88,7 +96,8 @@ const SearchScreen = ({navigation}) => {
       style={[
         styles.container,
         {
-          backgroundColor: focus.nearme.hasfocus ? '#FFFFFF' : '#F0F0F0',
+          backgroundColor:
+            focus.nearme.hasfocus || filterClicked ? '#FFFFFF' : '#F0F0F0',
         },
       ]}>
       <StatusBar
@@ -123,6 +132,7 @@ const SearchScreen = ({navigation}) => {
                 <TextInput
                   style={styles.input}
                   placeholder="Search"
+                  placeholderTextColor="#CCCCCC"
                   onFocus={() =>
                     setFocus(prev => ({
                       nearme: {hasfocus: false},
@@ -145,6 +155,7 @@ const SearchScreen = ({navigation}) => {
                 <TextInput
                   style={styles.input}
                   placeholder="Near Me"
+                  placeholderTextColor="#CCCCCC"
                   onFocus={() =>
                     setFocus(prev => ({
                       search: {hasfocus: false},
@@ -222,8 +233,8 @@ const SearchScreen = ({navigation}) => {
         </View>
       )}
       {filterClicked && (
-        <View style={{flex:1}}>
-          <KeyboardAwareScrollView showsVerticalScrollIndicator={false} >
+        <View style={{flex: 1}}>
+          <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.filterTextContainer}>
               <Text style={styles.filterHeaderText}>Sort by</Text>
             </View>
@@ -240,7 +251,7 @@ const SearchScreen = ({navigation}) => {
                 ]}
                 onPress={() =>
                   setSortbyClicked(prev => ({
-                    popular: {isClicked: true},
+                    popular: {isClicked: !sortbyClicked.popular.isClicked},
                     distance: {isClicked: false},
                     rating: {isClicked: false},
                   }))
@@ -269,7 +280,7 @@ const SearchScreen = ({navigation}) => {
                 onPress={() =>
                   setSortbyClicked(prev => ({
                     popular: {isClicked: false},
-                    distance: {isClicked: true},
+                    distance: {isClicked: !sortbyClicked.distance.isClicked},
                     rating: {isClicked: false},
                   }))
                 }>
@@ -298,7 +309,7 @@ const SearchScreen = ({navigation}) => {
                   setSortbyClicked(prev => ({
                     popular: {isClicked: false},
                     distance: {isClicked: false},
-                    rating: {isClicked: true},
+                    rating: {isClicked: !sortbyClicked.rating.isClicked},
                   }))
                 }>
                 <Text
@@ -340,7 +351,6 @@ const SearchScreen = ({navigation}) => {
                   autoCorrect={false}
                   style={{
                     fontFamily: 'Avenir Book',
-                    fontSize: 16,
                     marginTop: 10,
                     color: '#000000',
                     fontSize: 20,
@@ -351,7 +361,7 @@ const SearchScreen = ({navigation}) => {
                     fontFamily: 'Avenir Book',
                     //   alignSelf: 'center',
                     height: 50,
-                    paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
+                    paddingTop: Platform.OS === 'ios' ? 2 : 2.8,
                   }}
                 />
               </View>
@@ -367,7 +377,9 @@ const SearchScreen = ({navigation}) => {
                   ]}
                   onPress={() =>
                     setFilterbyClicked(prev => ({
-                      onerupee: {isClicked: true},
+                      onerupee: {
+                        isClicked: !filterbyClicked.onerupee.isClicked,
+                      },
                       tworupee: {isClicked: false},
                       threerupee: {isClicked: false},
                       fourrupee: {isClicked: false},
@@ -397,7 +409,9 @@ const SearchScreen = ({navigation}) => {
                   onPress={() =>
                     setFilterbyClicked(prev => ({
                       onerupee: {isClicked: false},
-                      tworupee: {isClicked: true},
+                      tworupee: {
+                        isClicked: !filterbyClicked.tworupee.isClicked,
+                      },
                       threerupee: {isClicked: false},
                       fourrupee: {isClicked: false},
                     }))
@@ -427,7 +441,9 @@ const SearchScreen = ({navigation}) => {
                     setFilterbyClicked(prev => ({
                       onerupee: {isClicked: false},
                       tworupee: {isClicked: false},
-                      threerupee: {isClicked: true},
+                      threerupee: {
+                        isClicked: !filterbyClicked.threerupee.isClicked,
+                      },
                       fourrupee: {isClicked: false},
                     }))
                   }>
@@ -457,7 +473,9 @@ const SearchScreen = ({navigation}) => {
                       onerupee: {isClicked: false},
                       tworupee: {isClicked: false},
                       threerupee: {isClicked: false},
-                      fourrupee: {isClicked: true},
+                      fourrupee: {
+                        isClicked: !filterbyClicked.fourrupee.isClicked,
+                      },
                     }))
                   }>
                   <Text
@@ -477,62 +495,246 @@ const SearchScreen = ({navigation}) => {
             <View style={styles.filterTextContainer}>
               <Text style={styles.filterHeaderText}>Features</Text>
             </View>
-            <View style={styles.featureContainer}>
-              <Text style={styles.featureText}>Accepts credit cards</Text>
-              <Image
-                source={require('../../assets/images/filter_selected.png')}
-                style={styles.selectedIcon}
-              />
-            </View>
-            <View style={styles.featureContainer}>
-              <Text style={styles.featureText}>Delivery</Text>
-              <Image
-                source={require('../../assets/images/filter_selected.png')}
-                style={styles.selectedIcon}
-              />
-            </View>
-            <View style={styles.featureContainer}>
-              <Text style={styles.featureText}>Dog friendly</Text>
-              <Image
-                source={require('../../assets/images/filter_selected.png')}
-                style={styles.selectedIcon}
-              />
-            </View>
-            <View style={styles.featureContainer}>
-              <Text style={styles.featureText}>Family-friendly places</Text>
-              <Image
-                source={require('../../assets/images/filter_selected.png')}
-                style={styles.selectedIcon}
-              />
-            </View>
-            <View style={styles.featureContainer}>
-              <Text style={styles.featureText}>In walking distance</Text>
-              <Image
-                source={require('../../assets/images/filter_selected.png')}
-                style={styles.selectedIcon}
-              />
-            </View>
-            <View style={styles.featureContainer}>
-              <Text style={styles.featureText}>Outdoor seating</Text>
-              <Image
-                source={require('../../assets/images/filter_selected.png')}
-                style={styles.selectedIcon}
-              />
-            </View>
-            <View style={styles.featureContainer}>
-              <Text style={styles.featureText}>Parking</Text>
-              <Image
-                source={require('../../assets/images/filter_selected.png')}
-                style={styles.selectedIcon}
-              />
-            </View>
-            <View style={styles.featureContainer}>
-              <Text style={styles.featureText}>Wi-Fi</Text>
-              <Image
-                source={require('../../assets/images/filter_selected.png')}
-                style={styles.selectedIcon}
-              />
-            </View>
+            <TouchableOpacity
+              style={styles.featureContainer}
+              onPress={() =>
+                setFeatures(prev => ({
+                  ...prev,
+                  creditCard: !features.creditCard,
+                }))
+              }>
+              <Text
+                style={[
+                  styles.featureText,
+                  {color: features.creditCard ? '#000000' : '#A9A9A9'},
+                ]}>
+                Accepts credit cards
+              </Text>
+
+              {features.creditCard ? (
+                <Image
+                  source={require('../../assets/images/filter_selected.png')}
+                  style={styles.selectedIcon}
+                />
+              ) : (
+                <Icon
+                  name="plus"
+                  size={23}
+                  color="rgba(53, 19, 71, 0.4)"
+                  style={styles.plusIcon}
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.featureContainer}
+              onPress={() =>
+                setFeatures(prev => ({
+                  ...prev,
+                  delivery: !features.delivery,
+                }))
+              }>
+              <Text
+                style={[
+                  styles.featureText,
+                  {color: features.delivery ? '#000000' : '#A9A9A9'},
+                ]}>
+                Delivery
+              </Text>
+
+              {features.delivery ? (
+                <Image
+                  source={require('../../assets/images/filter_selected.png')}
+                  style={styles.selectedIcon}
+                />
+              ) : (
+                <Icon
+                  name="plus"
+                  size={23}
+                  color="rgba(53, 19, 71, 0.4)"
+                  style={styles.plusIcon}
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.featureContainer}
+              onPress={() =>
+                setFeatures(prev => ({
+                  ...prev,
+                  dogFriendly: !features.dogFriendly,
+                }))
+              }>
+              <Text
+                style={[
+                  styles.featureText,
+                  {color: features.dogFriendly ? '#000000' : '#A9A9A9'},
+                ]}>
+                Dog Friendly
+              </Text>
+
+              {features.dogFriendly ? (
+                <Image
+                  source={require('../../assets/images/filter_selected.png')}
+                  style={styles.selectedIcon}
+                />
+              ) : (
+                <Icon
+                  name="plus"
+                  size={23}
+                  color="rgba(53, 19, 71, 0.4)"
+                  style={styles.plusIcon}
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.featureContainer}
+              onPress={() =>
+                setFeatures(prev => ({
+                  ...prev,
+                  familyFriendly: !features.familyFriendly,
+                }))
+              }>
+              <Text
+                style={[
+                  styles.featureText,
+                  {color: features.familyFriendly ? '#000000' : '#A9A9A9'},
+                ]}>
+                Family-Friendly places
+              </Text>
+
+              {features.familyFriendly ? (
+                <Image
+                  source={require('../../assets/images/filter_selected.png')}
+                  style={styles.selectedIcon}
+                />
+              ) : (
+                <Icon
+                  name="plus"
+                  size={23}
+                  color="rgba(53, 19, 71, 0.4)"
+                  style={styles.plusIcon}
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.featureContainer}
+              onPress={() =>
+                setFeatures(prev => ({
+                  ...prev,
+                  walkingDistance: !features.walkingDistance,
+                }))
+              }>
+              <Text
+                style={[
+                  styles.featureText,
+                  {color: features.walkingDistance ? '#000000' : '#A9A9A9'},
+                ]}>
+                In walking distance
+              </Text>
+
+              {features.walkingDistance ? (
+                <Image
+                  source={require('../../assets/images/filter_selected.png')}
+                  style={styles.selectedIcon}
+                />
+              ) : (
+                <Icon
+                  name="plus"
+                  size={23}
+                  color="rgba(53, 19, 71, 0.4)"
+                  style={styles.plusIcon}
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.featureContainer}
+              onPress={() =>
+                setFeatures(prev => ({
+                  ...prev,
+                  outdoorSeating: !features.outdoorSeating,
+                }))
+              }>
+              <Text
+                style={[
+                  styles.featureText,
+                  {color: features.outdoorSeating ? '#000000' : '#A9A9A9'},
+                ]}>
+                Outdoor Seating
+              </Text>
+
+              {features.outdoorSeating ? (
+                <Image
+                  source={require('../../assets/images/filter_selected.png')}
+                  style={styles.selectedIcon}
+                />
+              ) : (
+                <Icon
+                  name="plus"
+                  size={23}
+                  color="rgba(53, 19, 71, 0.4)"
+                  style={styles.plusIcon}
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.featureContainer}
+              onPress={() =>
+                setFeatures(prev => ({
+                  ...prev,
+                  parking: !features.parking,
+                }))
+              }>
+              <Text
+                style={[
+                  styles.featureText,
+                  {color: features.parking ? '#000000' : '#A9A9A9'},
+                ]}>
+                Parking
+              </Text>
+
+              {features.parking ? (
+                <Image
+                  source={require('../../assets/images/filter_selected.png')}
+                  style={styles.selectedIcon}
+                />
+              ) : (
+                <Icon
+                  name="plus"
+                  size={23}
+                  color="rgba(53, 19, 71, 0.4)"
+                  style={styles.plusIcon}
+                />
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.featureContainer}
+              onPress={() =>
+                setFeatures(prev => ({
+                  ...prev,
+                  wifi: !features.wifi,
+                }))
+              }>
+              <Text
+                style={[
+                  styles.featureText,
+                  {color: features.wifi ? '#000000' : '#A9A9A9'},
+                ]}>
+                Wi-Fi
+              </Text>
+
+              {features.wifi ? (
+                <Image
+                  source={require('../../assets/images/filter_selected.png')}
+                  style={styles.selectedIcon}
+                />
+              ) : (
+                <Icon
+                  name="plus"
+                  size={23}
+                  color="rgba(53, 19, 71, 0.4)"
+                  style={styles.plusIcon}
+                />
+              )}
+            </TouchableOpacity>
           </KeyboardAwareScrollView>
         </View>
       )}
@@ -673,7 +875,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingLeft: 20,
     alignItems: 'center',
-    height: 58,
+    height: 54,
   },
   buttonText: {
     fontFamily: 'Avenir Medium',
@@ -682,7 +884,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   sortbyButtons: {
-    height: 59,
+    height: 58,
     width: '33.33%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -705,7 +907,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   filterbyButtons: {
-    height: 59,
+    height: 58,
     width: '25%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -713,6 +915,10 @@ const styles = StyleSheet.create({
   selectedIcon: {
     height: 18,
     width: 18,
+  },
+  plusIcon: {
+    height: 19,
+    width: 19,
   },
   featureContainer: {
     flexDirection: 'row',
@@ -726,6 +932,5 @@ const styles = StyleSheet.create({
   featureText: {
     fontFamily: 'Avenir Book',
     fontSize: 18,
-    color: '#000000',
   },
 });

@@ -1,20 +1,93 @@
 import {
   View,
-  Text,
-  Image,
   StyleSheet,
   useWindowDimensions,
   ScrollView,
   FlatList,
-  TouchableOpacity,
+  PermissionsAndroid,
   Pressable,
+  Platform,
 } from 'react-native';
-import React from 'react';
+import React, {useState, useEffect, useRef} from 'react';
+
 import RestaurantDetails from '../../components/RestaurantDetails';
+import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
 const NearYou = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const mapHeight = width < height ? '28%' : '50%';
+  const [currentLongitude, setCurrentLongitude] = useState('');
+  const [currentLatitude, setCurrentLatitude] = useState('');
+  const [locationStatus, setLocationStatus] = useState('');
+  const mapRef = useRef(null);
+  console.warn(currentLongitude, currentLatitude);
+  useEffect(() => {
+    const requestLocationPermission = async () => {
+      if (Platform.OS === 'ios') {
+        getOneTimeLocation();
+      } else {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              title: 'Location Access Required',
+              message: 'This App needs to Access your location',
+            },
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            getOneTimeLocation();
+          } else {
+            setLocationStatus('Permission Denied');
+          }
+        } catch (err) {
+          console.warn(err);
+        }
+      }
+    };
+    requestLocationPermission();
+  }, []);
+
+  const getOneTimeLocation = () => {
+    setLocationStatus('Getting Location ...');
+    Geolocation.getCurrentPosition(
+      position => {
+        setTimeout(() => {
+          try {
+            mapRef.current.animateToRegion(
+              {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.2,
+              },
+              3 * 1000,
+            );
+            // setLoading(false);
+          } catch (error) {
+            console.log('Failed to animate direction');
+          }
+        }, 500);
+        setLocationStatus('You are Here');
+
+        const currentLongitude = position.coords.longitude;
+
+        const currentLatitude = position.coords.latitude;
+
+        setCurrentLongitude(currentLongitude);
+
+        setCurrentLatitude(currentLatitude);
+      },
+      error => {
+        setLocationStatus(error.message);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 30000,
+        maximumAge: 1000,
+      },
+    );
+  };
+
   const DATA = [
     {
       id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -55,26 +128,23 @@ const NearYou = ({navigation}) => {
     <ScrollView contentContainerStyle={{flex: 1}}>
       <View style={styles.container}>
         <View style={[styles.mapContainer, {height: mapHeight}]}>
-          <MapView
-            style={styles.mapStyle}
-            initialRegion={{
-              latitude: 37.78825,
-              longitude: -122.4324,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-            customMapStyle={mapStyle}>
-            <Marker
-              draggable
-              coordinate={{
-                latitude: 37.78825,
-                longitude: -122.4324,
-              }}
-              onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
-              title={'Test Marker'}
-              description={'This is a description of the marker'}
-            />
-          </MapView>
+          {currentLatitude && currentLongitude !== '' ? (
+            <MapView
+              style={styles.mapStyle}
+              customMapStyle={mapStyle}
+              ref={mapRef}>
+              <Marker
+                draggable
+                coordinate={{
+                  latitude: currentLatitude,
+                  longitude: currentLongitude,
+                }}
+                onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
+                title={'Test Marker'}
+                description={'This is a description of the marker'}
+              />
+            </MapView>
+          ) : null}
         </View>
         <FlatList
           data={DATA}

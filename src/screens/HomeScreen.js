@@ -14,6 +14,7 @@ const HomeScreen = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? '37%' : '30%';
   const height1 = width < height ? '62%' : '100%';
+
   return (
     <View style={styles.container}>
       <StatusBar

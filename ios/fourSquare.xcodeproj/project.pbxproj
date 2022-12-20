@@ -39,7 +39,7 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = fourSquare/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = fourSquare/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = fourSquare/main.m; sourceTree = "<group>"; };
-		142C774154674637901F922D /* Avenir Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Avenir Light.ttf"; path = "../assets/fonts/Avenir Light.ttf"; sourceTree = "<group>"; };
+		142C774154674637901F922D /* Avenir Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Avenir Light.ttf"; path = "../assets/fonts/Avenir Light.ttf"; sourceTree = "<group>"; };
 		19F6CBCC0A4E27FBF8BF4A61 /* libPods-fourSquare-fourSquareTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fourSquare-fourSquareTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B4392A12AC88292D35C810B /* Pods-fourSquare.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fourSquare.debug.xcconfig"; path = "Target Support Files/Pods-fourSquare/Pods-fourSquare.debug.xcconfig"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-fourSquare.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fourSquare.release.xcconfig"; path = "Target Support Files/Pods-fourSquare/Pods-fourSquare.release.xcconfig"; sourceTree = "<group>"; };
@@ -47,8 +47,8 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-fourSquare.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-fourSquare.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = fourSquare/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-fourSquare-fourSquareTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-fourSquare-fourSquareTests.release.xcconfig"; path = "Target Support Files/Pods-fourSquare-fourSquareTests/Pods-fourSquare-fourSquareTests.release.xcconfig"; sourceTree = "<group>"; };
-		90086D7A892A4373A30BFD66 /* Avenir Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Avenir Medium.ttf"; path = "../assets/fonts/Avenir Medium.ttf"; sourceTree = "<group>"; };
-		DB0A05A77760415B9417D244 /* Avenir Book.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Avenir Book.ttf"; path = "../assets/fonts/Avenir Book.ttf"; sourceTree = "<group>"; };
+		90086D7A892A4373A30BFD66 /* Avenir Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Avenir Medium.ttf"; path = "../assets/fonts/Avenir Medium.ttf"; sourceTree = "<group>"; };
+		DB0A05A77760415B9417D244 /* Avenir Book.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Avenir Book.ttf"; path = "../assets/fonts/Avenir Book.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -97,7 +97,6 @@
 				90086D7A892A4373A30BFD66 /* Avenir Medium.ttf */,
 			);
 			name = Resources;
-			path = "";
 			sourceTree = "<group>";
 		};
 		13B07FAE1A68108700A75B9A /* fourSquare */ = {
