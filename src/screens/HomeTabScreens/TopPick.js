@@ -1,6 +1,14 @@
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, Pressable} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import React from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
+import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
 const DATA = [
   {
     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -31,12 +39,12 @@ const DATA = [
 const TopPick = ({navigation}) => {
   const renderItem = ({item}) => {
     return (
-      <Pressable onPress={handleCardClick}>
-        <RestaurantDetails />
+      <Pressable onPress={handleCardClick} style={styles.cardContainer}>
+        <RestaurantDetailsModified />
       </Pressable>
     );
   };
-  
+
   const handleCardClick = () => {
     navigation.navigate('RestaurantDetailScreen');
   };
@@ -57,5 +65,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginBottom: 20,
+  },
+  cardContainer: {
+    shadowColor: '#171717',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.6,
+    shadowRadius: 2,
+    elevation: 10,
+    marginHorizontal: 5,
   },
 });

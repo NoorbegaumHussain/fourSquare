@@ -26,6 +26,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
 import {isMap} from 'immer/dist/internal';
+import RestaurantDetailsModified from '../components/RestaurantDetailsModified';
 const DATA = [
   {
     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -50,7 +51,6 @@ const SearchScreen = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
   const [filterClicked, setFilterClicked] = useState(false);
-  const [nearme, setNearme] = useState('');
   const [focus, setFocus] = useState({
     search: {hasfocus: false},
     nearme: {hasfocus: false},
@@ -79,6 +79,10 @@ const SearchScreen = ({navigation}) => {
   const [place, setPlace] = useState({
     isSet: false,
     placeString: '',
+  });
+  const [nearme, setNearme] = useState({
+    isNearme: false,
+    nearmeString: '',
   });
   const [mapView, setMapView] = useState(false);
   console.log(place.isSet, place.placeString);
@@ -198,19 +202,18 @@ const SearchScreen = ({navigation}) => {
 
   const renderSearch = ({item}) => {
     return (
-      <View style={{flex: 1,marginLeft:20}}>
-        <Pressable onPress={handleCardClick}>
-          <RestaurantDetails
-            image={
-              <Image
-                source={require('../../assets/images/favourite_icon.png')}
-                style={styles.favIcon}
-              />
-            }
-          />
-          <Text>{item.title}</Text>
-        </Pressable>
-      </View>
+      <Pressable
+        onPress={handleCardClick}
+        style={styles.cardContainerInRenderSearch}>
+        <RestaurantDetailsModified
+          image={
+            <Image
+              source={require('../../assets/images/favourite_icon.png')}
+              style={styles.favIcon}
+            />
+          }
+        />
+      </Pressable>
     );
   };
 
@@ -282,6 +285,8 @@ const SearchScreen = ({navigation}) => {
                         nearme: {hasfocus: false},
                         search: {hasfocus: false},
                       }));
+                      setFilterClicked(false);
+                      //Do here
                     } else {
                       setPlace(() => ({
                         isSet: false,
@@ -315,7 +320,28 @@ const SearchScreen = ({navigation}) => {
                     }))
                   }
                   onChangeText={searchString => {
-                    setNearme({searchString});
+                    if (searchString.length > 2) {
+                      setNearme(() => ({
+                        isNearme: true,
+                        nearmeString: searchString,
+                      }));
+                      setFocus(prev => ({
+                        nearme: {hasfocus: false},
+                        search: {hasfocus: false},
+                      }));
+                      setFilterClicked(false);
+                      //Do here
+                    } else {
+                      setNearme(() => ({
+                        isNearme: false,
+                        nearmeString: '',
+                      }));
+                      setFocus(prev => ({
+                        nearme: {hasfocus: true},
+                        search: {hasfocus: false},
+                      }));
+                    }
+                    // setSearch({searchString});
                   }}
                   underlineColorAndroid="transparent"
                 />
@@ -323,8 +349,7 @@ const SearchScreen = ({navigation}) => {
             </View>
             <View style={styles.filterContainer}>
               {filterClicked ? (
-                <TouchableOpacity
-                  onPress={() => setFilterClicked(!filterClicked)}>
+                <TouchableOpacity onPress={null}>
                   <Text style={styles.doneText}>Done</Text>
                 </TouchableOpacity>
               ) : (
@@ -340,30 +365,33 @@ const SearchScreen = ({navigation}) => {
           </View>
         </SafeAreaView>
       </View>
-      {!filterClicked && focus.search.hasfocus && (
-        <ScrollView>
-          <View style={styles.nearbyPlacesContainer}>
-            <Text style={styles.nearbyPlacesText}>Near by places</Text>
-          </View>
-          <View>
-            <FlatList
-              data={DATA}
-              keyExtractor={item => item.id}
-              renderItem={renderItem}
-            />
-          </View>
-          <View style={styles.nearbyPlacesContainer}>
-            <Text style={styles.nearbyPlacesText}>Suggestions</Text>
-          </View>
-          <View>
-            <FlatList
-              data={suggestionsData}
-              keyExtractor={item => item.id}
-              renderItem={renderSuggestions}
-            />
-          </View>
-        </ScrollView>
-      )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 && (
+          <ScrollView>
+            <View style={styles.nearbyPlacesContainer}>
+              <Text style={styles.nearbyPlacesText}>Near by places</Text>
+            </View>
+            <View>
+              <FlatList
+                data={DATA}
+                keyExtractor={item => item.id}
+                renderItem={renderItem}
+              />
+            </View>
+            <View style={styles.nearbyPlacesContainer}>
+              <Text style={styles.nearbyPlacesText}>Suggestions</Text>
+            </View>
+            <View>
+              <FlatList
+                data={suggestionsData}
+                keyExtractor={item => item.id}
+                renderItem={renderSuggestions}
+              />
+            </View>
+          </ScrollView>
+        )}
       {place.isSet && !mapView && (
         <View style={{flex: 1}}>
           <FlatList
@@ -423,26 +451,34 @@ const SearchScreen = ({navigation}) => {
           </View>
         </View>
       )}
-      {!filterClicked && focus.nearme.hasfocus && (
-        <View>
-          <View style={styles.nearmeListContainer}>
-            <Image
-              source={require('../../assets/images/location_icon.png')}
-              style={styles.locationIcon}
-            />
-            <Text style={styles.nearmeListText}>Use my current location</Text>
-          </View>
-          <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
-          <View style={styles.nearmeListContainer}>
-            <Image
-              source={require('../../assets/images/map_icon.png')}
-              style={styles.locationIcon}
-            />
-            <Text style={styles.nearmeListText}>Select Search area on map</Text>
-          </View>
-          <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
-        </View>
+      {nearme.isNearme && nearme.nearmeString > 2 && (
+        <Text style={{backgroundColor: 'red'}}>Hiiii</Text>
       )}
+      {!filterClicked &&
+        focus.nearme.hasfocus &&
+        nearme.nearmeString < 2 &&
+        place.placeString < 2 && (
+          <View>
+            <View style={styles.nearmeListContainer}>
+              <Image
+                source={require('../../assets/images/location_icon.png')}
+                style={styles.locationIcon}
+              />
+              <Text style={styles.nearmeListText}>Use my current location</Text>
+            </View>
+            <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
+            <View style={styles.nearmeListContainer}>
+              <Image
+                source={require('../../assets/images/map_icon.png')}
+                style={styles.locationIcon}
+              />
+              <Text style={styles.nearmeListText}>
+                Select Search area on map
+              </Text>
+            </View>
+            <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
+          </View>
+        )}
       {filterClicked && (
         <View style={{flex: 1}}>
           <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
@@ -1278,7 +1314,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   line: {
-    // borderWidth:0.3,
     height: 0.4,
   },
   filterHeaderText: {
@@ -1384,5 +1419,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  cardContainerInRenderSearch: {
+    shadowColor: '#171717',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.6,
+    shadowRadius: 2,
+    elevation: 5,
+    marginHorizontal: 5,
+    height: '25%',
+    width: '78%',
   },
 });

@@ -19,9 +19,9 @@ const DrawerNavigator = () => {
         sceneContainerStyle: {
           backgroundColor: '#FFFFFF',
         },
-        drawerStyle: {
-          width: '80%',
-        },
+        // drawerStyle: {
+        //   width: '80%',
+        // },
         drawerType: 'slide',
       }}
       drawerContent={props => <DrawerContent {...props} />}>

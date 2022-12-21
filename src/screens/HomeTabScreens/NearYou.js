@@ -14,6 +14,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
+import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
 const NearYou = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const mapHeight = width < height ? '28%' : '50%';
@@ -120,8 +121,8 @@ const NearYou = ({navigation}) => {
   };
   const renderItem = ({item}) => {
     return (
-      <Pressable onPress={handleCardClick}>
-        <RestaurantDetails
+      <Pressable onPress={handleCardClick} style={styles.cardContainer}>
+        <RestaurantDetailsModified
           image={
             <Image
               source={require('../../../assets/images/favourite_icon.png')}
@@ -156,6 +157,7 @@ const NearYou = ({navigation}) => {
       <FlatList
         data={DATA}
         keyExtractor={item => item.id}
+        showsVerticalScrollIndicator={false}
         renderItem={renderItem}
       />
     </View>
@@ -411,5 +413,14 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     width: 25,
     marginTop: 8,
+  },
+
+  cardContainer: {
+    shadowColor: '#171717',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.6,
+    shadowRadius: 2,
+    elevation: 5,
+    marginHorizontal: 5,
   },
 });

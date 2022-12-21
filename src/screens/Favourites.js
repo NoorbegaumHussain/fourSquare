@@ -12,6 +12,7 @@ import {
 import React from 'react';
 import Icon from 'react-native-vector-icons/Feather';
 import RestaurantDetails from '../components/RestaurantDetails';
+import RestaurantDetailsModified from '../components/RestaurantDetailsModified';
 const DATA = [
   {
     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -44,8 +45,8 @@ const Favourites = ({navigation}) => {
   };
   const renderItem = ({item}) => {
     return (
-      <TouchableOpacity onPress={handleCardClick}>
-        <RestaurantDetails
+      <TouchableOpacity onPress={handleCardClick} style={styles.cardContainer}>
+        <RestaurantDetailsModified
           image={
             <Image
               source={require('../../assets/images/close.png')}
@@ -135,6 +136,8 @@ const Favourites = ({navigation}) => {
         data={DATA}
         keyExtractor={item => item.id}
         renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
+
       />
     </View>
   );
@@ -209,6 +212,14 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     width: 16,
     height: 16,
-    marginRight: 5,
+    marginRight:-7
+  },
+  cardContainer: {
+    shadowColor: '#171717',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.6,
+    shadowRadius: 2,
+    elevation: 5,
+    marginHorizontal: 5,
   },
 });
