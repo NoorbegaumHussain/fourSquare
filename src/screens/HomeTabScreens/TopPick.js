@@ -6,53 +6,76 @@ import {
   TouchableOpacity,
   Pressable,
 } from 'react-native';
-import React from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
 import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
-const DATA = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Second Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571sdse29d72',
-    title: 'Third Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145rew571e29d72',
-    title: 'Third Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96jh145571e29d72',
-    title: 'Third Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571em,n29d72',
-    title: 'Third Item',
-  },
-];
+import getCurrentLatLong from '../../utils/getCurrentLatLong';
+import Geolocation from '@react-native-community/geolocation';
+import {getPlacesByType} from '../../services/auth';
+import Toast from 'react-native-simple-toast';
+import {useIsFocused} from '@react-navigation/native';
 
 const TopPick = ({navigation}) => {
+  const [currentLongitude, setCurrentLongitude] = useState('');
+  const [currentLatitude, setCurrentLatitude] = useState('');
+  const [nearbyLocations, setNearbyLocations] = useState([]);
+  const [placeId, setPlaceId] = useState('');
+  // console.log('nearbyLocations', nearbyLocations);
+  const getOneTimeLocation = () => {
+    Geolocation.getCurrentPosition(position => {
+      const currentLongitude = position.coords.longitude;
+
+      const currentLatitude = position.coords.latitude;
+
+      setCurrentLongitude(currentLongitude);
+
+      setCurrentLatitude(currentLatitude);
+    });
+  };
+  const loadPlaces = async () => {
+    getOneTimeLocation();
+    const response = await getPlacesByType(
+      currentLatitude,
+      currentLongitude,
+      'toppick',
+    );
+    if (response.status) {
+      setNearbyLocations(response?.data?.data);
+    } else {
+      console.log(response);
+    }
+  };
+
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus === true) {
+      loadPlaces();
+    }
+  }, [focus, currentLatitude]);
+
   const renderItem = ({item}) => {
     return (
-      <Pressable onPress={handleCardClick} style={styles.cardContainer}>
-        <RestaurantDetailsModified />
-      </Pressable>
+      <View style={styles.cardContainer}>
+        <RestaurantDetailsModified
+          navigation={navigation}
+          placeId={item?._id}
+          placeName={item?.placeName}
+          url={item.image?.url}
+          sector={item?.sector}
+          city={item?.city}
+          rating={item?.totalrating}
+          priceRange={item?.priceRange}
+          distance={item?.dist?.calculated}
+        />
+      </View>
     );
   };
 
-  const handleCardClick = () => {
-    navigation.navigate('RestaurantDetailScreen');
-  };
   return (
     <View style={styles.container}>
       <FlatList
-        data={DATA}
-        keyExtractor={item => item.id}
+        data={nearbyLocations}
+        keyExtractor={item => item._id}
         renderItem={renderItem}
       />
     </View>

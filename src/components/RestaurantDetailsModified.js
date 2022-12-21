@@ -1,35 +1,57 @@
 import {View, Text, Image, StyleSheet, useWindowDimensions} from 'react-native';
 import React from 'react';
+import {convertPriceRange} from '../utils/convertPriceRange';
+import {roundOff} from '../utils/roundOffNumber';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
-const RestaurantDetailsModified = ({image}) => {
+const RestaurantDetailsModified = ({
+  placeId,
+  image,
+  placeName,
+  url,
+  sector,
+  city,
+  rating,
+  priceRange,
+  distance,
+  onPress,
+  navigation,
+}) => {
+  const handleCardClick = () => {
+    navigation.navigate('RestaurantDetailScreen', {
+      placeId: placeId,
+    });
+  };
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handleCardClick}>
       <Image
-        source={require('../../assets/images/restaurant.png')}
+        source={{
+          uri: url,
+        }}
         style={styles.image}
       />
       <View style={styles.contentContainer}>
         <View style={styles.favContainer}>
-          <Text style={styles.restaurantName}>Attil</Text>
+          <Text style={styles.restaurantName}>{placeName}</Text>
           {image}
         </View>
         <View style={styles.restaurantInfo}>
           <View>
             <View style={styles.ratingBackground}>
-              <Text style={styles.ratingText}>8.5</Text>
+              <Text style={styles.ratingText}>{rating}</Text>
             </View>
             <View style={styles.textContainer}>
-              <Text style={styles.restaurantDetails}>Indian </Text>
+              <Text style={styles.restaurantDetails}>{sector} </Text>
               <View style={styles.dotContainer} />
-              <Text style={styles.restaurantDetails}> ₹₹₹₹ 6.5km</Text>
+              <Text style={styles.restaurantDetails}>
+                {` ${convertPriceRange(priceRange)} ${roundOff(distance, 1)}km`}
+              </Text>
             </View>
-            <Text style={styles.restaurantAdress}>
-              Daffodils,Laxmindra Nagar
-            </Text>
+            <Text style={styles.restaurantAdress}>{city}</Text>
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -100,6 +122,6 @@ const styles = StyleSheet.create({
   },
   restaurantAdress: {
     color: '#797D7F',
-    paddingBottom:4
+    paddingBottom: 4,
   },
 });

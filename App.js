@@ -1,11 +1,21 @@
 import React from 'react';
 import AuthStack from './src/navigation/AuthStack';
-import AboutUs from './src/screens/AboutUs';
-import Favourites from './src/screens/Favourites';
-import Feedback from './src/screens/Feedback';
+import store from './src/redux/store';
+import {Provider} from 'react-redux';
+import {PersistGate} from 'redux-persist/integration/react';
+import {persistStore} from 'redux-persist';
 import 'react-native-gesture-handler';
+
+let persistor = persistStore(store);
+
 const App = () => {
-  return <AuthStack />;
+  return (
+    <Provider store={store}>
+      <PersistGate persistor={persistor}>
+        <AuthStack />
+      </PersistGate>
+    </Provider>
+  );
 };
 
 export default App;

@@ -9,35 +9,59 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
 import MapView, {Marker} from 'react-native-maps';
 import PrimaryButton from '../components/PrimaryButton';
 import LinearGradient from 'react-native-linear-gradient';
 import {Rating, AirbnbRating} from 'react-native-ratings';
 import CustomModal from '../components/CustomModal';
+import {getPlacesById} from '../services/auth';
+import Toast from 'react-native-simple-toast';
+import {useIsFocused} from '@react-navigation/native';
 
-const RestaurantDetailScreen = ({navigation}) => {
+const RestaurantDetailScreen = ({navigation, route}) => {
+  console.log(route?.params?.placeId);
   const [modal, setModal] = useState(false);
   const [visible, setVisible] = useState(false);
-
+  const [particularRestaurantData, setParticularRestaurantDetails] = useState(
+    [],
+  );
   const {width, height} = useWindowDimensions();
   const handleRatingPress = () => {
     setVisible(true);
     setModal(true);
   };
+
+  const loadRestaurantDetails = async () => {
+    const response = await getPlacesById(route?.params?.placeId);
+
+    if (response.status) {
+      setParticularRestaurantDetails(response?.data?.data);
+    } else {
+      Toast.show(response);
+    }
+  };
+
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus === true) {
+      loadRestaurantDetails();
+    }
+  }, [focus]);
+
   return (
     <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <ImageBackground
-          source={require('../../assets/images/restaurant.png')}
+          source={{uri: particularRestaurantData?.image?.url}}
           resizeMode="cover"
           style={styles.image}>
           <LinearGradient
             start={{x: 1, y: 0}}
             end={{x: 1, y: 1}}
             locations={[0, 0.5, 1]}
-            style={{height: 330}}
+            style={{height: 370}}
             colors={['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.0)', 'rgba(0,0,0,0.8)']}>
             <SafeAreaView>
               <View style={styles.header}>
@@ -47,7 +71,9 @@ const RestaurantDetailScreen = ({navigation}) => {
                     style={styles.backIcon}
                   />
                 </TouchableOpacity>
-                <Text style={styles.text}>Attil</Text>
+                <Text style={styles.text}>
+                  {particularRestaurantData?.placeName}
+                </Text>
                 <View style={styles.rightHeader}>
                   <TouchableOpacity>
                     <Image
@@ -65,16 +91,15 @@ const RestaurantDetailScreen = ({navigation}) => {
               </View>
               <View style={styles.textContainer}>
                 <Text style={styles.restaurantDetails}>
-                  Indian Restaurant, Chinese Restaurant, {'\n'} and Italian
-                  Restaurant.
+                  {particularRestaurantData?.sector}
                 </Text>
               </View>
               <AirbnbRating
                 size={15}
                 showRating={false}
-                defaultRating={0}
+                defaultRating={particularRestaurantData?.totalrating}
                 style={styles.ratings}
-                // isDisabled={false}
+                isDisabled={true}
                 // onFinishRating={rating => ratingCompleted(rating)}
               />
             </SafeAreaView>
@@ -115,10 +140,7 @@ const RestaurantDetailScreen = ({navigation}) => {
         <View style={styles.overViewContainer}>
           <Text style={styles.overViewText}>Overview</Text>
           <Text style={styles.overViewDetails}>
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry. Lorem Ipsum has been the industry's standard dummy text
-            ever since the 1500s, when an unknown printer took a galley of type
-            and scrambled it to make a
+            {particularRestaurantData?.overview}
           </Text>
         </View>
 
@@ -153,9 +175,11 @@ const RestaurantDetailScreen = ({navigation}) => {
             }}>
             <View style={styles.maptextContainer}>
               <Text style={styles.mapText}>
-                Daffodils,Laxmindra {'\n'} Nagar,2nd Cross Udupi
+                {particularRestaurantData.city}
               </Text>
-              <Text style={styles.mapTextNumber}>+91 7634723464</Text>
+              <Text style={styles.mapTextNumber}>
+                {particularRestaurantData.phone}
+              </Text>
               <Text style={styles.mapTextDistance}>Drive : 5 km</Text>
             </View>
           </LinearGradient>
@@ -433,7 +457,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   image: {
-    height: 330,
+    height: 370,
     width: '100%',
   },
   text: {
@@ -464,7 +488,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   textContainer: {
-    marginTop: Platform.OS === 'ios' ? 155 : 175,
+    marginTop: Platform.OS === 'ios' ? 215 : 235,
   },
   iconContainer: {
     flexDirection: 'row',
@@ -562,6 +586,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   submitButton: {
+    alignContent: 'flex-end',
     width: '100%',
     borderTopWidth: 1,
     borderColor: '#A0A0A0',

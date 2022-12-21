@@ -8,18 +8,24 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
-  Platform
+  Platform,
 } from 'react-native';
 import {TextField} from 'rn-material-ui-textfield';
 import OutlinedButton from '../components/OutlinedButton';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {Formik} from 'formik';
 import * as yup from 'yup';
+import {useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
+import {addUser} from '../redux/fourSquareSlice';
+import {loginUser} from '../services/auth';
+import Toast from 'react-native-simple-toast';
 
 const LoginScreen = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
-
+  // const dispatch = useDispatch();
+  // dispatch(addUser())
   const loginValidationSchema = yup.object().shape({
     email: yup
       .string()
@@ -53,9 +59,24 @@ const LoginScreen = ({navigation}) => {
             <Formik
               validationSchema={loginValidationSchema}
               initialValues={{email: '', password: ''}}
-              onSubmit={values => {
-                console.log(values);
-                navigation.navigate('DrawerNavigator');
+              onSubmit={async values => {
+                const obj = {
+                  email: values.email,
+                  password: values.password,
+                };
+                const response = await loginUser(obj);
+                if (response?.data?.status) {
+                  Toast.show(response?.data?.message);
+                  const headers = response.headers;
+                  let stringifiedToken = JSON.stringify({
+                    accessToken: headers.authorization,
+                    refreshToken: headers['refresh-token'],
+                  });
+                  console.log(stringifiedToken);
+                  navigation.navigate('DrawerNavigator');
+                } else {
+                  Toast.show(response);
+                }
               }}>
               {({
                 handleChange,
@@ -283,7 +304,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 35,
-    marginBottom:20,
+    marginBottom: 20,
   },
   facebook: {
     // height: 53,

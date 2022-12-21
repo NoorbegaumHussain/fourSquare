@@ -407,7 +407,7 @@ const SearchScreen = ({navigation}) => {
       {place.isSet && mapView && (
         <View style={{flex: 1}}>
           <View style={styles.mainContainer}>
-            <View style={[styles.mapContainer, {height: '103.5%'}]}>
+            <View style={[styles.mapContainer, {height: '100%'}]}>
               {currentLatitude && currentLongitude !== '' ? (
                 <MapView
                   style={styles.mapStyle}
@@ -1402,7 +1402,6 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     backgroundColor: '#E5E5E5',
-    marginBottom: 20,
   },
   mapContainer: {
     position: 'absolute',

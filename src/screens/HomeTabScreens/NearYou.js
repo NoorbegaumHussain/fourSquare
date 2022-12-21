@@ -9,21 +9,42 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useLayoutEffect} from 'react';
 
 import RestaurantDetails from '../../components/RestaurantDetails';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
 import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
+import {restaurantsNearYou} from '../../services/auth';
+import {useIsFocused} from '@react-navigation/native';
+import Toast from 'react-native-simple-toast';
+
 const NearYou = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const mapHeight = width < height ? '28%' : '50%';
   const [currentLongitude, setCurrentLongitude] = useState('');
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
+  const [nearbyLocations, setNearbyLocations] = useState([]);
+  const [placeId, setPlaceId] = useState('');
+
   const mapRef = useRef(null);
 
-  useEffect(() => {
+  const loadPlaces = async () => {
+    const response = await restaurantsNearYou(
+      currentLatitude,
+      currentLongitude,
+    );
+ 
+    if (response.status) {
+      setNearbyLocations(response?.data?.data);
+    } else {
+      console.info(response.error);
+    }
+  };
+
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
     const requestLocationPermission = async () => {
       if (Platform.OS === 'ios') {
         getOneTimeLocation();
@@ -46,8 +67,11 @@ const NearYou = ({navigation}) => {
         }
       }
     };
+    if (focus === true && currentLatitude !== '') {
+      loadPlaces();
+    }
     requestLocationPermission();
-  }, []);
+  }, [focus, currentLatitude]);
 
   const getOneTimeLocation = () => {
     setLocationStatus('Getting Location ...');
@@ -90,39 +114,19 @@ const NearYou = ({navigation}) => {
     );
   };
 
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'First Item',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Second Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571sdse29d72',
-      title: 'Third Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145rew571e29d72',
-      title: 'Third Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96jh145571e29d72',
-      title: 'Third Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571em,n29d72',
-      title: 'Third Item',
-    },
-  ];
-  const handleCardClick = () => {
-    navigation.navigate('RestaurantDetailScreen');
-  };
   const renderItem = ({item}) => {
     return (
-      <Pressable onPress={handleCardClick} style={styles.cardContainer}>
+      <View style={styles.cardContainer}>
         <RestaurantDetailsModified
+          navigation={navigation}
+          placeId={item?._id}
+          placeName={item?.placeName}
+          url={item.image?.url}
+          sector={item?.sector}
+          city={item?.city}
+          rating={item?.totalrating}
+          priceRange={item?.priceRange}
+          distance={item?.dist?.calculated}
           image={
             <Image
               source={require('../../../assets/images/favourite_icon.png')}
@@ -130,7 +134,7 @@ const NearYou = ({navigation}) => {
             />
           }
         />
-      </Pressable>
+      </View>
     );
   };
   return (
@@ -155,8 +159,8 @@ const NearYou = ({navigation}) => {
         ) : null}
       </View>
       <FlatList
-        data={DATA}
-        keyExtractor={item => item.id}
+        data={nearbyLocations}
+        keyExtractor={item => item._id}
         showsVerticalScrollIndicator={false}
         renderItem={renderItem}
       />
