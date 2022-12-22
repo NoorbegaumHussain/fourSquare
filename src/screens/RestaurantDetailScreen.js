@@ -17,7 +17,7 @@ import PrimaryButton from '../components/PrimaryButton';
 import LinearGradient from 'react-native-linear-gradient';
 import {Rating, AirbnbRating} from 'react-native-ratings';
 import CustomModal from '../components/CustomModal';
-import {getPlacesById} from '../services/auth';
+import {addRating, getPlacesById} from '../services/auth';
 import Toast from 'react-native-simple-toast';
 import {useIsFocused} from '@react-navigation/native';
 import {roundOff} from '../utils/roundOffNumber';
@@ -27,6 +27,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   console.log(route?.params);
   const [modal, setModal] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [rating, setRating] = useState(0);
   const [currentLongitude, setCurrentLongitude] = useState('');
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
@@ -40,7 +41,23 @@ const RestaurantDetailScreen = ({navigation, route}) => {
     setModal(true);
   };
 
+  const handleSubmit = async () => {
+    const obj = {
+      placeId: route?.params?.placeId,
+      rating: rating,
+    };
+    const response = await addRating(obj);
+    if (response.status) {
+      // setReviews(response?.data?.data);
+      console.log(response.data);
+      setVisible(false);
+      setModal(false);
+    } else {
+      console.log(response);
+    }
+  };
   const focus = useIsFocused();
+
   useLayoutEffect(() => {
     if (focus === true) {
       setTimeout(() => {
@@ -61,6 +78,9 @@ const RestaurantDetailScreen = ({navigation, route}) => {
     }
   }, [focus]);
 
+  const ratingCompleted = rating => {
+    setRating(rating);
+  };
   return (
     <View style={styles.container}>
       <ScrollView
@@ -132,6 +152,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
             onPress={() =>
               navigation.navigate('PhotoGallery', {
                 placeId: route?.params?.placeId,
+                placeName: route?.params?.placeName,
               })
             }>
             <Image
@@ -218,7 +239,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
               ]}>
               Overall Rating
             </Text>
-            <Text style={styles.ratingInNumber}>4.5</Text>
+            <Text style={styles.ratingInNumber}>{route?.params?.rating}</Text>
             <Text
               style={[
                 styles.experience,
@@ -229,16 +250,18 @@ const RestaurantDetailScreen = ({navigation, route}) => {
             <AirbnbRating
               size={30}
               showRating={false}
-              defaultRating={5}
+              defaultRating={rating}
               isDisabled={false}
               starContainerStyle={{
                 width: '70%',
                 justifyContent: 'space-around',
                 marginTop: 40,
               }}
-              // onFinishRating={rating => ratingCompleted(rating)}
+              onFinishRating={rating => ratingCompleted(rating)}
             />
-            <TouchableOpacity style={styles.submitButton}>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}>
               <Text style={styles.submitText}>Submit</Text>
             </TouchableOpacity>
           </View>

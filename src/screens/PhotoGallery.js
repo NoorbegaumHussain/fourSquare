@@ -15,8 +15,13 @@ import {useIsFocused} from '@react-navigation/native';
 
 const PhotoGallery = ({navigation, route}) => {
   const [menuImages, setMenuImages] = useState([]);
-  const handlePhotoClick = () => {
-    navigation.navigate('PhotoDetails');
+  const handlePhotoClick = (image, imageId, name) => {
+    navigation.navigate('PhotoDetails', {
+      image: image,
+      imageId: imageId,
+      name: name,
+      placeName: route?.params?.placeName,
+    });
   };
   // console.warn(menuImages);
 
@@ -47,7 +52,7 @@ const PhotoGallery = ({navigation, route}) => {
         <SafeAreaView>
           <CustomAppBar
             navigation={navigation}
-            name="Atil"
+            name={route?.params?.placeName}
             rightIcon={
               <Icon
                 name="camera-plus-outline"
@@ -60,15 +65,14 @@ const PhotoGallery = ({navigation, route}) => {
         </SafeAreaView>
       </View>
       <View style={styles.imageContainer}>
-        {menuImages.map(image => {
-          console.log(image?.photos?.url);
-        })}
-        <TouchableOpacity onPress={handlePhotoClick}>
-          <Image
-            source={require('../../assets/images/restaurant.png')}
-            style={styles.image}
-          />
-        </TouchableOpacity>
+        {menuImages.map(image => (
+          <TouchableOpacity
+            onPress={() =>
+              handlePhotoClick(image?.photos?.url[0], image?._id, image?.name)
+            }>
+            <Image source={{uri: image?.photos?.url[0]}} style={styles.image} />
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );
@@ -85,7 +89,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    // justifyContent: 'center',
     display: 'flex',
     flexWrap: 'wrap',
     marginTop: 2,

@@ -8,13 +8,34 @@ import {
   TextInput,
   Platform,
 } from 'react-native';
-import React from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import PrimaryButton from '../components/PrimaryButton';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ImagePickerComponent from '../components/ImagePickerComponent';
+import {useIsFocused} from '@react-navigation/native';
+import {getAbout} from '../services/auth';
 const AboutUs = ({navigation}) => {
+  const [aboutus, setAboutus] = useState('');
+  const loadList = async () => {
+    const response = await getAbout();
+
+    if (response.status) {
+      console.log('success about', response.data.data[0].aboutUs);
+      setAboutus(response.data.data[0].aboutUs);
+    } else {
+      console.log(response);
+    }
+  };
+
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus === true) {
+      loadList();
+    }
+  }, [focus]);
+
   return (
     <View style={styles.container}>
       <View style={{flex: 1, height: '100%'}}>
@@ -38,6 +59,7 @@ const AboutUs = ({navigation}) => {
             </View>
           </SafeAreaView>
         </View>
+        <Text style={styles.aboutUstext}>{aboutus}</Text>
       </View>
     </View>
   );
@@ -115,5 +137,15 @@ const styles = StyleSheet.create({
     height: 22,
     width: 22,
     marginLeft: 6,
+  },
+  aboutUstext: {
+    fontFamily: 'Avenir Book',
+    fontSize: 21,
+    lineHeight: 30,
+    color: 'rgba(0,0,0,0.6)',
+    fontWeight: '400',
+    textAlign: 'justify',
+    paddingHorizontal: 18,
+    marginVertical: 20,
   },
 });

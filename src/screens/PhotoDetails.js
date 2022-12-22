@@ -7,16 +7,38 @@ import {
   Platform,
   useWindowDimensions,
 } from 'react-native';
-import React from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/AntDesign';
 import LinearGradient from 'react-native-linear-gradient';
-const PhotoDetails = ({navigation}) => {
+import {getParticularImageDetailsById} from '../services/auth';
+import {useIsFocused} from '@react-navigation/native';
+const PhotoDetails = ({navigation, route}) => {
   const {width, height} = useWindowDimensions();
+  const [date, setDate] = useState('');
+  const loadImages = async () => {
+    const response = await getParticularImageDetailsById(
+      route?.params?.imageId,
+    );
+    if (response.status) {
+      console.log('.............', response.data.data);
+      setDate(response?.data);
+    } else {
+      console.log(response);
+    }
+  };
+
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus === true) {
+      loadImages();
+    }
+  }, [focus]);
+
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require('../../assets/images/restaurant.png')}
+        source={{uri: route?.params?.image}}
         resizeMode="cover"
         style={styles.image}>
         <LinearGradient
@@ -34,7 +56,7 @@ const PhotoDetails = ({navigation}) => {
                   color="#FFFFFF"
                   onPress={() => navigation.goBack()}
                 />
-                <Text style={styles.text}>Attil</Text>
+                <Text style={styles.text}>{route?.params?.placeName}</Text>
                 <Image
                   source={require('../../assets/images/share_icon.png')}
                   style={styles.shareIcon}
@@ -52,7 +74,7 @@ const PhotoDetails = ({navigation}) => {
               style={styles.profile}
             />
             <View style={styles.textContainer}>
-              <Text style={styles.name}>Saish Balu</Text>
+              <Text style={styles.name}>{route?.params?.name}</Text>
               <Text style={styles.date}>Added May 12,2016</Text>
             </View>
           </View>

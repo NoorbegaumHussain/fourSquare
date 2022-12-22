@@ -15,13 +15,34 @@ import OutlinedButton from '../components/OutlinedButton';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {Formik} from 'formik';
 import * as yup from 'yup';
-import {useSelector} from 'react-redux';
-import {useDispatch} from 'react-redux';
-import {addUser} from '../redux/fourSquareSlice';
-import {loginUser} from '../services/auth';
+import {getOTP, loginUser} from '../services/auth';
 import Toast from 'react-native-simple-toast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// const getData = async () => {
+//   try {
+//     const value = await AsyncStorage.getItem('token');
+//     return value;
+//     console.log(value);
+//   } catch (e) {
+//     console.log(e);
+//   }
+// };
+// let newToken = getData();
+// console.log(newToken);
 const LoginScreen = ({navigation}) => {
+  const getData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('token');
+      return value;
+      // console.log(value);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  const data = getData();
+  console.log(data)
+
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
   // const dispatch = useDispatch();
@@ -72,7 +93,11 @@ const LoginScreen = ({navigation}) => {
                     accessToken: headers.authorization,
                     refreshToken: headers['refresh-token'],
                   });
-                  console.log(stringifiedToken);
+                  try {
+                    await AsyncStorage.setItem('token', stringifiedToken);
+                  } catch (e) {
+                    console.log('error in storing data in async');
+                  }
                   navigation.navigate('DrawerNavigator');
                 } else {
                   Toast.show(response);
@@ -193,7 +218,19 @@ const LoginScreen = ({navigation}) => {
                       )}
                     </View>
                   </View>
-                  <TouchableOpacity onPress={handleForgotPasssword}>
+                  <TouchableOpacity
+                    onPress={async () => {
+                      const response = await getOTP(values.email);
+                      if (response.status) {
+                        console.log('OTP successfullysent');
+                        console.log(response.data);
+                        navigation.navigate('ForgotPassword', {
+                          email: values.email,
+                        });
+                      } else {
+                        console.log('please try again');
+                      }
+                    }}>
                     <Text style={styles.forgotPassText}>Forgot Password?</Text>
                   </TouchableOpacity>
                   <View style={styles.loginButtonContainer}>

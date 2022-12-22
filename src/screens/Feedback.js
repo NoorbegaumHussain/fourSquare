@@ -8,13 +8,26 @@ import {
   TextInput,
   Platform,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import PrimaryButton from '../components/PrimaryButton';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ImagePickerComponent from '../components/ImagePickerComponent';
+import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
+import {addFeedback} from '../services/auth';
 const Feedback = ({navigation}) => {
+  const [text, setText] = useState('');
+  const handleSubmit = async () => {
+    const response = await addFeedback(text);
+    if (response.status) {
+      console.log('success');
+    } else {
+      console.log(response);
+    }
+    // navigation.navigate('');
+    // navigation.navigate('');
+  };
   return (
     <View style={styles.container}>
       <View style={{flex: 1, height: '100%'}}>
@@ -44,14 +57,14 @@ const Feedback = ({navigation}) => {
             <TextInput
               multiline={true}
               style={styles.input}
-              // onChangeText={onChangeText}
+              onChangeText={string => setText(string)}
               // value={text}
             />
           </KeyboardAwareScrollView>
         </View>
       </View>
       <View style={styles.primaryButtonContainer}>
-        <PrimaryButton text="Submit" onPress={() => navigation.navigate('')} />
+        <PrimaryButton text="Submit" onPress={handleSubmit} />
       </View>
     </View>
   );
@@ -101,7 +114,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#000000',
     marginBottom: 10,
-    fontWeight:'500'
+    fontWeight: '500',
   },
   reviewContainer: {
     marginHorizontal: 18,

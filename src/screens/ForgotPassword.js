@@ -12,18 +12,31 @@ import {TextField} from 'rn-material-ui-textfield';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import OutlinedButton from '../components/OutlinedButton';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {verifyOTP} from '../services/auth';
 
-const ForgotPassword = ({navigation}) => {
+const ForgotPassword = ({navigation, route}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
   const [otp, setOtp] = useState('');
-  const handleGetIn = () => {
+  const handleGetIn = async () => {
     if (otp !== '') {
-      navigation.navigate('ConfirmPassword');
+      const obj = {
+        email: route?.params?.email,
+        token: otp,
+      };
+      const response = await verifyOTP(obj);
+      console.log(response.data.isValid);
+      if (response?.data?.status) {
+        navigation.navigate('ConfirmPassword', {
+          token: response?.headers['otp-verification-token'],
+          email: route?.params?.email,
+        });
+      }
     } else {
-      console.log('Please enter otp');
+      console.log('Otp could not be verified');
     }
   };
+
   return (
     <View style={styles.container}>
       <ImageBackground

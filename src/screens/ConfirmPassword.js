@@ -13,8 +13,9 @@ import {TextField} from 'rn-material-ui-textfield';
 import {Formik} from 'formik';
 import * as yup from 'yup';
 import OutlinedButton from '../components/OutlinedButton';
+import {resetPassword} from '../services/auth';
 
-const ConfirmPassword = () => {
+const ConfirmPassword = ({navigation, route}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
 
@@ -40,8 +41,19 @@ const ConfirmPassword = () => {
             <Formik
               validationSchema={loginValidationSchema}
               initialValues={{confirmPassword: '', password: ''}}
-              onSubmit={values => {
-                console.log('Heyy', values);
+              onSubmit={async values => {
+                const obj = {
+                  email: route?.params?.email,
+                  password: values.password,
+                };
+                console.log('Heyy', obj, route?.params?.token);
+                const response = await resetPassword(obj, route?.params?.token);
+                console.log(response);
+                if (response.status) {
+                  navigation.navigate('DrawerNavigator');
+                } else {
+                  console.log('Password verification failed');
+                }
               }}>
               {({
                 handleChange,

@@ -14,6 +14,7 @@ import {Formik} from 'formik';
 import * as yup from 'yup';
 import OutlinedButton from '../components/OutlinedButton';
 import {registerUser} from '../services/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Register = ({navigation}) => {
   const {width, height} = useWindowDimensions();
@@ -64,8 +65,17 @@ const Register = ({navigation}) => {
                 };
                 const response = await registerUser(obj);
                 if (response?.data?.status) {
-                  console.log(response?.data?.message);
-                  navigation.navigate('AppStack');
+                  const headers = response.headers;
+                  let stringifiedToken = JSON.stringify({
+                    accessToken: headers.authorization,
+                    refreshToken: headers['refresh-token'],
+                  });
+                  try {
+                    await AsyncStorage.setItem('token', stringifiedToken);
+                  } catch (e) {
+                    console.log('error in storing data in async');
+                  }
+                  navigation.navigate('DrawerNavigator');
                 } else {
                   console.log(response);
                 }
