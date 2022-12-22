@@ -7,14 +7,64 @@ import {
   Image,
   TextInput,
   Platform,
+  Alert,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import PrimaryButton from '../components/PrimaryButton';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ImagePickerComponent from '../components/ImagePickerComponent';
+import ImagePicker from 'react-native-image-crop-picker';
 const AddReview = ({navigation}) => {
+  const [text, setText] = useState('');
+  const [imagedata, setImgData] = useState([]);
+  const [imageuri, setImageUri] = useState('');
+  console.log(imagedata);
+  const getImageFromCamera = async () => {
+    ImagePicker.openCamera({
+      width: 104,
+      height: 104,
+      cropping: true,
+    }).then(image => {
+      // console.log(image);
+      setImageUri(`file://${image.path}`);
+      const {path, filename, mime} = image;
+      setImgData([...imagedata, {image: {filename, mime, path}}]);
+    });
+  };
+
+  const getImageFromGallary = async () => {
+    ImagePicker.openPicker({
+      width: 104,
+      height: 104,
+      cropping: true,
+      includeBase64: true,
+    }).then(image => {
+      // console.log(image);
+      setImageUri(`file://${image.path}`);
+      const {path, filename, mime} = image;
+      setImgData([...imagedata, {image: {filename, mime, path}}]);
+    });
+  };
+
+  const createThreeButtonAlert = () =>
+    Alert.alert('Select Picture From', '', [
+      {
+        text: 'Camera',
+        onPress: () => getImageFromCamera(),
+      },
+      {
+        text: 'Cancel',
+        onPress: () => null,
+        style: 'cancel',
+      },
+      {
+        text: 'Gallary',
+        onPress: () => getImageFromGallary(),
+      },
+    ]);
+
   return (
     <View style={styles.container}>
       <View style={{flex: 1, height: '100%'}}>
@@ -39,19 +89,60 @@ const AddReview = ({navigation}) => {
           </SafeAreaView>
         </View>
         <View style={styles.reviewContainer}>
-          <KeyboardAwareScrollView>
+          {/* <View style={{flex: 1, height: '100%'}}> */}
+          <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
             <Text style={styles.writeReviewText}>Write Review</Text>
             <TextInput
               multiline={true}
               style={styles.input}
               textAlignVertical="top"
-              // onChangeText={onChangeText}
-              // value={text}
+              onChangeText={string => setText(string)}
             />
             <Text style={styles.photoText}>Add a photos to your review</Text>
-
-            <ImagePickerComponent />
+            <View
+              style={{
+                // marginHorizontal: 0,
+                flex: 1,
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+              }}>
+              {imagedata?.map(item => (
+                <Image
+                  source={{uri: item?.image?.path}}
+                  style={{
+                    height: 70,
+                    width: 70,
+                    borderRadius: 10,
+                    marginRight: 10,
+                    marginTop: 10,
+                  }}
+                />
+              ))}
+              <View
+                style={{
+                  height: 70,
+                  width: 70,
+                  borderRadius: 10,
+                  alignContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: '#cccccc',
+                  marginBottom: 80,
+                  marginTop: 10,
+                  marginRight: 10,
+                }}>
+                <Icon
+                  name="camera-plus-outline"
+                  size={40}
+                  color="#301934"
+                  style={{alignSelf: 'center', marginTop: 18}}
+                  onPress={() => {
+                    createThreeButtonAlert();
+                  }}
+                />
+              </View>
+            </View>
           </KeyboardAwareScrollView>
+          {/* </View> */}
         </View>
       </View>
       <View style={styles.primaryButtonContainer}>
@@ -107,6 +198,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   reviewContainer: {
+    flex: 1,
     marginHorizontal: 18,
     marginVertical: 25,
   },
@@ -132,5 +224,23 @@ const styles = StyleSheet.create({
     height: 22,
     width: 22,
     marginLeft: 6,
+  },
+  addImageContainer: {
+    height: 65,
+    width: 65,
+    borderRadius: 5,
+    marginRight: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#CCCCCC',
+  },
+  pickedimage: {
+    height: 65,
+    width: 65,
+    borderRadius: 5,
+    marginRight: 24,
+  },
+  imageContainer: {
+    flexDirection: 'row',
   },
 });

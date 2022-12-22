@@ -67,6 +67,10 @@ const Coffee = ({navigation}) => {
           rating={item?.totalrating}
           priceRange={item?.priceRange}
           distance={item?.dist?.calculated}
+          overview={item?.overview}
+          phone={item?.phone}
+          latitude={item?.location?.coordinates[1]}
+          longitude={item?.location?.coordinates[0]}
         />
       </View>
     );

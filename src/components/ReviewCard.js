@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import React from 'react';
 
-const ReviewCard = ({name, userReview, date}) => {
+const ReviewCard = ({name, userReview, date, url}) => {
   const {height, width} = useWindowDimensions();
   return (
     <TouchableOpacity style={styles.Container}>
@@ -21,7 +21,7 @@ const ReviewCard = ({name, userReview, date}) => {
             height: 52,
           }}>
           <Image
-            source={require('../../assets/images/profile1.png')}
+            source={{uri: url}}
             style={{height: 45, width: 45, borderRadius: 50}}
           />
           <View
@@ -82,6 +82,6 @@ const styles = StyleSheet.create({
     // borderWidth:0.3,
     height: 0.4,
     backgroundColor: '#8D8D8d',
-    marginTop:15
+    marginTop: 15,
   },
 });

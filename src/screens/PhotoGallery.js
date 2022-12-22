@@ -6,15 +6,36 @@ import {
   StatusBar,
   Image,
 } from 'react-native';
-import React from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import CustomAppBar from '../components/CustomAppBar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import {getImagesById} from '../services/auth';
+import {useIsFocused} from '@react-navigation/native';
 
-const PhotoGallery = ({navigation}) => {
+const PhotoGallery = ({navigation, route}) => {
+  const [menuImages, setMenuImages] = useState([]);
   const handlePhotoClick = () => {
     navigation.navigate('PhotoDetails');
   };
+  // console.warn(menuImages);
+
+  const loadImages = async () => {
+    const response = await getImagesById(route?.params?.placeId);
+    if (response.status) {
+      setMenuImages(response?.data?.data[0].uploadedImages);
+    } else {
+      console.log(response);
+    }
+  };
+
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus === true) {
+      loadImages();
+    }
+  }, [focus]);
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -39,44 +60,15 @@ const PhotoGallery = ({navigation}) => {
         </SafeAreaView>
       </View>
       <View style={styles.imageContainer}>
+        {menuImages.map(image => {
+          console.log(image?.photos?.url);
+        })}
         <TouchableOpacity onPress={handlePhotoClick}>
           <Image
             source={require('../../assets/images/restaurant.png')}
             style={styles.image}
           />
         </TouchableOpacity>
-        <Image
-          source={require('../../assets/images/restaurant.png')}
-          style={styles.image}
-        />
-        <Image
-          source={require('../../assets/images/restaurant.png')}
-          style={styles.image}
-        />
-        <Image
-          source={require('../../assets/images/restaurant.png')}
-          style={styles.image}
-        />
-        <Image
-          source={require('../../assets/images/restaurant.png')}
-          style={styles.image}
-        />
-        <Image
-          source={require('../../assets/images/restaurant.png')}
-          style={styles.image}
-        />
-        <Image
-          source={require('../../assets/images/restaurant.png')}
-          style={styles.image}
-        />
-        <Image
-          source={require('../../assets/images/restaurant.png')}
-          style={styles.image}
-        />
-        <Image
-          source={require('../../assets/images/restaurant.png')}
-          style={styles.image}
-        />
       </View>
     </View>
   );

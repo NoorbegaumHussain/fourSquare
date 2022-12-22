@@ -13,7 +13,6 @@ export default PrimaryButton;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
     height: 54,

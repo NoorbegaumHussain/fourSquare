@@ -7,10 +7,12 @@ import {
   FlatList,
   Pressable,
 } from 'react-native';
-import React from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import CustomAppBar from '../components/CustomAppBar';
 import ReviewCard from '../components/ReviewCard';
 import Icon from 'react-native-vector-icons/AntDesign';
+import {useIsFocused} from '@react-navigation/native';
+import {getReviewsById} from '../services/auth';
 
 const DATA = [
   {
@@ -69,18 +71,41 @@ const DATA = [
     date: 'June 24,2015',
   },
 ];
-const renderItem = ({item}) => {
-  return (
-    <Pressable>
-      <ReviewCard
-        name={item.name}
-        userReview={item.userReview}
-        date={item.date}
-      />
-    </Pressable>
-  );
-};
-const ReviewList = ({navigation}) => {
+
+const ReviewList = ({navigation, route}) => {
+  const [reviews, setReviews] = useState('');
+  const renderItem = ({item}) => {
+    return (
+      <Pressable>
+        <ReviewCard
+          name={item?.name}
+          userReview={item?.reviewMessage}
+          date={item.date}
+          url={item?.reviewerPhoto?.url}
+        />
+      </Pressable>
+    );
+  };
+
+  console.log(reviews);
+
+  const loadList = async () => {
+    const response = await getReviewsById(route?.params?.placeId);
+
+    if (response.status) {
+      setReviews(response?.data?.data);
+    } else {
+      console.log(response);
+    }
+  };
+
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus === true) {
+      loadList();
+    }
+  }, [focus]);
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -93,13 +118,24 @@ const ReviewList = ({navigation}) => {
           <CustomAppBar
             navigation={navigation}
             name="Atil"
-            rightIcon={<Icon name="addfile" size={24} color="#FFFFFF" />}
+            rightIcon={
+              <Icon
+                name="addfile"
+                size={24}
+                color="#FFFFFF"
+                onPress={() =>
+                  navigation.navigate('AddReview', {
+                    placeId: route?.params?.placeId,
+                  })
+                }
+              />
+            }
           />
         </SafeAreaView>
       </View>
       <FlatList
-        data={DATA}
-        keyExtractor={item => item.id}
+        data={reviews}
+        keyExtractor={item => item._id}
         renderItem={renderItem}
       />
     </View>

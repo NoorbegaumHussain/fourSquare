@@ -16,10 +16,26 @@ const RestaurantDetailsModified = ({
   distance,
   onPress,
   navigation,
+  overview,
+  phone,
+  latitude,
+  longitude,
 }) => {
   const handleCardClick = () => {
     navigation.navigate('RestaurantDetailScreen', {
       placeId: placeId,
+      url: url,
+      image: url,
+      placeName: placeName,
+      sector: sector,
+      city: city,
+      rating: rating,
+      priceRange: priceRange,
+      distance: distance,
+      overview: overview,
+      phone: phone,
+      latitude: latitude,
+      longitude: longitude,
     });
   };
   return (

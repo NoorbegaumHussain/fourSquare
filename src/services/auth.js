@@ -17,37 +17,22 @@ export const loginUser = async data => {
     const response = await axios.post(`${BASE_URL}/api/user/login`, data);
     return response;
   } catch (error) {
-    // const {message: errorMessage} = errorHandler(error, 'login');
-    return error;
+    const {message: errorMessage} = errorHandler(error, 'login');
+    return errorMessage;
   }
 };
-
-// export const restaurantsNearYou = async (latitude, longitude) => {
-//   try {
-//     let res = await fetch(
-//       `${BASE_URL}/place/find-nearby-location?longitude=${longitude}&latitude=${latitude}&page=1`,
-//       {
-//         method: 'post',
-//       },
-//     );
-//     const jsonResponse = await res.json();
-//     console.log(jsonResponse);
-//     return jsonResponse;
-//   } catch (error) {
-//     const {message: errorMessage} = errorHandler(error, 'nearyou');
-//     return errorMessage;
-//   }
-// };
 
 export const restaurantsNearYou = async (latitude, longitude) => {
   try {
     const response = await axios.post(
       `${BASE_URL}/api/place/find-nearby-location?longitude=${longitude}&latitude=${latitude}&page=1`,
     );
+    // console.info(response.data)
+
     return response;
   } catch (error) {
-    // const {message: errorMessage} = errorHandler(error, 'login');
-    return error;
+    const {message: errorMessage} = errorHandler(error, 'login');
+    return errorMessage;
   }
 };
 
@@ -99,8 +84,8 @@ export const getPlacesByType = async (latitude, longitude, type) => {
       return response;
     }
   } catch (error) {
-    // const {message: errorMessage} = errorHandler(error, `getting ${type} info`);
-    return error;
+    const {message: errorMessage} = errorHandler(error, `getting ${type} info`);
+    return errorMessage;
   }
 };
 
@@ -118,10 +103,54 @@ export const getPlacesById = async placeId => {
 
     return response;
   } catch (error) {
-    // const {message: errorMessage} = errorHandler(
-    //   error,
-    //   'getting restaurant details',
-    // );
-    return error;
+    const {message: errorMessage} = errorHandler(
+      error,
+      'getting restaurant details',
+    );
+    return errorMessage;
+  }
+};
+
+export const getImagesById = async placeId => {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}/api/place/get-images?placeId=${placeId}`,
+
+      // {
+      //   headers: {
+      //     Authorization: BearerToken,
+      //   },
+      // },
+    );
+
+    return response;
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(
+      error,
+      'getting images details',
+    );
+    return errorMessage;
+  }
+};
+
+export const getReviewsById = async placeId => {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}/api/place/reviews?placeId=${placeId}`,
+
+      // {
+      //   headers: {
+      //     Authorization: BearerToken,
+      //   },
+      // },
+    );
+
+    return response;
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(
+      error,
+      'getting review details',
+    );
+    return errorMessage;
   }
 };

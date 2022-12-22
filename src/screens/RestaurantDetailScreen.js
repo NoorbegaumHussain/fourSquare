@@ -8,8 +8,9 @@ import {
   useWindowDimensions,
   Platform,
   TouchableOpacity,
+  PermissionsAndroid,
 } from 'react-native';
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useLayoutEffect, useRef, useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
 import MapView, {Marker} from 'react-native-maps';
 import PrimaryButton from '../components/PrimaryButton';
@@ -19,11 +20,17 @@ import CustomModal from '../components/CustomModal';
 import {getPlacesById} from '../services/auth';
 import Toast from 'react-native-simple-toast';
 import {useIsFocused} from '@react-navigation/native';
+import {roundOff} from '../utils/roundOffNumber';
+import Geolocation from '@react-native-community/geolocation';
 
 const RestaurantDetailScreen = ({navigation, route}) => {
-  console.log(route?.params?.placeId);
+  console.log(route?.params);
   const [modal, setModal] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [currentLongitude, setCurrentLongitude] = useState('');
+  const [currentLatitude, setCurrentLatitude] = useState('');
+  const [locationStatus, setLocationStatus] = useState('');
+  const mapRef = useRef(null);
   const [particularRestaurantData, setParticularRestaurantDetails] = useState(
     [],
   );
@@ -33,35 +40,41 @@ const RestaurantDetailScreen = ({navigation, route}) => {
     setModal(true);
   };
 
-  const loadRestaurantDetails = async () => {
-    const response = await getPlacesById(route?.params?.placeId);
-
-    if (response.status) {
-      setParticularRestaurantDetails(response?.data?.data);
-    } else {
-      Toast.show(response);
-    }
-  };
-
   const focus = useIsFocused();
   useLayoutEffect(() => {
     if (focus === true) {
-      loadRestaurantDetails();
+      setTimeout(() => {
+        try {
+          mapRef.current.animateToRegion(
+            {
+              latitude: route?.params?.latitude,
+              longitude: route?.params?.longitude,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.2,
+            },
+            3 * 1000,
+          );
+        } catch (error) {
+          Toast.show('Failed to animate direction');
+        }
+      }, 500);
     }
   }, [focus]);
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{flex: 1, height: '90%'}}>
         <ImageBackground
-          source={{uri: particularRestaurantData?.image?.url}}
+          source={{uri: route?.params?.url}}
           resizeMode="cover"
           style={styles.image}>
           <LinearGradient
             start={{x: 1, y: 0}}
             end={{x: 1, y: 1}}
             locations={[0, 0.5, 1]}
-            style={{height: 370}}
+            style={{height: 360}}
             colors={['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.0)', 'rgba(0,0,0,0.8)']}>
             <SafeAreaView>
               <View style={styles.header}>
@@ -71,9 +84,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
                     style={styles.backIcon}
                   />
                 </TouchableOpacity>
-                <Text style={styles.text}>
-                  {particularRestaurantData?.placeName}
-                </Text>
+                <Text style={styles.text}>{route?.params?.placeName}</Text>
                 <View style={styles.rightHeader}>
                   <TouchableOpacity>
                     <Image
@@ -91,13 +102,13 @@ const RestaurantDetailScreen = ({navigation, route}) => {
               </View>
               <View style={styles.textContainer}>
                 <Text style={styles.restaurantDetails}>
-                  {particularRestaurantData?.sector}
+                  {route?.params?.sector}
                 </Text>
               </View>
               <AirbnbRating
                 size={15}
                 showRating={false}
-                defaultRating={particularRestaurantData?.totalrating}
+                defaultRating={route?.params?.rating}
                 style={styles.ratings}
                 isDisabled={true}
                 // onFinishRating={rating => ratingCompleted(rating)}
@@ -118,7 +129,11 @@ const RestaurantDetailScreen = ({navigation, route}) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.individualIconContainer}
-            onPress={() => navigation.navigate('PhotoGallery')}>
+            onPress={() =>
+              navigation.navigate('PhotoGallery', {
+                placeId: route?.params?.placeId,
+              })
+            }>
             <Image
               source={require('../../assets/images/photos_icon.png')}
               style={styles.ratingIcon}
@@ -127,7 +142,11 @@ const RestaurantDetailScreen = ({navigation, route}) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.individualIconContainer}
-            onPress={() => navigation.navigate('ReviewList')}>
+            onPress={() =>
+              navigation.navigate('ReviewList', {
+                placeId: route?.params?.placeId,
+              })
+            }>
             <Image
               source={require('../../assets/images/review_icon.png')}
               style={styles.ratingIcon}
@@ -139,32 +158,27 @@ const RestaurantDetailScreen = ({navigation, route}) => {
         <View style={styles.line} />
         <View style={styles.overViewContainer}>
           <Text style={styles.overViewText}>Overview</Text>
-          <Text style={styles.overViewDetails}>
-            {particularRestaurantData?.overview}
-          </Text>
+          <Text style={styles.overViewDetails}>{route?.params?.overview}</Text>
         </View>
 
         <View style={styles.mapContainer}>
-          <MapView
-            style={styles.mapStyle}
-            initialRegion={{
-              latitude: 37.78825,
-              longitude: -122.4324,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-            customMapStyle={mapStyle}>
-            <Marker
-              draggable
-              coordinate={{
-                latitude: 37.78825,
-                longitude: -122.4324,
-              }}
-              onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
-              title={'Test Marker'}
-              description={'This is a description of the marker'}
-            />
-          </MapView>
+          {route?.params?.latitude && route?.params?.longitude !== undefined ? (
+            <MapView
+              style={styles.mapStyle}
+              customMapStyle={mapStyle}
+              ref={mapRef}>
+              <Marker
+                draggable
+                coordinate={{
+                  latitude: route?.params?.latitude,
+                  longitude: route?.params?.longitude,
+                }}
+                onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
+                title={'Test Marker'}
+                description={'This is a description of the marker'}
+              />
+            </MapView>
+          ) : null}
           <LinearGradient
             start={{x: 0, y: 1}}
             end={{x: 1, y: 1}}
@@ -174,13 +188,11 @@ const RestaurantDetailScreen = ({navigation, route}) => {
               height: Platform.OS === 'ios' ? 161 : 150,
             }}>
             <View style={styles.maptextContainer}>
-              <Text style={styles.mapText}>
-                {particularRestaurantData.city}
-              </Text>
-              <Text style={styles.mapTextNumber}>
-                {particularRestaurantData.phone}
-              </Text>
-              <Text style={styles.mapTextDistance}>Drive : 5 km</Text>
+              <Text style={styles.mapText}>{route?.params?.city}</Text>
+              <Text style={styles.mapTextNumber}>{route?.params?.phone}</Text>
+              <Text style={styles.mapTextDistance}>{`Drive : ${roundOff(
+                route?.params?.distance,
+              )} km`}</Text>
             </View>
           </LinearGradient>
         </View>
@@ -457,7 +469,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   image: {
-    height: 370,
+    height: 360,
     width: '100%',
   },
   text: {
@@ -518,6 +530,8 @@ const styles = StyleSheet.create({
   },
   overViewContainer: {
     marginHorizontal: 20,
+    height: '20.5%',
+    flex: 1,
   },
   overViewText: {
     fontFamily: 'Avenir Book',
@@ -558,6 +572,8 @@ const styles = StyleSheet.create({
   maptextContainer: {
     marginTop: 13,
     marginLeft: 18,
+    height: '20%',
+    flex: 1,
   },
   mapText: {
     fontFamily: 'Avenir Medium',

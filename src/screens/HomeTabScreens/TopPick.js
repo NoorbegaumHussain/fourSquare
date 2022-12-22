@@ -54,6 +54,7 @@ const TopPick = ({navigation}) => {
   }, [focus, currentLatitude]);
 
   const renderItem = ({item}) => {
+    console.log(item?.overview);
     return (
       <View style={styles.cardContainer}>
         <RestaurantDetailsModified
@@ -66,6 +67,10 @@ const TopPick = ({navigation}) => {
           rating={item?.totalrating}
           priceRange={item?.priceRange}
           distance={item?.dist?.calculated}
+          overview={item?.overview}
+          phone={item?.phone}
+          latitude={item?.location?.coordinates[1]}
+          longitude={item?.location?.coordinates[0]}
         />
       </View>
     );
