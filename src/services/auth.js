@@ -24,200 +24,200 @@ export const loginUser = async data => {
 };
 
 export const restaurantsNearYou = async (latitude, longitude) => {
-  const tokendata = await getData();
-  if (tokendata.accessToken !== null) {
-    try {
-      const response = await axios.post(
-        `${BASE_URL}/api/place/find-nearby-location?longitude=${longitude}&latitude=${latitude}&page=1`,
-      );
-      return response;
-    } catch (error) {
-      const {message: errorMessage} = errorHandler(error, 'login');
-      return errorMessage;
-    }
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}api/place/find-nearby-location?longitude=${longitude}&latitude=${latitude}`,
+    );
+    // console.log('responseeeee', response.data);
+    return response;
+  } catch (error) {
+    // const {message: errorMessage} = errorHandler(error, 'login');
+    return error.response.data;
   }
+  // }
 };
 
 export const getPlacesByType = async (latitude, longitude, type) => {
-  const tokendata = await getData();
-  if (tokendata.accessToken !== null) {
-    try {
-      if (type === 'toppick') {
-        let response = await axios.get(
-          `${BASE_URL}/api/place/top-picks?longitude=${longitude}&latitude=${latitude}&page=1`,
-        );
-        return response;
-      } else if (type === 'popular') {
-        let response = await axios.get(
-          `${BASE_URL}/api/place/popular?longitude=${longitude}&latitude=${latitude}&page=1`,
-        );
-        return response;
-      } else if (type === 'lunch') {
-        let response = await axios.get(
-          `${BASE_URL}/api/place/lunch?longitude=${longitude}&latitude=${latitude}&page=1`,
-        );
-        return response;
-      } else {
-        let response = await axios.get(
-          `${BASE_URL}/api/place/cafe?longitude=${longitude}&latitude=${latitude}&page=1`,
-        );
-        return response;
-      }
-    } catch (error) {
-      const {message: errorMessage} = errorHandler(
-        error,
-        `getting ${type} info`,
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    if (type === 'toppick') {
+      let response = await axios.get(
+        `${BASE_URL}api/place/top-picks?longitude=${longitude}&latitude=${latitude}&page=1`,
       );
-      return errorMessage;
+      return response;
+    } else if (type === 'popular') {
+      let response = await axios.get(
+        `${BASE_URL}api/place/popular?longitude=${longitude}&latitude=${latitude}&page=1`,
+      );
+      return response;
+    } else if (type === 'lunch') {
+      let response = await axios.get(
+        `${BASE_URL}api/place/lunch?longitude=${longitude}&latitude=${latitude}&page=1`,
+      );
+      return response;
+    } else {
+      let response = await axios.get(
+        `${BASE_URL}api/place/cafe?longitude=${longitude}&latitude=${latitude}&page=1`,
+      );
+      return response;
     }
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(error, `getting ${type} info`);
+    return errorMessage;
   }
+  // }
 };
 
 export const getPlacesById = async placeId => {
-  const tokendata = await getData();
-  if (tokendata.accessToken !== null) {
-    try {
-      var response = await axios.get(
-        `${BASE_URL}/api/place/get-place-details?placeId=${placeId}`,
-      );
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}api/place/get-place-details?placeId=${placeId}`,
+    );
 
-      return response;
-    } catch (error) {
-      const {message: errorMessage} = errorHandler(
-        error,
-        'getting restaurant details',
-      );
-      return errorMessage;
-    }
+    return response;
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(
+      error,
+      'getting restaurant details',
+    );
+    return errorMessage;
   }
+  // }
 };
 
 export const getImagesById = async placeId => {
-  const tokendata = await getData();
-  if (tokendata.accessToken !== null) {
-    try {
-      var response = await axios.get(
-        `${BASE_URL}/api/place/get-images?placeId=${placeId}`,
-      );
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}api/place/get-images?placeId=${placeId}`,
+    );
 
-      return response;
-    } catch (error) {
-      const {message: errorMessage} = errorHandler(
-        error,
-        'getting images details',
-      );
-      return errorMessage;
-    }
+    return response;
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(
+      error,
+      'getting images details',
+    );
+    return errorMessage;
   }
+  // }
 };
 
 export const getReviewsById = async placeId => {
-  const tokendata = await getData();
-  if (tokendata.accessToken !== null) {
-    try {
-      var response = await axios.get(
-        `${BASE_URL}/api/place/reviews?placeId=${placeId}`,
-      );
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}api/place/reviews?placeId=${placeId}`,
+    );
 
-      return response;
-    } catch (error) {
-      const {message: errorMessage} = errorHandler(
-        error,
-        'getting review details',
-      );
-      return errorMessage;
-    }
+    return response;
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(
+      error,
+      'getting review details',
+    );
+    return errorMessage;
   }
+  // }
 };
 
 export const addRating = async data => {
-  const tokendata = await getData();
-  if (tokendata.accessToken !== null) {
-    try {
-      const response = await axios.post(
-        `https://four-square-lake.vercel.app/api/place/rating?placeId=${data.placeId}&star=${data.rating}`,
-        {},
-        {
-          headers: {
-            Authorization: BearerToken,
-          },
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    const response = await axios.post(
+      `https://four-square-lake.vercel.app/api/place/rating?placeId=${data.placeId}&star=${data.rating}`,
+      {},
+      {
+        headers: {
+          Authorization: BearerToken,
         },
-      );
-      console.info('Response', response.data);
-      return response;
-    } catch (error) {
-      console.log('inside Try', error.response);
+      },
+    );
+    console.info('Response', response.data);
+    return response;
+  } catch (error) {
+    console.log('inside Try', error.response);
 
-      const {message: errorMessage} = errorHandler(error, 'login');
-      return errorMessage;
-    }
+    const {message: errorMessage} = errorHandler(error, 'login');
+    return errorMessage;
   }
+  // }
 };
 
 export const getParticularImageDetailsById = async imageId => {
-  const tokendata = await getData();
-  if (tokendata.accessToken !== null) {
-    try {
-      var response = await axios.get(
-        `${BASE_URL}/api/place/get-image-details?imageId=${imageId}`,
-      );
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}api/place/get-image-details?imageId=${imageId}`,
+    );
 
-      return response;
-    } catch (error) {
-      const {message: errorMessage} = errorHandler(
-        error,
-        'getting review details',
-      );
-      return errorMessage;
-    }
+    return response;
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(
+      error,
+      'getting review details',
+    );
+    return errorMessage;
   }
+  // }
 };
 
 export const addFeedback = async data => {
-  const tokendata = await getData();
-  if (tokendata.accessToken !== null) {
-    try {
-      const response = await axios.post(
-        `https://four-square-lake.vercel.app/api/application/add-feedback?feedback=${data}`,
-        {},
-        {
-          headers: {
-            Authorization: BearerToken,
-          },
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    const response = await axios.post(
+      `https://four-square-lake.vercel.app/api/application/add-feedback?feedback=${data}`,
+      {},
+      {
+        headers: {
+          Authorization: BearerToken,
         },
-      );
-      console.info('Response', response.data);
-      return response;
-    } catch (error) {
-      console.log('inside Try', error.response);
+      },
+    );
+    console.info('Response', response.data);
+    return response;
+  } catch (error) {
+    console.log('inside Try', error.response);
 
-      const {message: errorMessage} = errorHandler(error, 'login');
-      return errorMessage;
-    }
+    const {message: errorMessage} = errorHandler(error, 'login');
+    return errorMessage;
   }
+  // }
 };
 
 export const getAbout = async () => {
-  const tokendata = await getData();
-  if (tokendata.accessToken !== null) {
-    try {
-      var response = await axios.get(`${BASE_URL}/api/application/aboutus`);
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    var response = await axios.get(`${BASE_URL}/api/application/aboutus`);
 
-      return response;
-    } catch (error) {
-      const {message: errorMessage} = errorHandler(
-        error,
-        'getting review details',
-      );
-      return errorMessage;
-    }
+    return response;
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(
+      error,
+      'getting review details',
+    );
+    return errorMessage;
   }
+  // }
 };
 
 export const getOTP = async email => {
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
   try {
     var response = await axios.get(
-      `${BASE_URL}/api/otp?email=${email}`,
+      `${BASE_URL}api/otp?email=${email}`,
       {},
       {
         headers: {
@@ -234,33 +234,31 @@ export const getOTP = async email => {
     );
     return errorMessage;
   }
+  // }
 };
 
 export const verifyOTP = async data => {
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
   try {
-    const response = await axios.post(
-      `https://four-square-lake.vercel.app/api/otp`,
-      data,
-      {
-        headers: {
-          Authorization: BearerToken,
-        },
+    const response = await axios.post(`${BASE_URL}/api/otp`, data, {
+      headers: {
+        Authorization: BearerToken,
       },
-    );
+    });
     console.info('Response', response.data);
     return response;
   } catch (error) {
-    console.log('inside Try', error.response);
-
     const {message: errorMessage} = errorHandler(error, 'login');
     return errorMessage;
   }
+  // }
 };
 
 export const resetPassword = async (obj, token) => {
   try {
     const response = await axios.post(
-      `${BASE_URL}/api/otp/reset-password`,
+      `${BASE_URL}api/otp/reset-password`,
       obj,
       {
         headers: {
@@ -272,4 +270,52 @@ export const resetPassword = async (obj, token) => {
   } catch (error) {
     return error.response.data.message;
   }
+};
+
+export const getFavourites = async (lat, long, text) => {
+  console.log(lat, long, text);
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  try {
+    var response = await axios.get(
+      `https://four-square-lake.vercel.app/api/place/favourites?longitude=74.7399110573&latitude=13.3792943665&text=${text}`,
+      {
+        headers: {
+          Authorization: BearerToken,
+        },
+      },
+    );
+
+    return response;
+  } catch (error) {
+    // const {message: errorMessage} = errorHandler(
+    //   error,
+    //   'getting review details',
+    // );
+    return error.response;
+  }
+  // }
+};
+
+export const addOrRemoveFromFav = async placeId => {
+  // const tokendata = await getData();
+  // if (tokendata.accessToken !== null) {
+  console.log(placeId);
+  try {
+    const response = await axios.post(
+      `${BASE_URL}api/place/favourites?placeId=${placeId}`,
+      {},
+      {
+        headers: {
+          Authorization: BearerToken,
+        },
+      },
+    );
+    console.info('Response', response.data);
+    return response;
+  } catch (error) {
+    // const {message: errorMessage} = errorHandler(error, 'login');
+    return error.response;
+  }
+  // }
 };

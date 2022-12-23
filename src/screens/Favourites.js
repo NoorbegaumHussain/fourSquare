@@ -9,37 +9,58 @@ import {
   TextInput,
   FlatList,
 } from 'react-native';
-import React from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import Icon from 'react-native-vector-icons/Feather';
 import RestaurantDetails from '../components/RestaurantDetails';
 import RestaurantDetailsModified from '../components/RestaurantDetailsModified';
-const DATA = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Second Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571sdse29d72',
-    title: 'Third Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145rew571e29d72',
-    title: 'Third Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96jh145571e29d72',
-    title: 'Third Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571em,n29d72',
-    title: 'Third Item',
-  },
-];
+import Geolocation from '@react-native-community/geolocation';
+import {addOrRemoveFromFav, getFavourites} from '../services/auth';
+import {useIsFocused} from '@react-navigation/native';
+import {addToFavourite, deleteFromFavourites} from '../redux/fourSquareSlice';
+import {useDispatch, useSelector} from 'react-redux';
+
 const Favourites = ({navigation}) => {
+  const [currentLongitude, setCurrentLongitude] = useState('');
+  const [currentLatitude, setCurrentLatitude] = useState('');
+  const [nearbyLocations, setNearbyLocations] = useState([]);
+  const [text, setText] = useState('');
+  const [deleted, setDeleted] = useState('');
+  const favList = useSelector(state => state.foursquaredata.favourite);
+  const dispatch = useDispatch();
+
+  const getOneTimeLocation = () => {
+    Geolocation.getCurrentPosition(position => {
+      const currentLongitude = position.coords.longitude;
+
+      const currentLatitude = position.coords.latitude;
+
+      setCurrentLongitude(currentLongitude);
+
+      setCurrentLatitude(currentLatitude);
+    });
+  };
+  const loadPlaces = async () => {
+    getOneTimeLocation();
+    const response = await getFavourites(
+      currentLatitude,
+      currentLongitude,
+      text,
+    );
+    if (response.status) {
+      console.log(response.data);
+      setNearbyLocations(response?.data?.data);
+    } else {
+      console.log(response);
+    }
+  };
+
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus === true) {
+      loadPlaces();
+    }
+  }, [focus, text, deleted]);
+
   const handleCardClick = () => {
     navigation.navigate('RestaurantDetailScreen');
   };
@@ -47,11 +68,42 @@ const Favourites = ({navigation}) => {
     return (
       <TouchableOpacity onPress={handleCardClick} style={styles.cardContainer}>
         <RestaurantDetailsModified
+          navigation={navigation}
+          placeId={item?._id}
+          placeName={item?.placeName}
+          url={item.image?.url}
+          sector={item?.sector}
+          city={item?.city}
+          rating={item?.totalrating}
+          priceRange={item?.priceRange}
+          distance={item?.dist?.calculated}
+          overview={item?.overview}
+          phone={item?.phone}
+          latitude={item?.location?.coordinates[1]}
+          longitude={item?.location?.coordinates[0]}
           image={
-            <Image
-              source={require('../../assets/images/close.png')}
-              style={styles.favIcon}
-            />
+            <TouchableOpacity
+              style={{
+                height: 50,
+                width: 50,
+                alignItems: 'center',
+              }}
+              onPress={async () => {
+                console.info(item._id);
+                const response = await addOrRemoveFromFav(item?.placeId);
+                console.log('fav resppppppp', response.data);
+                if (response?.data?.status) {
+                  console.log('deleting', item?.placeId);
+                  dispatch(deleteFromFavourites(item?.placeId));
+                } else {
+                  dispatch(deleteFromFavourites(item?.placeId));
+                }
+              }}>
+              <Image
+                source={require('../../assets/images/close.png')}
+                style={styles.favIcon}
+              />
+            </TouchableOpacity>
           }
         />
       </TouchableOpacity>
@@ -106,9 +158,9 @@ const Favourites = ({navigation}) => {
                   //     search: {hasfocus: true},
                   //   }))
                   // }
-                  // onChangeText={searchString => {
-                  //   setSearch({searchString});
-                  // }}
+                  onChangeText={searchString => {
+                    setText(searchString);
+                  }}
                   underlineColorAndroid="transparent"
                 />
               </View>
@@ -133,11 +185,10 @@ const Favourites = ({navigation}) => {
         </SafeAreaView>
       </View>
       <FlatList
-        data={DATA}
-        keyExtractor={item => item.id}
+        data={nearbyLocations}
+        keyExtractor={item => item._id}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
-
       />
     </View>
   );
@@ -212,7 +263,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     width: 16,
     height: 16,
-    marginRight:-7
+    marginRight: -7,
   },
   cardContainer: {
     shadowColor: '#171717',

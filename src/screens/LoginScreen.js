@@ -41,7 +41,7 @@ const LoginScreen = ({navigation}) => {
     }
   };
   const data = getData();
-  console.log(data)
+  console.log(data);
 
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
@@ -95,6 +95,8 @@ const LoginScreen = ({navigation}) => {
                   });
                   try {
                     await AsyncStorage.setItem('token', stringifiedToken);
+                    const temp = await AsyncStorage.getItem('token');
+                    console.log(temp);
                   } catch (e) {
                     console.log('error in storing data in async');
                   }

@@ -2,14 +2,28 @@ import {createSlice} from '@reduxjs/toolkit';
 export const FourSquareSlice = createSlice({
   name: 'foursquaredata',
   initialState: {
-    value: [1, 2],
+    favourite: [],
   },
   reducers: {
-    addUser: (state, action) => {
-      console.log('Inside add user');
+    addToFavourite: (state, action) => {
+      if (state.favourite.includes(action.payload)) {
+        console.log('duplicate encountered');
+      } else {
+        state.favourite.push(action.payload);
+      }
+
+      console.log('after adding', state.favourite);
+    },
+    deleteFromFavourites: (state, action) => {
+      if (state.favourite.includes(action.payload)) {
+        console.log(action.payload);
+        state.favourite = state.favourite.filter(fav => fav !== action.payload);
+        console.log('after removing', state.favourite);
+      }
     },
   },
 });
-export const {addUser} = FourSquareSlice.actions;
+export const {addUser, addToFavourite, deleteFromFavourites} =
+  FourSquareSlice.actions;
 
 export default FourSquareSlice.reducer;

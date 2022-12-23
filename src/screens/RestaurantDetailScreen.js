@@ -24,7 +24,7 @@ import {roundOff} from '../utils/roundOffNumber';
 import Geolocation from '@react-native-community/geolocation';
 
 const RestaurantDetailScreen = ({navigation, route}) => {
-  console.log(route?.params);
+
   const [modal, setModal] = useState(false);
   const [visible, setVisible] = useState(false);
   const [rating, setRating] = useState(0);

@@ -8,6 +8,7 @@ import {
   Pressable,
   Platform,
   Image,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useState, useEffect, useRef, useLayoutEffect} from 'react';
 
@@ -15,9 +16,19 @@ import RestaurantDetails from '../../components/RestaurantDetails';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
 import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
-import {restaurantsNearYou} from '../../services/auth';
+import {
+  addOrRemoveFromFav,
+  getFavourites,
+  restaurantsNearYou,
+} from '../../services/auth';
 import {useIsFocused} from '@react-navigation/native';
 import Toast from 'react-native-simple-toast';
+import {useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
+import {
+  addToFavourite,
+  deleteFromFavourites,
+} from '../../redux/fourSquareSlice';
 
 const NearYou = ({navigation}) => {
   const {width, height} = useWindowDimensions();
@@ -27,9 +38,12 @@ const NearYou = ({navigation}) => {
   const [locationStatus, setLocationStatus] = useState('');
   const [nearbyLocations, setNearbyLocations] = useState([]);
   const [placeId, setPlaceId] = useState('');
-
+  const [fav, setFav] = useState(false);
+  const [favId, setFavId] = useState('');
   const mapRef = useRef(null);
-
+  const dispatch = useDispatch();
+  const favList = useSelector(state => state.foursquaredata.favourite);
+  console.log('favvvvvvv', favList);
   const loadPlaces = async () => {
     const response = await restaurantsNearYou(
       currentLatitude,
@@ -40,6 +54,22 @@ const NearYou = ({navigation}) => {
       setNearbyLocations(response?.data?.data);
     } else {
       console.info(response.error);
+    }
+  };
+
+  const loadFav = async () => {
+    const response = await getFavourites(
+      currentLatitude,
+      currentLongitude,
+      ' ',
+    );
+    if (response.status && response?.data?.data !== undefined) {
+      setFav(response?.data?.data);
+      response?.data?.data.map(item => {
+        dispatch(addToFavourite(item.placeId));
+      });
+    } else {
+      console.log(response);
     }
   };
 
@@ -69,9 +99,10 @@ const NearYou = ({navigation}) => {
     };
     if (focus === true && currentLatitude !== '') {
       loadPlaces();
+      loadFav();
     }
     requestLocationPermission();
-  }, [focus, currentLatitude]);
+  }, [focus, currentLatitude, favList]);
 
   const getOneTimeLocation = () => {
     setLocationStatus('Getting Location ...');
@@ -132,10 +163,34 @@ const NearYou = ({navigation}) => {
           latitude={item?.location?.coordinates[1]}
           longitude={item?.location?.coordinates[0]}
           image={
-            <Image
-              source={require('../../../assets/images/favourite_icon.png')}
-              style={styles.favIcon}
-            />
+            <TouchableOpacity
+              style={{
+                height: 50,
+                width: 50,
+                alignItems: 'center',
+              }}
+              onPress={async () => {
+                const response = await addOrRemoveFromFav(item?._id);
+                console.log('fav resppppppp', response.data);
+                if (response?.data?.status) {
+                  dispatch(addToFavourite(item?._id));
+                } else {
+                  dispatch(deleteFromFavourites(item?._id));
+                }
+                console.log('item Id ', item?._id);
+              }}>
+              {favList.includes(item?._id) && favList.length > 0 ? (
+                <Image
+                  source={require('../../../assets/images/favourite_icon.png')}
+                  style={styles.favIcon}
+                />
+              ) : (
+                <Image
+                  source={require('../../../assets/images/favourite_icon_selected.png')}
+                  style={styles.favIcon}
+                />
+              )}
+            </TouchableOpacity>
           }
         />
       </View>

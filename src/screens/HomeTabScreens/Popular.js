@@ -5,23 +5,30 @@ import {
   FlatList,
   TouchableOpacity,
   Pressable,
+  Image,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
 import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
 import getCurrentLatLong from '../../utils/getCurrentLatLong';
 import Geolocation from '@react-native-community/geolocation';
-import {getPlacesByType} from '../../services/auth';
+import {addOrRemoveFromFav, getPlacesByType} from '../../services/auth';
 import Toast from 'react-native-simple-toast';
 import {useIsFocused} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import {
+  addToFavourite,
+  deleteFromFavourites,
+} from '../../redux/fourSquareSlice';
+import {useDispatch} from 'react-redux';
 
 const Popular = ({navigation}) => {
   const [currentLongitude, setCurrentLongitude] = useState('');
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [nearbyLocations, setNearbyLocations] = useState([]);
   const [placeId, setPlaceId] = useState('');
-
-  // console.log('nearbyLocations', nearbyLocations);
+  const favList = useSelector(state => state.foursquaredata.favourite);
+  const dispatch = useDispatch();
   const getOneTimeLocation = () => {
     Geolocation.getCurrentPosition(position => {
       const currentLongitude = position.coords.longitude;
@@ -71,6 +78,35 @@ const Popular = ({navigation}) => {
           phone={item?.phone}
           latitude={item?.location?.coordinates[1]}
           longitude={item?.location?.coordinates[0]}
+          image={
+            <TouchableOpacity
+              style={{
+                height: 50,
+                width: 50,
+                alignItems: 'center',
+              }}
+              onPress={async () => {
+                const response = await addOrRemoveFromFav(item?._id);
+                console.log('fav resppppppp', response.data);
+                if (response?.data?.status) {
+                  dispatch(addToFavourite(item?._id));
+                } else {
+                  dispatch(deleteFromFavourites(item?._id));
+                }
+              }}>
+              {favList.includes(item?._id) ? (
+                <Image
+                  source={require('../../../assets/images/favourite_icon.png')}
+                  style={styles.favIcon}
+                />
+              ) : (
+                <Image
+                  source={require('../../../assets/images/favourite_icon_selected.png')}
+                  style={styles.favIcon}
+                />
+              )}
+            </TouchableOpacity>
+          }
         />
       </View>
     );
@@ -101,5 +137,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 10,
     marginHorizontal: 5,
+  },
+  favIcon: {
+    height: 25,
+    resizeMode: 'contain',
+    width: 25,
+    marginTop: 8,
   },
 });

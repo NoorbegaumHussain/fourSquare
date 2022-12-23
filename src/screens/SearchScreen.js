@@ -14,7 +14,7 @@ import {
   PermissionsAndroid,
   Animated,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import Icon from 'react-native-vector-icons/Feather';
 import CompassIcon from 'react-native-vector-icons/Ionicons';
 import {TextField} from 'rn-material-ui-textfield';
@@ -27,6 +27,8 @@ import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
 import {isMap} from 'immer/dist/internal';
 import RestaurantDetailsModified from '../components/RestaurantDetailsModified';
+import {restaurantsNearYou} from '../services/auth';
+import {useIsFocused} from '@react-navigation/native';
 const DATA = [
   {
     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -89,81 +91,47 @@ const SearchScreen = ({navigation}) => {
   const handleCardClick = () => {
     console.log('card Clicked ys');
   };
-  const mapHeight = width < height ? '28%' : '50%';
   const [currentLongitude, setCurrentLongitude] = useState('');
   const [currentLatitude, setCurrentLatitude] = useState('');
-  const [locationStatus, setLocationStatus] = useState('');
+
   const mapRef = useRef(null);
 
-  useEffect(() => {
-    const requestLocationPermission = async () => {
-      if (Platform.OS === 'ios') {
-        getOneTimeLocation();
-      } else {
-        try {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            {
-              title: 'Location Access Required',
-              message: 'This App needs to Access your location',
-            },
-          );
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            getOneTimeLocation();
-          } else {
-            setLocationStatus('Permission Denied');
-          }
-        } catch (err) {
-          console.warn(err);
-        }
-      }
-    };
-    if (mapView) {
-      requestLocationPermission();
-    }
-  }, [mapView]);
-
   const getOneTimeLocation = () => {
-    setLocationStatus('Getting Location ...');
-    Geolocation.getCurrentPosition(
-      position => {
-        setTimeout(() => {
-          try {
-            mapRef.current.animateToRegion(
-              {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.2,
-              },
-              3 * 1000,
-            );
-            // setLoading(false);
-          } catch (error) {
-            console.log('Failed to animate direction');
-          }
-        }, 500);
-        setLocationStatus('You are Here');
+    Geolocation.getCurrentPosition(position => {
+      const currentLongitude = position.coords.longitude;
 
-        const currentLongitude = position.coords.longitude;
+      const currentLatitude = position.coords.latitude;
 
-        const currentLatitude = position.coords.latitude;
+      setCurrentLongitude(currentLongitude);
 
-        setCurrentLongitude(currentLongitude);
-
-        setCurrentLatitude(currentLatitude);
-      },
-      error => {
-        setLocationStatus(error.message);
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 30000,
-        maximumAge: 1000,
-      },
-    );
+      setCurrentLatitude(currentLatitude);
+    });
   };
+
+  const [nearByPlaces, setNearByPlaces] = useState('');
+
+  const loadPlaces = async () => {
+    getOneTimeLocation();
+    const response = await restaurantsNearYou(
+      currentLatitude,
+      currentLongitude,
+    );
+    console.log('hhhhhhh', response.data.data);
+    if (response.status) {
+      setNearByPlaces(response?.data?.data);
+    } else {
+      console.info(response.error);
+    }
+  };
+  const focusonLoad = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus === true) {
+      loadPlaces();
+    }
+  }, [focusonLoad]);
+
   const renderItem = ({item}) => {
+    loadPlaces();
     return (
       <TouchableOpacity onPress={handleCardClick}>
         <View style={styles.cardContainer}>
@@ -200,11 +168,41 @@ const SearchScreen = ({navigation}) => {
     },
   ];
 
-  const renderSearch = ({item}) => {
+  const renderListSearch = ({item}) => {
     return (
       <Pressable
         onPress={handleCardClick}
         style={styles.cardContainerInRenderSearch}>
+        <RestaurantDetailsModified
+          navigation={navigation}
+          placeId={item?._id}
+          placeName={item?.placeName}
+          url={item.image?.url}
+          sector={item?.sector}
+          city={item?.city}
+          rating={item?.totalrating}
+          priceRange={item?.priceRange}
+          distance={item?.dist?.calculated}
+          overview={item?.overview}
+          phone={item?.phone}
+          latitude={item?.location?.coordinates[1]}
+          longitude={item?.location?.coordinates[0]}
+          image={
+            <Image
+              source={require('../../assets/images/favourite_icon.png')}
+              style={styles.favIcon}
+            />
+          }
+        />
+      </Pressable>
+    );
+  };
+
+  const renderMapSearch = ({item}) => {
+    return (
+      <Pressable
+        onPress={handleCardClick}
+        style={styles.cardContainerInRenderSearchMap}>
         <RestaurantDetailsModified
           image={
             <Image
@@ -397,7 +395,7 @@ const SearchScreen = ({navigation}) => {
           <FlatList
             data={searchData}
             keyExtractor={item => item.id}
-            renderItem={renderSearch}
+            renderItem={renderListSearch}
           />
           <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
             <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
@@ -432,7 +430,7 @@ const SearchScreen = ({navigation}) => {
             <FlatList
               data={searchData}
               keyExtractor={item => item.id}
-              renderItem={renderSearch}
+              renderItem={renderMapSearch}
               pagingEnabled={true}
               horizontal
               bounces={false}
@@ -1420,6 +1418,13 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   cardContainerInRenderSearch: {
+    shadowColor: '#171717',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.6,
+    shadowRadius: 2,
+    elevation: 10,
+  },
+  cardContainerInRenderSearchMap: {
     shadowColor: '#171717',
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.6,

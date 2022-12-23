@@ -46,7 +46,6 @@ const ConfirmPassword = ({navigation, route}) => {
                   email: route?.params?.email,
                   password: values.password,
                 };
-                console.log('Heyy', obj, route?.params?.token);
                 const response = await resetPassword(obj, route?.params?.token);
                 console.log(response);
                 if (response.status) {

@@ -1,4 +1,11 @@
-import {View, Text, Image, StyleSheet, useWindowDimensions} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  useWindowDimensions,
+  Pressable,
+} from 'react-native';
 import React from 'react';
 import {convertPriceRange} from '../utils/convertPriceRange';
 import {roundOff} from '../utils/roundOffNumber';
@@ -39,7 +46,7 @@ const RestaurantDetailsModified = ({
     });
   };
   return (
-    <TouchableOpacity style={styles.container} onPress={handleCardClick}>
+    <Pressable style={styles.container} onPress={handleCardClick}>
       <Image
         source={{
           uri: url,
@@ -54,7 +61,7 @@ const RestaurantDetailsModified = ({
         <View style={styles.restaurantInfo}>
           <View>
             <View style={styles.ratingBackground}>
-              <Text style={styles.ratingText}>{rating}</Text>
+              <Text style={styles.ratingText}>{roundOff(rating)}</Text>
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.restaurantDetails}>{sector} </Text>
@@ -63,11 +70,16 @@ const RestaurantDetailsModified = ({
                 {` ${convertPriceRange(priceRange)} ${roundOff(distance, 1)}km`}
               </Text>
             </View>
-            <Text style={styles.restaurantAdress}>{city}</Text>
+            <Text
+              style={styles.restaurantAdress}
+              ellipsizeMode="tail"
+              numberOfLines={2}>
+              {city}
+            </Text>
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -89,9 +101,9 @@ const styles = StyleSheet.create({
   favContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '64%',
+    width: '67%',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingLeft: 10,
   },
   dotContainer: {
     backgroundColor: '#686868',

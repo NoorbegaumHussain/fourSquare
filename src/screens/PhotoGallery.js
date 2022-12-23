@@ -27,11 +27,12 @@ const PhotoGallery = ({navigation, route}) => {
 
   const loadImages = async () => {
     const response = await getImagesById(route?.params?.placeId);
-    if (response.status) {
-      setMenuImages(response?.data?.data[0].uploadedImages);
-    } else {
-      console.log(response);
-    }
+    console.log(response.data.data);
+    // if (response.status) {
+    //   setMenuImages(response?.data?.data[0].uploadedImages);
+    // } else {
+    //   console.log(response);
+    // }
   };
 
   const focus = useIsFocused();
