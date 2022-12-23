@@ -24,7 +24,6 @@ import {roundOff} from '../utils/roundOffNumber';
 import Geolocation from '@react-native-community/geolocation';
 
 const RestaurantDetailScreen = ({navigation, route}) => {
-
   const [modal, setModal] = useState(false);
   const [visible, setVisible] = useState(false);
   const [rating, setRating] = useState(0);
@@ -213,6 +212,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
               <Text style={styles.mapTextNumber}>{route?.params?.phone}</Text>
               <Text style={styles.mapTextDistance}>{`Drive : ${roundOff(
                 route?.params?.distance,
+                1,
               )} km`}</Text>
             </View>
           </LinearGradient>
@@ -239,7 +239,9 @@ const RestaurantDetailScreen = ({navigation, route}) => {
               ]}>
               Overall Rating
             </Text>
-            <Text style={styles.ratingInNumber}>{route?.params?.rating}</Text>
+            <Text style={styles.ratingInNumber}>
+              {roundOff(route?.params?.rating, 1) * 2}
+            </Text>
             <Text
               style={[
                 styles.experience,

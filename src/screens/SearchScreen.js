@@ -117,7 +117,7 @@ const SearchScreen = ({navigation}) => {
       currentLongitude,
     );
     console.log('hhhhhhh', response.data.data);
-    if (response.status) {
+    if (response.status && response?.data?.data !== undefined) {
       setNearByPlaces(response?.data?.data);
     } else {
       console.info(response.error);

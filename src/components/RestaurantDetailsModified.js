@@ -61,7 +61,7 @@ const RestaurantDetailsModified = ({
         <View style={styles.restaurantInfo}>
           <View>
             <View style={styles.ratingBackground}>
-              <Text style={styles.ratingText}>{roundOff(rating)}</Text>
+              <Text style={styles.ratingText}>{roundOff(rating, 1)}</Text>
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.restaurantDetails}>{sector} </Text>
