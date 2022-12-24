@@ -29,6 +29,7 @@ const RestaurantDetailsModified = ({
   longitude,
 }) => {
   const handleCardClick = () => {
+    console.log('clicked', placeId, placeName);
     navigation.navigate('RestaurantDetailScreen', {
       placeId: placeId,
       url: url,
@@ -73,7 +74,7 @@ const RestaurantDetailsModified = ({
             <Text
               style={styles.restaurantAdress}
               ellipsizeMode="tail"
-              numberOfLines={2}>
+              numberOfLines={1}>
               {city}
             </Text>
           </View>

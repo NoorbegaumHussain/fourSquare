@@ -13,6 +13,7 @@ import ReviewCard from '../components/ReviewCard';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {useIsFocused} from '@react-navigation/native';
 import {getReviewsById} from '../services/auth';
+import {formatISODate} from '../utils/formatISODate';
 
 const DATA = [
   {
@@ -76,22 +77,19 @@ const ReviewList = ({navigation, route}) => {
   const [reviews, setReviews] = useState('');
   const renderItem = ({item}) => {
     return (
-      <Pressable>
-        <ReviewCard
-          name={item?.name}
-          userReview={item?.reviewMessage}
-          date={item.date}
-          url={item?.reviewerPhoto?.url}
-        />
-      </Pressable>
+      <ReviewCard
+        name={item?.name}
+        userReview={item?.reviewMessage}
+        date={formatISODate(item.createdAt)}
+        url={item?.reviewerPhoto?.url}
+      />
     );
   };
 
-  console.log(reviews);
+  console.log('jjjjjjj', reviews);
 
   const loadList = async () => {
     const response = await getReviewsById(route?.params?.placeId);
-
     if (response.status) {
       setReviews(response?.data?.data);
     } else {

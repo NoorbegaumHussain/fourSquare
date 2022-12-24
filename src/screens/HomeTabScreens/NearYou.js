@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
     height: 25,
     resizeMode: 'contain',
     width: 25,
-    marginTop: 8,
+    marginTop: 15,
   },
 
   cardContainer: {

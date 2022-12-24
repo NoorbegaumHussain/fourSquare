@@ -12,6 +12,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {getImagesById} from '../services/auth';
 import {useIsFocused} from '@react-navigation/native';
+import {restructureObject} from '../utils/restructureObject';
 
 const PhotoGallery = ({navigation, route}) => {
   const [menuImages, setMenuImages] = useState([]);
@@ -27,12 +28,12 @@ const PhotoGallery = ({navigation, route}) => {
 
   const loadImages = async () => {
     const response = await getImagesById(route?.params?.placeId);
-    console.log(response.data.data);
-    // if (response.status) {
-    //   setMenuImages(response?.data?.data[0].uploadedImages);
-    // } else {
-    //   console.log(response);
-    // }
+
+    if (response.status && response?.data?.data !== undefined) {
+      setMenuImages(restructureObject(response?.data?.data));
+    } else {
+      console.log(response);
+    }
   };
 
   const focus = useIsFocused();
@@ -69,9 +70,9 @@ const PhotoGallery = ({navigation, route}) => {
         {menuImages.map(image => (
           <TouchableOpacity
             onPress={() =>
-              handlePhotoClick(image?.photos?.url[0], image?._id, image?.name)
+              handlePhotoClick(image?.url, image?._id, image?.name)
             }>
-            <Image source={{uri: image?.photos?.url[0]}} style={styles.image} />
+            <Image source={{uri: image?.url}} style={styles.image} />
           </TouchableOpacity>
         ))}
       </View>

@@ -30,7 +30,7 @@ const ReviewCard = ({name, userReview, date, url}) => {
               flexDirection: 'row',
               width: '90%',
             }}>
-            <View style={{width: '60%', marginLeft: 20}}>
+            <View style={{width: '50%', marginLeft: 20}}>
               <Text
                 style={{
                   fontFamily: 'Avenir Medium',
@@ -57,6 +57,7 @@ const ReviewCard = ({name, userReview, date, url}) => {
                   fontSize: 14,
                   fontWeight: '500',
                   color: '#7A7A7A',
+                  width: '100%',
                 }}>
                 {date}
               </Text>

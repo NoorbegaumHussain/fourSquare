@@ -27,8 +27,15 @@ import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
 import {isMap} from 'immer/dist/internal';
 import RestaurantDetailsModified from '../components/RestaurantDetailsModified';
-import {restaurantsNearYou} from '../services/auth';
+import {
+  addOrRemoveFromFav,
+  restaurantsNearYou,
+  searchRestaurants,
+} from '../services/auth';
+import {useDispatch} from 'react-redux';
 import {useIsFocused} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import {addToFavourite, deleteFromFavourites} from '../redux/fourSquareSlice';
 const DATA = [
   {
     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -53,6 +60,8 @@ const SearchScreen = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
   const [filterClicked, setFilterClicked] = useState(false);
+  const favList = useSelector(state => state.foursquaredata.favourite);
+  const dispatch = useDispatch();
   const [focus, setFocus] = useState({
     search: {hasfocus: false},
     nearme: {hasfocus: false},
@@ -87,7 +96,7 @@ const SearchScreen = ({navigation}) => {
     nearmeString: '',
   });
   const [mapView, setMapView] = useState(false);
-  console.log(place.isSet, place.placeString);
+  // console.log(place.isSet, place.placeString);
   const handleCardClick = () => {
     console.log('card Clicked ys');
   };
@@ -108,17 +117,15 @@ const SearchScreen = ({navigation}) => {
     });
   };
 
-  const [nearByPlaces, setNearByPlaces] = useState('');
-
+  const [searchResult, setSearchResult] = useState('');
+  console.log('--------', searchResult);
   const loadPlaces = async () => {
-    getOneTimeLocation();
-    const response = await restaurantsNearYou(
-      currentLatitude,
-      currentLongitude,
-    );
-    console.log('hhhhhhh', response.data.data);
+    console.log('heyyy', place.placeString);
+    const response = await searchRestaurants(place.placeString);
+    // console.log('response', response.data);
+    // console.log('hhhhhhh', response.data.data);
     if (response.status && response?.data?.data !== undefined) {
-      setNearByPlaces(response?.data?.data);
+      setSearchResult(response?.data?.data);
     } else {
       console.info(response.error);
     }
@@ -126,12 +133,11 @@ const SearchScreen = ({navigation}) => {
   const focusonLoad = useIsFocused();
   useLayoutEffect(() => {
     if (focus === true) {
-      loadPlaces();
+      getOneTimeLocation();
     }
-  }, [focusonLoad]);
+  }, [focusonLoad, place.placeString]);
 
   const renderItem = ({item}) => {
-    loadPlaces();
     return (
       <TouchableOpacity onPress={handleCardClick}>
         <View style={styles.cardContainer}>
@@ -153,21 +159,6 @@ const SearchScreen = ({navigation}) => {
       </TouchableOpacity>
     );
   };
-  const searchData = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'First Item',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Second Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571sdse29d72',
-      title: 'Third Item',
-    },
-  ];
-
   const renderListSearch = ({item}) => {
     return (
       <Pressable
@@ -188,10 +179,34 @@ const SearchScreen = ({navigation}) => {
           latitude={item?.location?.coordinates[1]}
           longitude={item?.location?.coordinates[0]}
           image={
-            <Image
-              source={require('../../assets/images/favourite_icon.png')}
-              style={styles.favIcon}
-            />
+            <TouchableOpacity
+              style={{
+                height: 50,
+                width: 50,
+                alignItems: 'center',
+              }}
+              onPress={async () => {
+                const response = await addOrRemoveFromFav(item?._id);
+                console.log('fav resppppppp', response.data);
+                if (response?.data?.status) {
+                  dispatch(addToFavourite(item?._id));
+                } else {
+                  dispatch(deleteFromFavourites(item?._id));
+                }
+                console.log('item Id ', item?._id);
+              }}>
+              {favList.includes(item?._id) && favList.length > 0 ? (
+                <Image
+                  source={require('../../assets/images/favourite_icon.png')}
+                  style={styles.favIcon}
+                />
+              ) : (
+                <Image
+                  source={require('../../assets/images/favourite_icon_selected.png')}
+                  style={styles.favIcon}
+                />
+              )}
+            </TouchableOpacity>
           }
         />
       </Pressable>
@@ -214,7 +229,7 @@ const SearchScreen = ({navigation}) => {
       </Pressable>
     );
   };
-
+  const [searchTimer, setSearchTimer] = useState(null);
   const [currentIndex, setCurrentIndex] = useState([]);
   const scrollX = useRef(new Animated.Value(0)).current;
   const viewableItemsChanged = useRef(({viewableItems}) => {
@@ -274,6 +289,9 @@ const SearchScreen = ({navigation}) => {
                     }))
                   }
                   onChangeText={searchString => {
+                    if (searchTimer) {
+                      clearTimeout(searchTimer);
+                    }
                     if (searchString.length > 2) {
                       setPlace(() => ({
                         isSet: true,
@@ -295,7 +313,11 @@ const SearchScreen = ({navigation}) => {
                         search: {hasfocus: true},
                       }));
                     }
-                    // setSearch({searchString});
+                    setSearchTimer(
+                      setTimeout(() => {
+                        loadPlaces(searchString);
+                      }, 1000),
+                    );
                   }}
                   underlineColorAndroid="transparent"
                 />
@@ -393,7 +415,7 @@ const SearchScreen = ({navigation}) => {
       {place.isSet && !mapView && (
         <View style={{flex: 1}}>
           <FlatList
-            data={searchData}
+            data={searchResult}
             keyExtractor={item => item.id}
             renderItem={renderListSearch}
           />
@@ -428,7 +450,7 @@ const SearchScreen = ({navigation}) => {
             </View>
 
             <FlatList
-              data={searchData}
+              data={searchResult}
               keyExtractor={item => item.id}
               renderItem={renderMapSearch}
               pagingEnabled={true}
@@ -1395,7 +1417,8 @@ const styles = StyleSheet.create({
     height: 25,
     resizeMode: 'contain',
     width: 25,
-    marginTop: 8,
+    marginTop: 15,
+    marginRight: 10,
   },
   mainContainer: {
     flex: 1,
@@ -1423,6 +1446,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.6,
     shadowRadius: 2,
     elevation: 10,
+    marginHorizontal: 5,
   },
   cardContainerInRenderSearchMap: {
     shadowColor: '#171717',

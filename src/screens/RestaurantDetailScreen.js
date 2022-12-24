@@ -17,11 +17,16 @@ import PrimaryButton from '../components/PrimaryButton';
 import LinearGradient from 'react-native-linear-gradient';
 import {Rating, AirbnbRating} from 'react-native-ratings';
 import CustomModal from '../components/CustomModal';
-import {addRating, getPlacesById} from '../services/auth';
+import {
+  addRating,
+  getParticularPlaceDetailsById,
+  getPlacesById,
+} from '../services/auth';
 import Toast from 'react-native-simple-toast';
 import {useIsFocused} from '@react-navigation/native';
 import {roundOff} from '../utils/roundOffNumber';
 import Geolocation from '@react-native-community/geolocation';
+import {useSelector} from 'react-redux';
 
 const RestaurantDetailScreen = ({navigation, route}) => {
   const [modal, setModal] = useState(false);
@@ -30,6 +35,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   const [currentLongitude, setCurrentLongitude] = useState('');
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
+  const favList = useSelector(state => state.foursquaredata.favourite);
   const mapRef = useRef(null);
   const [particularRestaurantData, setParticularRestaurantDetails] = useState(
     [],
@@ -38,6 +44,17 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   const handleRatingPress = () => {
     setVisible(true);
     setModal(true);
+  };
+
+  const loadParticularPlaces = async () => {
+    const response = await getParticularPlaceDetailsById(
+      route?.params?.placeId,
+    );
+    if (response?.status === 200) {
+      console.log('Api hit successful');
+    } else {
+      console.log('Api hit successful');
+    }
   };
 
   const handleSubmit = async () => {
@@ -59,6 +76,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
 
   useLayoutEffect(() => {
     if (focus === true) {
+      loadParticularPlaces();
       setTimeout(() => {
         try {
           mapRef.current.animateToRegion(
@@ -112,10 +130,18 @@ const RestaurantDetailScreen = ({navigation, route}) => {
                     />
                   </TouchableOpacity>
                   <TouchableOpacity>
-                    <Image
-                      source={require('../../assets/images/favourite_icon_copy.png')}
-                      style={styles.favIcon}
-                    />
+                    {favList.includes(route?.params?.placeId) &&
+                    favList.length > 0 ? (
+                      <Image
+                        source={require('../../assets/images/favourite_icon.png')}
+                        style={styles.favIcon}
+                      />
+                    ) : (
+                      <Image
+                        source={require('../../assets/images/favourite_icon_copy.png')}
+                        style={styles.favIcon}
+                      />
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>

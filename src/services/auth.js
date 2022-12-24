@@ -278,7 +278,7 @@ export const getFavourites = async (lat, long, text) => {
   // if (tokendata.accessToken !== null) {
   try {
     var response = await axios.get(
-      `https://four-square-lake.vercel.app/api/place/favourites?longitude=74.7399110573&latitude=13.3792943665&text=${text}`,
+      `${BASE_URL}api/place/favourites?longitude=74.7399110573&latitude=13.3792943665&text=${text}`,
       {
         headers: {
           Authorization: BearerToken,
@@ -317,5 +317,26 @@ export const addOrRemoveFromFav = async placeId => {
     // const {message: errorMessage} = errorHandler(error, 'login');
     return error.response;
   }
-  // }
+};
+
+export const getParticularPlaceDetailsById = async placeId => {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}api/place/get-place-details?placeId=${placeId}`,
+    );
+
+    return response;
+  } catch (error) {
+    return error.response;
+  }
+};
+
+export const searchRestaurants = async text => {
+  try {
+    var response = await axios.get(`${BASE_URL}api/place/search?text=${text}`);
+
+    return response;
+  } catch (error) {
+    return error.response;
+  }
 };

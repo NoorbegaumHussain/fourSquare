@@ -59,17 +59,17 @@ const Favourites = ({navigation}) => {
     if (focus === true) {
       loadPlaces();
     }
-  }, [focus, text, deleted]);
+  }, [focus, text, favList, deleted]);
 
   const handleCardClick = () => {
     navigation.navigate('RestaurantDetailScreen');
   };
   const renderItem = ({item}) => {
     return (
-      <TouchableOpacity onPress={handleCardClick} style={styles.cardContainer}>
+      <View style={styles.cardContainer}>
         <RestaurantDetailsModified
           navigation={navigation}
-          placeId={item?._id}
+          placeId={item?.placeId}
           placeName={item?.placeName}
           url={item.image?.url}
           sector={item?.sector}
@@ -106,7 +106,7 @@ const Favourites = ({navigation}) => {
             </TouchableOpacity>
           }
         />
-      </TouchableOpacity>
+      </View>
     );
   };
   return (
