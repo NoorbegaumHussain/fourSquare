@@ -30,12 +30,15 @@ import RestaurantDetailsModified from '../components/RestaurantDetailsModified';
 import {
   addOrRemoveFromFav,
   restaurantsNearYou,
+  searchByFilter,
+  searchNearByCity,
   searchRestaurants,
 } from '../services/auth';
 import {useDispatch} from 'react-redux';
 import {useIsFocused} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import {addToFavourite, deleteFromFavourites} from '../redux/fourSquareSlice';
+import Card from '../components/Card';
 const DATA = [
   {
     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -57,10 +60,16 @@ const suggestionsData = [
   },
 ];
 const SearchScreen = ({navigation}) => {
+  const [currentLongitude, setCurrentLongitude] = useState('');
+  const [currentLatitude, setCurrentLatitude] = useState('');
+  const [locationStatus, setLocationStatus] = useState('');
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
   const [filterClicked, setFilterClicked] = useState(false);
+  const [radius, setRadius] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
+  const locationData = useSelector(state => state.foursquaredata.locationData);
+  // console.log('current lat ans long', currentLatitude, currentLongitude);
   const dispatch = useDispatch();
   const [focus, setFocus] = useState({
     search: {hasfocus: false},
@@ -95,57 +104,173 @@ const SearchScreen = ({navigation}) => {
     isNearme: false,
     nearmeString: '',
   });
+
   const [mapView, setMapView] = useState(false);
   // console.log(place.isSet, place.placeString);
   const handleCardClick = () => {
     console.log('card Clicked ys');
   };
-  const [currentLongitude, setCurrentLongitude] = useState('');
-  const [currentLatitude, setCurrentLatitude] = useState('');
+
+  const getSortByValue = () => {
+    if (sortbyClicked.popular.isClicked) {
+      return 'popular';
+    } else if (sortbyClicked.distance.isClicked) {
+      return 'distance';
+    } else {
+      return 'rating';
+    }
+  };
+  const getPriceRange = () => {
+    if (filterbyClicked.onerupee.isClicked) {
+      return 9;
+    } else if (filterbyClicked.tworupee.isClicked) {
+      return 99;
+    } else if (filterbyClicked.threerupee.isClicked) {
+      return 999;
+    } else {
+      return 9999;
+    }
+  };
+
+  const getFeaturesValue = () => {
+    Object.keys(features).forEach(key => {
+      if (features[key] === false) {
+        delete features[key];
+      }
+    });
+    return features;
+  };
+  const values = getFeaturesValue();
+
+  const obj = {
+    longitude: locationData.longitude,
+    latitude: locationData.latitude,
+    sortBy: getSortByValue(),
+    priceRange: getPriceRange(),
+    radius: radius,
+    text: place.placeString,
+    ...values,
+  };
+
+  const handleFilter = async () => {
+    const response = await searchByFilter(obj);
+    console.log('obj.....', obj);
+    console.log('response.......', response.status);
+  };
 
   const mapRef = useRef(null);
+  const focusonLoad = useIsFocused();
+  useLayoutEffect(() => {
+    getOneTimeLocation();
+    const requestLocationPermission = async () => {
+      if (Platform.OS === 'ios') {
+      } else {
+        try {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            {
+              title: 'Location Access Required',
+              message: 'This App needs to Access your location',
+            },
+          );
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            getOneTimeLocation();
+          } else {
+            setLocationStatus('Permission Denied');
+          }
+        } catch (err) {
+          console.warn(err);
+        }
+      }
+    };
+    if (mapView) {
+      requestLocationPermission();
+    }
+    if (focusonLoad === true) {
+      getOneTimeLocation();
+    }
+  }, [mapView, focusonLoad, place.placeString, currentLongitude]);
 
   const getOneTimeLocation = () => {
-    Geolocation.getCurrentPosition(position => {
-      const currentLongitude = position.coords.longitude;
+    setLocationStatus('Getting Location ...');
+    Geolocation.getCurrentPosition(
+      position => {
+        setTimeout(() => {
+          try {
+            mapRef.current.animateToRegion(
+              {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.2,
+              },
+              3 * 1000,
+            );
+            // setLoading(false);
+          } catch (error) {
+            console.log('Failed to animate direction');
+          }
+        }, 500);
+        setLocationStatus('You are Here');
 
-      const currentLatitude = position.coords.latitude;
+        const currentLongitude = position.coords.longitude;
 
-      setCurrentLongitude(currentLongitude);
+        const currentLatitude = position.coords.latitude;
 
-      setCurrentLatitude(currentLatitude);
-    });
+        setCurrentLongitude(currentLongitude);
+
+        setCurrentLatitude(currentLatitude);
+      },
+      error => {
+        setLocationStatus(error.message);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 30000,
+        maximumAge: 1000,
+      },
+    );
   };
 
   const [searchResult, setSearchResult] = useState('');
-  console.log('--------', searchResult);
+
   const loadPlaces = async () => {
-    console.log('heyyy', place.placeString);
+    getOneTimeLocation();
     const response = await searchRestaurants(place.placeString);
-    // console.log('response', response.data);
-    // console.log('hhhhhhh', response.data.data);
     if (response.status && response?.data?.data !== undefined) {
       setSearchResult(response?.data?.data);
     } else {
       console.info(response.error);
     }
   };
-  const focusonLoad = useIsFocused();
-  useLayoutEffect(() => {
-    if (focus === true) {
-      getOneTimeLocation();
+
+  const [nearbyCity, setNearByCity] = useState('');
+  const loadNearByCity = async () => {
+    const response = await searchNearByCity(
+      locationData.latitude,
+      locationData.longitude,
+    );
+    console.log('response...........................', response?.data);
+    if (response.status && response?.data?.data !== undefined) {
+      setNearByCity(response?.data?.data);
+    } else {
+      console.info(response.error);
     }
-  }, [focusonLoad, place.placeString]);
+  };
+
+  // const focusonLoad = useIsFocused();
+  // useLayoutEffect(() => {
+  //   if (focus === true) {
+  //     getOneTimeLocation();
+  //   }
+  // }, [focusonLoad, place.placeString, currentLongitude]);
 
   const renderItem = ({item}) => {
     return (
       <TouchableOpacity onPress={handleCardClick}>
         <View style={styles.cardContainer}>
-          <Image
-            source={require('../../assets/images/restaurant.png')}
-            style={styles.image}
-          />
-          <Text style={styles.cityName}>{item.title}</Text>
+          <Image source={{uri: item.image.url}} style={styles.image} />
+          <Text style={styles.cityName}>{item.city}</Text>
         </View>
       </TouchableOpacity>
     );
@@ -185,15 +310,14 @@ const SearchScreen = ({navigation}) => {
                 width: 50,
                 alignItems: 'center',
               }}
+              ratingStyle={{}}
               onPress={async () => {
                 const response = await addOrRemoveFromFav(item?._id);
-                console.log('fav resppppppp', response.data);
                 if (response?.data?.status) {
                   dispatch(addToFavourite(item?._id));
                 } else {
                   dispatch(deleteFromFavourites(item?._id));
                 }
-                console.log('item Id ', item?._id);
               }}>
               {favList.includes(item?._id) && favList.length > 0 ? (
                 <Image
@@ -213,33 +337,107 @@ const SearchScreen = ({navigation}) => {
     );
   };
 
-  const renderMapSearch = ({item}) => {
-    return (
-      <Pressable
-        onPress={handleCardClick}
-        style={styles.cardContainerInRenderSearchMap}>
-        <RestaurantDetailsModified
-          image={
-            <Image
-              source={require('../../assets/images/favourite_icon.png')}
-              style={styles.favIcon}
-            />
-          }
-        />
-      </Pressable>
-    );
-  };
   const [searchTimer, setSearchTimer] = useState(null);
   const [currentIndex, setCurrentIndex] = useState([]);
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const viewableItemsChanged = useRef(({viewableItems}) => {
-    setCurrentIndex(viewableItems[0]?.index);
-  }).current;
-  const slidesRef = useRef(null);
-  const viewConfig = useRef({
-    waitForInteraction: true,
-    viewAreaCoveragePercentThreshold: 0,
-  }).current;
+  // const scrollX = useRef(new Animated.Value(0)).current;
+  // const viewableItemsChanged = useRef(({viewableItems}) => {
+  //   setCurrentIndex(viewableItems[0]?.index);
+  // }).current;
+  // const slidesRef = useRef(null);
+  // const viewConfig = useRef({
+  //   waitForInteraction: true,
+  //   viewAreaCoveragePercentThreshold: 0,
+  // }).current;
+  const [Viewable, SetViewable] = React.useState([]);
+  const ref = React.useRef(null);
+
+  const onViewRef = React.useRef(viewableItems => {
+    let Check = [];
+    for (var i = 0; i < viewableItems.viewableItems.length; i++) {
+      Check.push(viewableItems.viewableItems[i].item);
+    }
+    SetViewable(Check);
+  });
+
+  const viewConfigRef = React.useRef({viewAreaCoveragePercentThreshold: 80});
+  const DATA = [
+    {
+      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+      title: 'First Item',
+    },
+    {
+      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+      title: 'Second Item',
+    },
+    {
+      id: '58694a0f-3da1-471f-bd96-145571e29d72',
+      title: 'Third',
+    },
+  ];
+  const renderTest = ({item, index}) => {
+    return (
+      <RestaurantDetailsModified
+        navigation={navigation}
+        placeId={item?._id}
+        placeName={item?.placeName}
+        url={item.image?.url}
+        sector={item?.sector}
+        city={item?.city}
+        rating={item?.totalrating}
+        priceRange={item?.priceRange}
+        distance={item?.dist?.calculated}
+        overview={item?.overview}
+        phone={item?.phone}
+        latitude={item?.location?.coordinates[1]}
+        longitude={item?.location?.coordinates[0]}
+        style={{
+          width: width - 10,
+          flexDirection: 'row',
+          backgroundColor: 'white',
+          borderRightColor: 'red',
+          marginRight: 5,
+          alignItems: 'center',
+          height: 135,
+          marginTop: 5,
+          marginLeft: 5,
+          shadowColor: '#171717',
+          shadowOffset: {width: 1, height: 0},
+          shadowOpacity: 0.6,
+          shadowRadius: 2,
+          elevation: 5,
+          marginBottom: 5,
+        }}
+        image={
+          <TouchableOpacity
+            style={{
+              height: 50,
+              width: 50,
+              alignItems: 'center',
+            }}
+            onPress={async () => {
+              const response = await addOrRemoveFromFav(item?._id);
+              if (response?.data?.status) {
+                dispatch(addToFavourite(item?._id));
+              } else {
+                dispatch(deleteFromFavourites(item?._id));
+              }
+            }}>
+            {favList.includes(item?._id) & (favList.length > 0) ? (
+              <Image
+                source={require('../../assets/images/favourite_icon.png')}
+                style={styles.favIcon}
+              />
+            ) : (
+              <Image
+                source={require('../../assets/images/favourite_icon_selected.png')}
+                style={styles.favIcon}
+              />
+            )}
+          </TouchableOpacity>
+        }
+      />
+    );
+  };
   return (
     <View
       style={[
@@ -282,12 +480,20 @@ const SearchScreen = ({navigation}) => {
                   style={styles.input}
                   placeholder="Search"
                   placeholderTextColor="#CCCCCC"
-                  onFocus={() =>
+                  onFocus={() => {
+                    if (searchTimer) {
+                      clearTimeout(searchTimer);
+                    }
                     setFocus(prev => ({
                       nearme: {hasfocus: false},
                       search: {hasfocus: true},
-                    }))
-                  }
+                    }));
+                    setSearchTimer(
+                      setTimeout(() => {
+                        loadNearByCity();
+                      }, 1000),
+                    );
+                  }}
                   onChangeText={searchString => {
                     if (searchTimer) {
                       clearTimeout(searchTimer);
@@ -333,12 +539,12 @@ const SearchScreen = ({navigation}) => {
                   style={styles.input}
                   placeholder="Near Me"
                   placeholderTextColor="#CCCCCC"
-                  onFocus={() =>
+                  onFocus={() => {
                     setFocus(prev => ({
                       search: {hasfocus: false},
                       nearme: {hasfocus: true},
-                    }))
-                  }
+                    }));
+                  }}
                   onChangeText={searchString => {
                     if (searchString.length > 2) {
                       setNearme(() => ({
@@ -369,7 +575,7 @@ const SearchScreen = ({navigation}) => {
             </View>
             <View style={styles.filterContainer}>
               {filterClicked ? (
-                <TouchableOpacity onPress={null}>
+                <TouchableOpacity onPress={handleFilter}>
                   <Text style={styles.doneText}>Done</Text>
                 </TouchableOpacity>
               ) : (
@@ -389,14 +595,14 @@ const SearchScreen = ({navigation}) => {
         focus.search.hasfocus &&
         place.placeString < 2 &&
         nearme.nearmeString < 2 && (
-          <ScrollView>
+          <View>
             <View style={styles.nearbyPlacesContainer}>
               <Text style={styles.nearbyPlacesText}>Near by places</Text>
             </View>
             <View>
               <FlatList
-                data={DATA}
-                keyExtractor={item => item.id}
+                data={nearbyCity}
+                keyExtractor={item => item._id}
                 renderItem={renderItem}
               />
             </View>
@@ -410,7 +616,7 @@ const SearchScreen = ({navigation}) => {
                 renderItem={renderSuggestions}
               />
             </View>
-          </ScrollView>
+          </View>
         )}
       {place.isSet && !mapView && (
         <View style={{flex: 1}}>
@@ -449,22 +655,31 @@ const SearchScreen = ({navigation}) => {
               ) : null}
             </View>
 
-            <FlatList
+            {/* <FlatList
               data={searchResult}
               keyExtractor={item => item.id}
-              renderItem={renderMapSearch}
-              pagingEnabled={true}
+              renderItem={renderListSearch}
               horizontal
-              bounces={false}
-              onScroll={Animated.event(
-                [{nativeEvent: {contentOffset: {x: scrollX}}}],
-                {useNativeDriver: false},
-              )}
-              onViewableItemsChanged={viewableItemsChanged}
-              viewabilityConfig={viewConfig}
-              scrollEventThrottle={32}
-              ref={slidesRef}
-            />
+              // pagingEnabled
+            /> */}
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderColor: 'red',
+              }}>
+              <FlatList
+                data={searchResult}
+                renderItem={renderTest}
+                keyExtractor={item => item._id}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                ref={ref}
+                onViewableItemsChanged={onViewRef.current}
+                viewabilityConfig={viewConfigRef.current}
+              />
+            </View>
           </View>
           <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
             <PrimaryButton text="List View" onPress={() => setMapView(false)} />
@@ -612,7 +827,7 @@ const SearchScreen = ({navigation}) => {
                   autoCapitalize="none"
                   labelFontSize={15}
                   // labelOffset={{y1: -6, x1: width1}}
-                  // onChangeText={handleChange('email')}
+                  onChangeText={string => setRadius(string)}
                   // onBlur={handleBlur('email')}
                   // value={values.email}
                   autoCorrect={false}
@@ -1456,6 +1671,6 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginHorizontal: 5,
     height: '25%',
-    width: '78%',
+    width: '100%',
   },
 });

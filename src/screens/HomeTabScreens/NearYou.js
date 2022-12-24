@@ -28,6 +28,7 @@ import {useSelector} from 'react-redux';
 import {
   addToFavourite,
   deleteFromFavourites,
+  storeLocation,
 } from '../../redux/fourSquareSlice';
 
 const NearYou = ({navigation}) => {
@@ -43,7 +44,7 @@ const NearYou = ({navigation}) => {
   const mapRef = useRef(null);
   const dispatch = useDispatch();
   const favList = useSelector(state => state.foursquaredata.favourite);
-  console.log('favvvvvvv', favList);
+  const locationData = useSelector(state => state.foursquaredata.locationData);
   const loadPlaces = async () => {
     const response = await restaurantsNearYou(
       currentLatitude,
@@ -59,8 +60,8 @@ const NearYou = ({navigation}) => {
 
   const loadFav = async () => {
     const response = await getFavourites(
-      currentLatitude,
-      currentLongitude,
+      locationData.latitude,
+      locationData.longitude,
       ' ',
     );
     if (response.status && response?.data?.data !== undefined) {
@@ -131,8 +132,13 @@ const NearYou = ({navigation}) => {
         const currentLatitude = position.coords.latitude;
 
         setCurrentLongitude(currentLongitude);
-
         setCurrentLatitude(currentLatitude);
+        dispatch(
+          storeLocation({
+            latitude: currentLatitude,
+            longitude: currentLongitude,
+          }),
+        );
       },
       error => {
         setLocationStatus(error.message);
@@ -177,19 +183,20 @@ const NearYou = ({navigation}) => {
                 } else {
                   dispatch(deleteFromFavourites(item?._id));
                 }
-                console.log('item Id ', item?._id);
               }}>
-              {favList.includes(item?._id) && favList.length > 0 ? (
-                <Image
-                  source={require('../../../assets/images/favourite_icon.png')}
-                  style={styles.favIcon}
-                />
-              ) : (
-                <Image
-                  source={require('../../../assets/images/favourite_icon_selected.png')}
-                  style={styles.favIcon}
-                />
-              )}
+              {item?._id !== undefined &&
+                favList !== undefined &&
+                (favList.includes(item?._id) ? (
+                  <Image
+                    source={require('../../../assets/images/favourite_icon.png')}
+                    style={styles.favIcon}
+                  />
+                ) : (
+                  <Image
+                    source={require('../../../assets/images/favourite_icon_selected.png')}
+                    style={styles.favIcon}
+                  />
+                ))}
             </TouchableOpacity>
           }
         />

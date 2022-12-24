@@ -27,6 +27,8 @@ const RestaurantDetailsModified = ({
   phone,
   latitude,
   longitude,
+  style = {},
+  ratingStyle={},
 }) => {
   const handleCardClick = () => {
     console.log('clicked', placeId, placeName);
@@ -47,7 +49,7 @@ const RestaurantDetailsModified = ({
     });
   };
   return (
-    <Pressable style={styles.container} onPress={handleCardClick}>
+    <Pressable style={[styles.container, {...style}]} onPress={handleCardClick}>
       <Image
         source={{
           uri: url,
@@ -92,8 +94,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     width: '100%',
     marginTop: 7,
+    height: 135,
     // marginHorizontal: 10,
-    borderRightColor: 'red',
   },
   image: {height: '100%', width: '33%'},
   contentContainer: {
@@ -120,7 +122,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 7,
   },
   ratingText: {
     color: '#FFFFFF',
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
   },
   restaurantInfo: {
     borderColor: 'black',
-    marginTop: 14,
+    marginTop: 11,
 
     width: '64%',
     textAlign: 'justify',
@@ -151,6 +152,6 @@ const styles = StyleSheet.create({
   },
   restaurantAdress: {
     color: '#797D7F',
-    paddingBottom: 4,
+    paddingBottom: 5,
   },
 });

@@ -273,12 +273,11 @@ export const resetPassword = async (obj, token) => {
 };
 
 export const getFavourites = async (lat, long, text) => {
-  console.log(lat, long, text);
   // const tokendata = await getData();
   // if (tokendata.accessToken !== null) {
   try {
     var response = await axios.get(
-      `${BASE_URL}api/place/favourites?longitude=74.7399110573&latitude=13.3792943665&text=${text}`,
+      `${BASE_URL}api/place/favourites?longitude=${long}&latitude=${lat}&text=${text}`,
       {
         headers: {
           Authorization: BearerToken,
@@ -339,4 +338,48 @@ export const searchRestaurants = async text => {
   } catch (error) {
     return error.response;
   }
+};
+
+export const searchNearByCity = async (latitude, longitude) => {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}api/place/nearby-city?longitude=${longitude}&latitude=${latitude}`,
+    );
+
+    return response;
+  } catch (error) {
+    return error.response;
+  }
+};
+
+export const searchByFilter = async obj => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}api/place/filter`,
+      obj,
+      // {
+      //   headers: {
+      //     'OTP-VERIFICATION-TOKEN': token,
+      //   },
+      // },
+    );
+    return response;
+  } catch (error) {
+    return error.response.data.message;
+  }
+};
+
+export const getParticularUserDetails = async () => {
+  try {
+    var response = await axios.get(`${BASE_URL}api/user`, {
+      headers: {
+        Authorization: BearerToken,
+      },
+    });
+
+    return response;
+  } catch (error) {
+    return error.response;
+  }
+  // }
 };

@@ -7,14 +7,37 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React, {useLayoutEffect, useState} from 'react';
 import {
   DrawerContentScrollView,
   useDrawerStatus,
 } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/Feather';
-
+import {useIsFocused} from '@react-navigation/native';
+import {getParticularUserDetails} from '../services/auth';
+import {useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
+import {addUserId} from '../redux/fourSquareSlice';
 const DrawerContent = props => {
+  const [userData, setUserData] = useState();
+  const userId = useSelector(state => state.foursquaredata.userId);
+  console.log('UserId', userId);
+  const dispatch = useDispatch();
+  const loadUserDetails = async () => {
+    const response = await getParticularUserDetails();
+    if (response.status === 200 && response?.data?.data !== undefined) {
+      setUserData(response?.data?.data);
+      dispatch(addUserId(response?.data?.data._id));
+      console.log('userDetails', response.data.data);
+    }
+  };
+
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus === true) {
+      loadUserDetails();
+    }
+  }, [focus]);
 
   return (
     <View style={styles.container}>
@@ -22,30 +45,60 @@ const DrawerContent = props => {
         source={require('../../assets/images/sidemenu_background.png')}
         style={{flex: 1}}>
         <DrawerContentScrollView {...props}>
-          <Image
-            source={require('../../assets/images/profile1.png')}
-            style={styles.image}
-          />
-          <Text style={styles.loginText}>Login</Text>
+          {userId !== null ? (
+            <Image
+              source={{uri: userData?.profilePic?.url}}
+              style={styles.image}
+            />
+          ) : (
+            <Image
+              source={require('../../assets/images/defaultProfile.png')}
+              style={styles.image}
+            />
+          )}
+
+          <Text style={styles.loginText}>Noorbegaum</Text>
           <View style={{marginTop: 40}}>
-            <TouchableOpacity
-              style={styles.drawerContentContainer}
-              onPress={() => props.navigation.navigate('Favourites')}>
-              <Image
-                source={require('../../assets/images/favourite_icon_copy.png')}
-                style={styles.drawerContentIconFav}
-              />
-              <Text style={styles.drawerContentText}>Favourites</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.drawerContentContainer}
-              onPress={() => props.navigation.navigate('Feedback')}>
-              <Image
-                source={require('../../assets/images/feedback.png')}
-                style={styles.drawerContentIcon}
-              />
-              <Text style={styles.drawerContentText}>Feedback</Text>
-            </TouchableOpacity>
+            {userId !== null ? (
+              <>
+                <TouchableOpacity
+                  style={styles.drawerContentContainer}
+                  onPress={() => props.navigation.navigate('Favourites')}>
+                  <Image
+                    source={require('../../assets/images/favourite_icon_copy.png')}
+                    style={styles.drawerContentIconFav}
+                  />
+                  <Text style={styles.drawerContentText}>Favourites</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.drawerContentContainer}
+                  onPress={() => props.navigation.navigate('Feedback')}>
+                  <Image
+                    source={require('../../assets/images/feedback.png')}
+                    style={styles.drawerContentIcon}
+                  />
+                  <Text style={styles.drawerContentText}>Feedback</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <TouchableOpacity style={styles.drawerContentContainer}>
+                  <Image
+                    source={require('../../assets/images/favourite_icon_copy.png')}
+                    style={styles.drawerContentIconFav}
+                  />
+                  <Text style={styles.drawerContentTextHide}>Favourites</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.drawerContentContainer}>
+                  <Image
+                    source={require('../../assets/images/feedback.png')}
+                    style={styles.drawerContentIcon}
+                  />
+                  <Text style={styles.drawerContentTextHide}>Feedback</Text>
+                </TouchableOpacity>
+              </>
+            )}
+
             <TouchableOpacity
               style={styles.drawerContentContainer}
               onPress={() => props.navigation.navigate('AboutUs')}>
@@ -55,7 +108,9 @@ const DrawerContent = props => {
               />
               <Text style={styles.drawerContentText}>AboutUs</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.drawerContentContainer}>
+            <TouchableOpacity
+              style={styles.drawerContentContainer}
+              onPress={() => props.navigation.navigate('AboutUs')}>
               <Image
                 source={require('../../assets/images/logout.png')}
                 style={styles.drawerContentIcon}
@@ -116,5 +171,11 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginHorizontal: 20,
     height: 22,
+  },
+  drawerContentTextHide: {
+    fontFamily: 'Avenir Medium',
+    fontSize: 18,
+    color: '#CCCCCC',
+    fontWeight: '500',
   },
 });

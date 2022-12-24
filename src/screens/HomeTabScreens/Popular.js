@@ -118,6 +118,7 @@ const Popular = ({navigation}) => {
         data={nearbyLocations}
         keyExtractor={item => item._id}
         renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );

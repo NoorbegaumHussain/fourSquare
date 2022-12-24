@@ -11,39 +11,24 @@ import {
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import Icon from 'react-native-vector-icons/Feather';
-import RestaurantDetails from '../components/RestaurantDetails';
 import RestaurantDetailsModified from '../components/RestaurantDetailsModified';
-import Geolocation from '@react-native-community/geolocation';
 import {addOrRemoveFromFav, getFavourites} from '../services/auth';
 import {useIsFocused} from '@react-navigation/native';
-import {addToFavourite, deleteFromFavourites} from '../redux/fourSquareSlice';
+import {deleteFromFavourites} from '../redux/fourSquareSlice';
 import {useDispatch, useSelector} from 'react-redux';
 
 const Favourites = ({navigation}) => {
-  const [currentLongitude, setCurrentLongitude] = useState('');
-  const [currentLatitude, setCurrentLatitude] = useState('');
   const [nearbyLocations, setNearbyLocations] = useState([]);
   const [text, setText] = useState('');
   const [deleted, setDeleted] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
   const dispatch = useDispatch();
+  const locationData = useSelector(state => state.foursquaredata.locationData);
 
-  const getOneTimeLocation = () => {
-    Geolocation.getCurrentPosition(position => {
-      const currentLongitude = position.coords.longitude;
-
-      const currentLatitude = position.coords.latitude;
-
-      setCurrentLongitude(currentLongitude);
-
-      setCurrentLatitude(currentLatitude);
-    });
-  };
   const loadPlaces = async () => {
-    getOneTimeLocation();
     const response = await getFavourites(
-      currentLatitude,
-      currentLongitude,
+      locationData.latitude,
+      locationData.longitude,
       text,
     );
     if (response.status) {
@@ -59,11 +44,8 @@ const Favourites = ({navigation}) => {
     if (focus === true) {
       loadPlaces();
     }
-  }, [focus, text, favList, deleted]);
+  }, [focus, text, favList]);
 
-  const handleCardClick = () => {
-    navigation.navigate('RestaurantDetailScreen');
-  };
   const renderItem = ({item}) => {
     return (
       <View style={styles.cardContainer}>

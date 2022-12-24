@@ -65,7 +65,6 @@ const RestaurantDetailScreen = ({navigation, route}) => {
     const response = await addRating(obj);
     if (response.status) {
       // setReviews(response?.data?.data);
-      console.log(response.data);
       setVisible(false);
       setModal(false);
     } else {
@@ -130,18 +129,19 @@ const RestaurantDetailScreen = ({navigation, route}) => {
                     />
                   </TouchableOpacity>
                   <TouchableOpacity>
-                    {favList.includes(route?.params?.placeId) &&
-                    favList.length > 0 ? (
-                      <Image
-                        source={require('../../assets/images/favourite_icon.png')}
-                        style={styles.favIcon}
-                      />
-                    ) : (
-                      <Image
-                        source={require('../../assets/images/favourite_icon_copy.png')}
-                        style={styles.favIcon}
-                      />
-                    )}
+                    {favList !== undefined &&
+                      (favList.includes(route?.params?.placeId) &&
+                      favList.length > 0 ? (
+                        <Image
+                          source={require('../../assets/images/favourite_icon.png')}
+                          style={styles.favIcon}
+                        />
+                      ) : (
+                        <Image
+                          source={require('../../assets/images/favourite_icon_copy.png')}
+                          style={styles.favIcon}
+                        />
+                      ))}
                   </TouchableOpacity>
                 </View>
               </View>
