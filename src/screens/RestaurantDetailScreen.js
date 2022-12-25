@@ -83,7 +83,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
               latitude: route?.params?.latitude,
               longitude: route?.params?.longitude,
               latitudeDelta: 0.05,
-              longitudeDelta: 0.2,
+              longitudeDelta: 0.1,
             },
             3 * 1000,
           );
@@ -210,7 +210,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
         <View style={styles.mapContainer}>
           {route?.params?.latitude && route?.params?.longitude !== undefined ? (
             <MapView
-              style={styles.mapStyle}
+              style={[styles.mapStyle, {width: width}]}
               customMapStyle={mapStyle}
               ref={mapRef}>
               <Marker
@@ -246,7 +246,11 @@ const RestaurantDetailScreen = ({navigation, route}) => {
         <View style={styles.primaryButtonContainer}>
           <PrimaryButton
             text="Add Review "
-            onPress={() => navigation.navigate('AddReview')}
+            onPress={() =>
+              navigation.navigate('AddReview', {
+                placeId: route?.params?.placeId,
+              })
+            }
           />
         </View>
       </ScrollView>
@@ -615,6 +619,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    marginLeft: '25%',
   },
   primaryButtonContainer: {
     justifyContent: 'flex-end',
@@ -632,6 +637,7 @@ const styles = StyleSheet.create({
     color: '#606060',
     lineHeight: 23,
     fontWeight: '600',
+    width: '50%',
   },
   mapTextNumber: {
     fontFamily: 'Avenir Medium',

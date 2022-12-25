@@ -3,10 +3,23 @@ import {BearerToken} from '../utils/BearerToken';
 import axios from 'axios';
 import {errorHandler} from '../utils/errorHandler';
 import {getData} from '../utils/BearerToken';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const registerUser = async data => {
   try {
     const response = await axios.post(`${BASE_URL}/api/user/register`, data);
+    const headers = response.headers;
+    let stringifiedToken = JSON.stringify({
+      accessToken: headers.authorization,
+      refreshToken: headers['refresh-token'],
+    });
+    try {
+      await AsyncStorage.setItem('token', stringifiedToken);
+      const temp = await AsyncStorage.getItem('token');
+      console.log('........', temp);
+    } catch (e) {
+      console.log('error in storing data in async');
+    }
     return response;
   } catch (error) {
     const {message: errorMessage} = errorHandler(error, 'register');
@@ -16,6 +29,15 @@ export const registerUser = async data => {
 export const loginUser = async data => {
   try {
     const response = await axios.post(`${BASE_URL}/api/user/login`, data);
+
+    // try {
+    //   await AsyncStorage.clear();
+    //   await AsyncStorage.setItem('token', stringifiedToken);
+    //   const temp = await AsyncStorage.getItem('token');
+    //   console.log('........', temp);
+    // } catch (e) {
+    //   console.log('error in storing data in async');
+    // }
     return response;
   } catch (error) {
     const {message: errorMessage} = errorHandler(error, 'login');
@@ -131,6 +153,7 @@ export const getReviewsById = async placeId => {
 export const addRating = async data => {
   // const tokendata = await getData();
   // if (tokendata.accessToken !== null) {
+  // AsyncStorage.getItem(LOGIN_TOKEN);
   try {
     const response = await axios.post(
       `https://four-square-lake.vercel.app/api/place/rating?placeId=${data.placeId}&star=${data.rating}`,
@@ -382,4 +405,56 @@ export const getParticularUserDetails = async () => {
     return error.response;
   }
   // }
+};
+
+// export const uploadImages = async formData => {
+//   try {
+//     const response = await axios.post(
+//       `${BASE_URL}/api/place/upload-multiple-images`,
+//       formData,
+//       {
+//         headers: {
+//           Authorization: BearerToken,
+//         },
+//       },
+//     );
+//     console.info('Response', response.data);
+//     return response;
+//   } catch (error) {
+//     const {message: errorMessage} = errorHandler(error, 'login');
+//     return errorMessage;
+//   }
+//   // }
+// };
+
+export const addReview = async formData => {
+  try {
+    let res = await fetch(`${BASE_URL}api/place/reviews`, {
+      method: 'post',
+      body: formData,
+      headers: {
+        Authorization: BearerToken,
+      },
+    });
+    const jsonResponse = await res.json();
+    return jsonResponse;
+  } catch (error) {
+    return error;
+  }
+};
+
+export const uploadSingleImage = async formData => {
+  try {
+    let res = await fetch(`${BASE_URL}api/place/upload-images`, {
+      method: 'post',
+      body: formData,
+      headers: {
+        Authorization: BearerToken,
+      },
+    });
+    const jsonResponse = await res.json();
+    return jsonResponse;
+  } catch (error) {
+    return error;
+  }
 };

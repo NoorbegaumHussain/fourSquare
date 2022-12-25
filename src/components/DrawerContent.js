@@ -28,7 +28,7 @@ const DrawerContent = props => {
     if (response.status === 200 && response?.data?.data !== undefined) {
       setUserData(response?.data?.data);
       dispatch(addUserId(response?.data?.data._id));
-      console.log('userDetails', response.data.data);
+      console.log('userDetails', response.data);
     }
   };
 
@@ -57,7 +57,7 @@ const DrawerContent = props => {
             />
           )}
 
-          <Text style={styles.loginText}>Noorbegaum</Text>
+          <Text style={styles.loginText}>{userData?.name}</Text>
           <View style={{marginTop: 40}}>
             {userId !== null ? (
               <>

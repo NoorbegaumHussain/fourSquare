@@ -22,6 +22,7 @@ const Register = ({navigation}) => {
   const phoneRegExp =
     /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
   const loginValidationSchema = yup.object().shape({
+    name: yup.string().required('UserName is Required'),
     email: yup
       .string()
       .email('Please enter valid email')
@@ -52,6 +53,7 @@ const Register = ({navigation}) => {
             <Formik
               validationSchema={loginValidationSchema}
               initialValues={{
+                name: '',
                 email: '',
                 mobileNo: '',
                 confirmPassword: '',
@@ -59,6 +61,7 @@ const Register = ({navigation}) => {
               }}
               onSubmit={async values => {
                 const obj = {
+                  name: values.name,
                   email: values.email,
                   phone: values.mobileNo,
                   password: values.password,
@@ -70,6 +73,7 @@ const Register = ({navigation}) => {
                     accessToken: headers.authorization,
                     refreshToken: headers['refresh-token'],
                   });
+                  console.log(stringifiedToken);
                   try {
                     await AsyncStorage.setItem('token', stringifiedToken);
                   } catch (e) {
@@ -96,9 +100,54 @@ const Register = ({navigation}) => {
                   <View style={styles.inputFieldsContainer}>
                     <View style={styles.textContainer}>
                       <TextField
+                        label="Name"
+                        name="name"
+                        keyboardType="default"
+                        formatText={this.formatText}
+                        onSubmitEditing={this.onSubmit}
+                        ref={this.fieldRef}
+                        textColor="#FFFFFF"
+                        tintColor="#b5abab"
+                        baseColor="#b5abab"
+                        lineWidth={1}
+                        autoCapitalize="none"
+                        labelFontSize={15}
+                        labelOffset={{y1: -6, x1: width1}}
+                        onChangeText={handleChange('name')}
+                        onBlur={handleBlur('name')}
+                        value={values.name}
+                        autoCorrect={false}
+                        style={{
+                          fontFamily: 'Avenir Book',
+                          fontSize: 16,
+                          marginBottom: 5,
+                          textAlign: 'center',
+                          marginTop: 10,
+                        }}
+                        labelTextStyle={{
+                          textAlign: 'center',
+                          color: '#b5abab',
+                          fontFamily: 'Avenir Book',
+                          alignSelf: 'center',
+                          height: 50,
+                          paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
+                        }}
+                        containerStyle={
+                          {
+                            // height:200,
+                            // borderWidth:1,
+                          }
+                        }
+                      />
+                      {errors.email && touched.email && (
+                        <Text style={styles.errorText}>{errors.email}</Text>
+                      )}
+                    </View>
+                    <View style={styles.textContainer}>
+                      <TextField
                         label="Email"
                         name="email"
-                        keyboardType="default"
+                        keyboardType="email-address"
                         formatText={this.formatText}
                         onSubmitEditing={this.onSubmit}
                         ref={this.fieldRef}
@@ -142,8 +191,8 @@ const Register = ({navigation}) => {
                     <View style={styles.textContainer}>
                       <TextField
                         label="Mobile Number"
-                        name="password"
-                        keyboardType="default"
+                        name="mobileNo"
+                        keyboardType="phone-pad"
                         formatText={this.formatText}
                         onSubmitEditing={this.onSubmit}
                         ref={this.fieldRef}
@@ -324,6 +373,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   inputFieldsContainer: {
-    marginTop: 55,
+    marginTop: 10,
   },
 });

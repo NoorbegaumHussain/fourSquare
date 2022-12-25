@@ -86,8 +86,6 @@ const ReviewList = ({navigation, route}) => {
     );
   };
 
-  console.log('jjjjjjj', reviews);
-
   const loadList = async () => {
     const response = await getReviewsById(route?.params?.placeId);
     if (response.status) {

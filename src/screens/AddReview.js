@@ -16,11 +16,31 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ImagePickerComponent from '../components/ImagePickerComponent';
 import ImagePicker from 'react-native-image-crop-picker';
-const AddReview = ({navigation}) => {
+import {createFormData} from '../utils/createFormData';
+import {addReview} from '../services/auth';
+
+const AddReview = ({navigation, route}) => {
   const [text, setText] = useState('');
   const [imagedata, setImgData] = useState([]);
   const [imageuri, setImageUri] = useState('');
-  console.log(imagedata);
+
+  const handleSubmit = async () => {
+    const obj = createFormData({
+      placeId: route?.params?.placeId,
+      reviewMessage: text,
+      image: imagedata,
+    });
+    console.log(obj);
+    const response = await addReview(obj);
+    // console.log(response);
+    if (response.status) {
+      console.log(response.message);
+      navigation.goBack();
+    } else {
+      console.log(response.message);
+    }
+  };
+
   const getImageFromCamera = async () => {
     ImagePicker.openCamera({
       width: 104,
@@ -146,7 +166,7 @@ const AddReview = ({navigation}) => {
         </View>
       </View>
       <View style={styles.primaryButtonContainer}>
-        <PrimaryButton text="Submit" onPress={() => navigation.navigate('')} />
+        <PrimaryButton text="Submit" onPress={handleSubmit} />
       </View>
     </View>
   );

@@ -33,7 +33,6 @@ const TopPick = ({navigation}) => {
   const [placeId, setPlaceId] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
   const dispatch = useDispatch();
-  console.log('nearbyLocations', fav);
   const getOneTimeLocation = () => {
     Geolocation.getCurrentPosition(position => {
       const currentLongitude = position.coords.longitude;
@@ -64,7 +63,6 @@ const TopPick = ({navigation}) => {
       currentLongitude,
       ' ',
     );
-    console.log(response.data);
     if (response.status) {
       setFav(response?.data?.data);
     } else {
@@ -81,7 +79,6 @@ const TopPick = ({navigation}) => {
   }, [focus, currentLatitude]);
 
   const renderItem = ({item}) => {
-    console.log(item?.overview);
     return (
       <View style={styles.cardContainer}>
         <RestaurantDetailsModified
@@ -107,7 +104,6 @@ const TopPick = ({navigation}) => {
               }}
               onPress={async () => {
                 const response = await addOrRemoveFromFav(item?._id);
-                console.log('fav resppppppp', response.data);
                 if (response?.data?.status) {
                   dispatch(addToFavourite(item?._id));
                 } else {

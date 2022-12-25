@@ -87,7 +87,6 @@ const Popular = ({navigation}) => {
               }}
               onPress={async () => {
                 const response = await addOrRemoveFromFav(item?._id);
-                console.log('fav resppppppp', response.data);
                 if (response?.data?.status) {
                   dispatch(addToFavourite(item?._id));
                 } else {

@@ -158,84 +158,46 @@ const SearchScreen = ({navigation}) => {
     console.log('response.......', response.status);
   };
 
+  const [Viewable, SetViewable] = React.useState([]);
+  const ref = React.useRef(null);
+
+  const onViewRef = React.useRef(viewableItems => {
+    let Check = [];
+    for (var i = 0; i < viewableItems.viewableItems.length; i++) {
+      Check.push(viewableItems.viewableItems[i].item);
+    }
+    SetViewable(Check);
+  });
+  console.log('....', Viewable[0]?.location?.coordinates);
+  const viewConfigRef = React.useRef({viewAreaCoveragePercentThreshold: 80});
+
   const mapRef = useRef(null);
   const focusonLoad = useIsFocused();
-  useLayoutEffect(() => {
-    getOneTimeLocation();
-    const requestLocationPermission = async () => {
-      if (Platform.OS === 'ios') {
-      } else {
-        try {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            {
-              title: 'Location Access Required',
-              message: 'This App needs to Access your location',
-            },
-          );
-          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            getOneTimeLocation();
-          } else {
-            setLocationStatus('Permission Denied');
-          }
-        } catch (err) {
-          console.warn(err);
-        }
-      }
-    };
-    if (mapView) {
-      requestLocationPermission();
+  const onLoad = () => {
+    try {
+      mapRef.current.animateToRegion(
+        {
+          latitude: Viewable[0]?.location?.coordinates[1],
+          longitude: Viewable[0]?.location?.coordinates[0],
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.2,
+        },
+        3 * 1000,
+      );
+      // setLoading(false);
+    } catch (error) {
+      console.log('Failed to animate direction');
     }
-    if (focusonLoad === true) {
-      getOneTimeLocation();
-    }
-  }, [mapView, focusonLoad, place.placeString, currentLongitude]);
-
-  const getOneTimeLocation = () => {
-    setLocationStatus('Getting Location ...');
-    Geolocation.getCurrentPosition(
-      position => {
-        setTimeout(() => {
-          try {
-            mapRef.current.animateToRegion(
-              {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                latitudeDelta: 0.05,
-                longitudeDelta: 0.2,
-              },
-              3 * 1000,
-            );
-            // setLoading(false);
-          } catch (error) {
-            console.log('Failed to animate direction');
-          }
-        }, 500);
-        setLocationStatus('You are Here');
-
-        const currentLongitude = position.coords.longitude;
-
-        const currentLatitude = position.coords.latitude;
-
-        setCurrentLongitude(currentLongitude);
-
-        setCurrentLatitude(currentLatitude);
-      },
-      error => {
-        setLocationStatus(error.message);
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 30000,
-        maximumAge: 1000,
-      },
-    );
   };
+  useLayoutEffect(() => {
+    if (focusonLoad === true) {
+      onLoad();
+    }
+  }, [mapView, focusonLoad, place.placeString, currentLongitude, mapRef]);
 
   const [searchResult, setSearchResult] = useState('');
 
   const loadPlaces = async () => {
-    getOneTimeLocation();
     const response = await searchRestaurants(place.placeString);
     if (response.status && response?.data?.data !== undefined) {
       setSearchResult(response?.data?.data);
@@ -348,18 +310,7 @@ const SearchScreen = ({navigation}) => {
   //   waitForInteraction: true,
   //   viewAreaCoveragePercentThreshold: 0,
   // }).current;
-  const [Viewable, SetViewable] = React.useState([]);
-  const ref = React.useRef(null);
 
-  const onViewRef = React.useRef(viewableItems => {
-    let Check = [];
-    for (var i = 0; i < viewableItems.viewableItems.length; i++) {
-      Check.push(viewableItems.viewableItems[i].item);
-    }
-    SetViewable(Check);
-  });
-
-  const viewConfigRef = React.useRef({viewAreaCoveragePercentThreshold: 80});
   const DATA = [
     {
       id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
@@ -374,7 +325,7 @@ const SearchScreen = ({navigation}) => {
       title: 'Third',
     },
   ];
-  const renderTest = ({item, index}) => {
+  const renderMapList = ({item, index}) => {
     return (
       <RestaurantDetailsModified
         navigation={navigation}
@@ -584,7 +535,12 @@ const SearchScreen = ({navigation}) => {
                   size={25}
                   color="#FFFFFF"
                   style={styles.filter}
-                  onPress={() => setFilterClicked(!filterClicked)}
+                  onPress={() => {
+                    // place.isSet && mapView &&
+                    setPlace({isSet: false});
+                    setMapView(false);
+                    setFilterClicked(!filterClicked);
+                  }}
                 />
               )}
             </View>
@@ -620,21 +576,44 @@ const SearchScreen = ({navigation}) => {
         )}
       {place.isSet && !mapView && (
         <View style={{flex: 1}}>
-          <FlatList
-            data={searchResult}
-            keyExtractor={item => item.id}
-            renderItem={renderListSearch}
-          />
-          <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
-            <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
-          </View>
+          {searchResult ? (
+            <>
+              <FlatList
+                data={searchResult}
+                keyExtractor={item => item.id}
+                renderItem={renderListSearch}
+              />
+
+              <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+                <PrimaryButton
+                  text="Map View"
+                  onPress={() => setMapView(true)}
+                />
+              </View>
+            </>
+          ) : (
+            <View style={{flex: 1, justifyContent: 'center'}}>
+              <Text
+                style={{
+                  color: '#000000',
+                  fontFamily: 'Avenir Medium',
+                  fontSize: 20,
+                  fontWeight: '500',
+                  textAlign: 'center',
+                  marginBottom: 15,
+                }}>
+                No Results Found
+              </Text>
+            </View>
+          )}
         </View>
       )}
       {place.isSet && mapView && (
         <View style={{flex: 1}}>
           <View style={styles.mainContainer}>
             <View style={[styles.mapContainer, {height: '100%'}]}>
-              {currentLatitude && currentLongitude !== '' ? (
+              {Viewable[0]?.location?.coordinates[1] &&
+              Viewable[0]?.location?.coordinates[0] !== '' ? (
                 <MapView
                   style={styles.mapStyle}
                   customMapStyle={mapStyle}
@@ -642,8 +621,8 @@ const SearchScreen = ({navigation}) => {
                   <Marker
                     draggable
                     coordinate={{
-                      latitude: currentLatitude,
-                      longitude: currentLongitude,
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
                     }}
                     onDragEnd={e =>
                       alert(JSON.stringify(e.nativeEvent.coordinate))
@@ -654,14 +633,6 @@ const SearchScreen = ({navigation}) => {
                 </MapView>
               ) : null}
             </View>
-
-            {/* <FlatList
-              data={searchResult}
-              keyExtractor={item => item.id}
-              renderItem={renderListSearch}
-              horizontal
-              // pagingEnabled
-            /> */}
             <View
               style={{
                 justifyContent: 'center',
@@ -670,7 +641,7 @@ const SearchScreen = ({navigation}) => {
               }}>
               <FlatList
                 data={searchResult}
-                renderItem={renderTest}
+                renderItem={renderMapList}
                 keyExtractor={item => item._id}
                 horizontal
                 pagingEnabled

@@ -10,6 +10,7 @@ import React from 'react';
 import Icon from 'react-native-vector-icons/Feather';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import HomeTab from '../navigation/HomeTab';
+import {useSelector} from 'react-redux';
 const HomeScreen = ({navigation}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? '37%' : '30%';
@@ -18,7 +19,8 @@ const HomeScreen = ({navigation}) => {
   const handleDrawer = () => {
     navigation.openDrawer();
   };
-
+  const userToken = useSelector(state => state.foursquaredata.userToken);
+  console.log('userToken', userToken);
   return (
     <View style={styles.container}>
       <StatusBar

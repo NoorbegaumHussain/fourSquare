@@ -5,6 +5,7 @@ export const FourSquareSlice = createSlice({
     favourite: [],
     userId: null,
     locationData: null,
+    userToken: null,
   },
   reducers: {
     addToFavourite: (state, action) => {
@@ -35,6 +36,12 @@ export const FourSquareSlice = createSlice({
     deleteLocation: (state, action) => {
       state.locationData = null;
     },
+    addUserToken: (state, action) => {
+      state.userToken = action.payload;
+    },
+    deleteUserToken: (state, action) => {
+      state.userToken = null;
+    },
   },
 });
 export const {
@@ -44,6 +51,8 @@ export const {
   deleteUserId,
   storeLocation,
   deleteLocation,
+  addUserToken,
+  deleteUserToken,
 } = FourSquareSlice.actions;
 
 export default FourSquareSlice.reducer;

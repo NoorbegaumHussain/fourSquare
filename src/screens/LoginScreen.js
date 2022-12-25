@@ -18,6 +18,8 @@ import * as yup from 'yup';
 import {getOTP, loginUser} from '../services/auth';
 import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useDispatch} from 'react-redux';
+import {addUserToken} from '../redux/fourSquareSlice';
 
 // const getData = async () => {
 //   try {
@@ -45,7 +47,7 @@ const LoginScreen = ({navigation}) => {
 
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   // dispatch(addUser())
   const loginValidationSchema = yup.object().shape({
     email: yup
@@ -67,7 +69,7 @@ const LoginScreen = ({navigation}) => {
   };
 
   const handleSkip = () => {
-    navigation.navigate('HomeScreen');
+    navigation.navigate('DrawerNavigator');
   };
   return (
     <View style={styles.container}>
@@ -93,13 +95,14 @@ const LoginScreen = ({navigation}) => {
                     accessToken: headers.authorization,
                     refreshToken: headers['refresh-token'],
                   });
-                  try {
-                    await AsyncStorage.setItem('token', stringifiedToken);
-                    const temp = await AsyncStorage.getItem('token');
-                    console.log(temp);
-                  } catch (e) {
-                    console.log('error in storing data in async');
-                  }
+                  dispatch(addUserToken(stringifiedToken));
+                  // try {
+                  //   await AsyncStorage.setItem('token', stringifiedToken);
+                  //   const temp = await AsyncStorage.getItem('token');
+                  //   console.log(temp);
+                  // } catch (e) {
+                  //   console.log('error in storing data in async');
+                  // }
                   navigation.navigate('DrawerNavigator');
                 } else {
                   Toast.show(response);

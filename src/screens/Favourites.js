@@ -166,12 +166,28 @@ const Favourites = ({navigation}) => {
           </View>
         </SafeAreaView>
       </View>
-      <FlatList
-        data={nearbyLocations}
-        keyExtractor={item => item._id}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-      />
+      {nearbyLocations ? (
+        <FlatList
+          data={nearbyLocations}
+          keyExtractor={item => item._id}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+        />
+      ) : (
+        <View style={{flex: 1, justifyContent: 'center'}}>
+          <Text
+            style={{
+              color: '#000000',
+              fontFamily: 'Avenir Medium',
+              fontSize: 20,
+              fontWeight: '500',
+              textAlign: 'center',
+              marginBottom: 15,
+            }}>
+            No Favourites Found
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
