@@ -392,6 +392,23 @@ export const searchByFilter = async obj => {
   }
 };
 
+export const searchNearMe = async (latitude, longitude, text) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}api/place/search-near-me?longitude=${longitude}&latitude=${latitude}&text=${text}`,
+      {},
+      // {
+      //   headers: {
+      //     'OTP-VERIFICATION-TOKEN': token,
+      //   },
+      // },
+    );
+    return response;
+  } catch (error) {
+    return error.response.data.message;
+  }
+};
+
 export const getParticularUserDetails = async () => {
   try {
     var response = await axios.get(`${BASE_URL}api/user`, {

@@ -32,6 +32,7 @@ import {
   restaurantsNearYou,
   searchByFilter,
   searchNearByCity,
+  searchNearMe,
   searchRestaurants,
 } from '../services/auth';
 import {useDispatch} from 'react-redux';
@@ -69,6 +70,7 @@ const SearchScreen = ({navigation}) => {
   const [radius, setRadius] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
   const locationData = useSelector(state => state.foursquaredata.locationData);
+  const [text, setText] = useState('');
   // console.log('current lat ans long', currentLatitude, currentLongitude);
   const dispatch = useDispatch();
   const [focus, setFocus] = useState({
@@ -96,6 +98,7 @@ const SearchScreen = ({navigation}) => {
     parking: false,
     wifi: false,
   });
+
   const [place, setPlace] = useState({
     isSet: false,
     placeString: '',
@@ -106,9 +109,13 @@ const SearchScreen = ({navigation}) => {
   });
 
   const [mapView, setMapView] = useState(false);
+  const [filterView, setFilterView] = useState(false);
   // console.log(place.isSet, place.placeString);
-  const handleCardClick = () => {
-    console.log('card Clicked ys');
+  const [category, setCategory] = useState('');
+  const handleCardClick = data => {
+    setText(data);
+    console.log(text);
+    // loadPlaces();
   };
 
   const getSortByValue = () => {
@@ -148,14 +155,23 @@ const SearchScreen = ({navigation}) => {
     sortBy: getSortByValue(),
     priceRange: getPriceRange(),
     radius: radius,
-    text: place.placeString,
+    text: place.placeString === undefined ? text : place.placeString,
     ...values,
   };
-
+  const [filteredValue, setFilteredValue] = useState('');
   const handleFilter = async () => {
     const response = await searchByFilter(obj);
     console.log('obj.....', obj);
-    console.log('response.......', response.status);
+    if (response.status && response?.data?.data !== undefined) {
+      setFilterClicked(false);
+      setFilterView(true);
+      setPlace({isSet: false});
+      setNearme({isNearme: false});
+      setFilteredValue(response?.data?.data);
+    } else {
+      console.log('response.......', response.data);
+    }
+    console.log('response.......', response.data);
   };
 
   const [Viewable, SetViewable] = React.useState([]);
@@ -168,22 +184,35 @@ const SearchScreen = ({navigation}) => {
     }
     SetViewable(Check);
   });
-  console.log('....', Viewable[0]?.location?.coordinates);
+  console.log('....viewable', Viewable[0]?.location?.coordinates);
   const viewConfigRef = React.useRef({viewAreaCoveragePercentThreshold: 80});
 
   const mapRef = useRef(null);
   const focusonLoad = useIsFocused();
   const onLoad = () => {
     try {
-      mapRef.current.animateToRegion(
-        {
-          latitude: Viewable[0]?.location?.coordinates[1],
-          longitude: Viewable[0]?.location?.coordinates[0],
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.2,
-        },
-        3 * 1000,
-      );
+      if (Viewable[0]?.location?.coordinates[1] !== undefined) {
+        mapRef.current.animateToRegion(
+          {
+            latitude: Viewable[0]?.location?.coordinates[1],
+            longitude: Viewable[0]?.location?.coordinates[0],
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.2,
+          },
+          3 * 1000,
+        );
+      } else {
+        mapRef.current.animateToRegion(
+          {
+            latitude: locationData.latitude,
+            longitude: locationData.longitude,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.2,
+          },
+          3 * 1000,
+        );
+      }
+
       // setLoading(false);
     } catch (error) {
       console.log('Failed to animate direction');
@@ -192,13 +221,14 @@ const SearchScreen = ({navigation}) => {
   useLayoutEffect(() => {
     if (focusonLoad === true) {
       onLoad();
+      loadPlaces();
     }
-  }, [mapView, focusonLoad, place.placeString, currentLongitude, mapRef]);
+  }, [mapView, focusonLoad, place.placeString, currentLongitude, mapRef,text]);
 
   const [searchResult, setSearchResult] = useState('');
 
   const loadPlaces = async () => {
-    const response = await searchRestaurants(place.placeString);
+    const response = await searchRestaurants(text);
     if (response.status && response?.data?.data !== undefined) {
       setSearchResult(response?.data?.data);
     } else {
@@ -212,9 +242,23 @@ const SearchScreen = ({navigation}) => {
       locationData.latitude,
       locationData.longitude,
     );
-    console.log('response...........................', response?.data);
     if (response.status && response?.data?.data !== undefined) {
       setNearByCity(response?.data?.data);
+    } else {
+      console.info(response.error);
+    }
+  };
+
+  const [searchNear, setSearchNearMe] = useState('');
+  const loadNearMePlaces = async () => {
+    const response = await searchNearMe(
+      locationData.latitude,
+      locationData.longitude,
+      text,
+    );
+    console.log('response...........................', response?.data);
+    if (response.status && response?.data?.data !== undefined) {
+      setSearchNearMe(response?.data?.data);
     } else {
       console.info(response.error);
     }
@@ -229,7 +273,7 @@ const SearchScreen = ({navigation}) => {
 
   const renderItem = ({item}) => {
     return (
-      <TouchableOpacity onPress={handleCardClick}>
+      <TouchableOpacity onPress={() => handleCardClick(item.city)}>
         <View style={styles.cardContainer}>
           <Image source={{uri: item.image.url}} style={styles.image} />
           <Text style={styles.cityName}>{item.city}</Text>
@@ -239,7 +283,7 @@ const SearchScreen = ({navigation}) => {
   };
   const renderSuggestions = ({item}) => {
     return (
-      <TouchableOpacity onPress={handleCardClick}>
+      <TouchableOpacity onPress={() => handleCardClick(item.title)}>
         <View style={styles.cardContainer}>
           <Text style={styles.cityName}>{item.title}</Text>
         </View>
@@ -248,54 +292,99 @@ const SearchScreen = ({navigation}) => {
   };
   const renderListSearch = ({item}) => {
     return (
-      <Pressable
-        onPress={handleCardClick}
-        style={styles.cardContainerInRenderSearch}>
-        <RestaurantDetailsModified
-          navigation={navigation}
-          placeId={item?._id}
-          placeName={item?.placeName}
-          url={item.image?.url}
-          sector={item?.sector}
-          city={item?.city}
-          rating={item?.totalrating}
-          priceRange={item?.priceRange}
-          distance={item?.dist?.calculated}
-          overview={item?.overview}
-          phone={item?.phone}
-          latitude={item?.location?.coordinates[1]}
-          longitude={item?.location?.coordinates[0]}
-          image={
-            <TouchableOpacity
-              style={{
-                height: 50,
-                width: 50,
-                alignItems: 'center',
-              }}
-              ratingStyle={{}}
-              onPress={async () => {
-                const response = await addOrRemoveFromFav(item?._id);
-                if (response?.data?.status) {
-                  dispatch(addToFavourite(item?._id));
-                } else {
-                  dispatch(deleteFromFavourites(item?._id));
-                }
-              }}>
-              {favList.includes(item?._id) && favList.length > 0 ? (
-                <Image
-                  source={require('../../assets/images/favourite_icon.png')}
-                  style={styles.favIcon}
-                />
-              ) : (
-                <Image
-                  source={require('../../assets/images/favourite_icon_selected.png')}
-                  style={styles.favIcon}
-                />
-              )}
-            </TouchableOpacity>
-          }
-        />
-      </Pressable>
+      <RestaurantDetailsModified
+        navigation={navigation}
+        placeId={item?._id}
+        placeName={item?.placeName}
+        url={item.image?.url}
+        sector={item?.sector}
+        city={item?.city}
+        rating={item?.totalrating}
+        priceRange={item?.priceRange}
+        distance={item?.dist?.calculated}
+        overview={item?.overview}
+        phone={item?.phone}
+        latitude={item?.location?.coordinates[1]}
+        longitude={item?.location?.coordinates[0]}
+        image={
+          <TouchableOpacity
+            style={{
+              height: 50,
+              width: 50,
+              alignItems: 'center',
+            }}
+            ratingStyle={{}}
+            onPress={async () => {
+              const response = await addOrRemoveFromFav(item?._id);
+              if (response?.data?.status) {
+                dispatch(addToFavourite(item?._id));
+              } else {
+                dispatch(deleteFromFavourites(item?._id));
+              }
+            }}>
+            {favList.includes(item?._id) && favList.length > 0 ? (
+              <Image
+                source={require('../../assets/images/favourite_icon.png')}
+                style={styles.favIcon}
+              />
+            ) : (
+              <Image
+                source={require('../../assets/images/favourite_icon_selected.png')}
+                style={styles.favIcon}
+              />
+            )}
+          </TouchableOpacity>
+        }
+      />
+    );
+  };
+
+  const renderNearMeSearch = ({item}) => {
+    return (
+      <RestaurantDetailsModified
+        navigation={navigation}
+        placeId={item?._id}
+        placeName={item?.placeName}
+        url={item.image?.url}
+        sector={item?.sector}
+        city={item?.city}
+        rating={item?.totalrating}
+        priceRange={item?.priceRange}
+        distance={item?.dist?.calculated}
+        overview={item?.overview}
+        phone={item?.phone}
+        latitude={item?.location?.coordinates[1]}
+        longitude={item?.location?.coordinates[0]}
+        image={
+          <TouchableOpacity
+            style={{
+              height: 50,
+              width: 50,
+              alignItems: 'center',
+            }}
+            ratingStyle={{}}
+            onPress={async () => {
+              const response = await addOrRemoveFromFav(item?._id);
+              if (response?.data?.status) {
+                dispatch(addToFavourite(item?._id));
+              } else {
+                dispatch(deleteFromFavourites(item?._id));
+              }
+            }}>
+            {favList.includes(item?._id) && favList.length > 0 ? (
+              <Image
+                source={require('../../assets/images/favourite_icon.png')}
+                style={styles.favIcon}
+              />
+            ) : (
+              <Image
+                source={require('../../assets/images/favourite_icon_selected.png')}
+                style={styles.favIcon}
+              />
+            )}
+          </TouchableOpacity>
+        }
+      />
     );
   };
 
@@ -435,21 +524,25 @@ const SearchScreen = ({navigation}) => {
                     if (searchTimer) {
                       clearTimeout(searchTimer);
                     }
+                    setFilterView(false);
                     setFocus(prev => ({
                       nearme: {hasfocus: false},
                       search: {hasfocus: true},
                     }));
-                    setSearchTimer(
-                      setTimeout(() => {
-                        loadNearByCity();
-                      }, 1000),
-                    );
+                    // setSearchTimer(
+                    //   setTimeout(() => {
+                    loadNearByCity();
+                    //   }, 1000),
+                    // );
                   }}
                   onChangeText={searchString => {
+                    console.log('category ####>>>>>>', category);
+                    setText(category ? category : searchString);
                     if (searchTimer) {
                       clearTimeout(searchTimer);
                     }
-                    if (searchString.length > 2) {
+                    if (searchString.length > 2 && !filterClicked) {
+                      setFilterView(false);
                       setPlace(() => ({
                         isSet: true,
                         placeString: searchString,
@@ -459,7 +552,6 @@ const SearchScreen = ({navigation}) => {
                         search: {hasfocus: false},
                       }));
                       setFilterClicked(false);
-                      //Do here
                     } else {
                       setPlace(() => ({
                         isSet: false,
@@ -470,11 +562,11 @@ const SearchScreen = ({navigation}) => {
                         search: {hasfocus: true},
                       }));
                     }
-                    setSearchTimer(
-                      setTimeout(() => {
-                        loadPlaces(searchString);
-                      }, 1000),
-                    );
+                    // setSearchTimer(
+                    //   setTimeout(() => {
+                    loadPlaces(category ? category : searchString);
+                    //   }, 500),
+                    // );
                   }}
                   underlineColorAndroid="transparent"
                 />
@@ -491,13 +583,19 @@ const SearchScreen = ({navigation}) => {
                   placeholder="Near Me"
                   placeholderTextColor="#CCCCCC"
                   onFocus={() => {
+                    setFilterView(false);
                     setFocus(prev => ({
                       search: {hasfocus: false},
                       nearme: {hasfocus: true},
                     }));
                   }}
                   onChangeText={searchString => {
-                    if (searchString.length > 2) {
+                    setText(searchString);
+                    if (searchTimer) {
+                      clearTimeout(searchTimer);
+                    }
+                    if (searchString.length > 2 && !filterClicked) {
+                      setFilterView(false);
                       setNearme(() => ({
                         isNearme: true,
                         nearmeString: searchString,
@@ -518,6 +616,11 @@ const SearchScreen = ({navigation}) => {
                         search: {hasfocus: false},
                       }));
                     }
+                    setSearchTimer(
+                      setTimeout(() => {
+                        loadNearMePlaces(searchString);
+                      }, 500),
+                    );
                     // setSearch({searchString});
                   }}
                   underlineColorAndroid="transparent"
@@ -539,7 +642,8 @@ const SearchScreen = ({navigation}) => {
                     // place.isSet && mapView &&
                     setPlace({isSet: false});
                     setMapView(false);
-                    setFilterClicked(!filterClicked);
+                    setFilterClicked(true);
+                    setFilterView(false);
                   }}
                 />
               )}
@@ -574,7 +678,7 @@ const SearchScreen = ({navigation}) => {
             </View>
           </View>
         )}
-      {place.isSet && !mapView && (
+      {place.isSet && !mapView && place.placeString > nearme.nearmeString && (
         <View style={{flex: 1}}>
           {searchResult ? (
             <>
@@ -657,8 +761,89 @@ const SearchScreen = ({navigation}) => {
           </View>
         </View>
       )}
-      {nearme.isNearme && nearme.nearmeString > 2 && (
-        <Text style={{backgroundColor: 'red'}}>Hiiii</Text>
+      {nearme.isNearme &&
+        !mapView &&
+        place.placeString < nearme.nearmeString && (
+          <View style={{flex: 1}}>
+            {nearme ? (
+              <>
+                <FlatList
+                  data={searchNear}
+                  keyExtractor={item => item.id}
+                  renderItem={renderNearMeSearch}
+                  showsVerticalScrollIndicator={false}
+                />
+                <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+                  <PrimaryButton
+                    text="Map View"
+                    onPress={() => setMapView(true)}
+                  />
+                </View>
+              </>
+            ) : (
+              <View style={{flex: 1, justifyContent: 'center'}}>
+                <Text
+                  style={{
+                    color: '#000000',
+                    fontFamily: 'Avenir Medium',
+                    fontSize: 20,
+                    fontWeight: '500',
+                    textAlign: 'center',
+                    marginBottom: 15,
+                  }}>
+                  No Results Found
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+      {nearme.isNearme && mapView && (
+        <View style={{flex: 1}}>
+          <View style={styles.mainContainer}>
+            <View style={[styles.mapContainer, {height: '100%'}]}>
+              {locationData.latitude && locationData.longitude !== '' ? (
+                <MapView
+                  style={styles.mapStyle}
+                  customMapStyle={mapStyle}
+                  ref={mapRef}>
+                  <Marker
+                    draggable
+                    coordinate={{
+                      latitude: locationData.latitude,
+                      longitude: locationData.longitude,
+                    }}
+                    onDragEnd={e =>
+                      alert(JSON.stringify(e.nativeEvent.coordinate))
+                    }
+                    title={'Test Marker'}
+                    description={'This is a description of the marker'}
+                  />
+                </MapView>
+              ) : null}
+            </View>
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderColor: 'red',
+              }}>
+              <FlatList
+                data={searchNear}
+                renderItem={renderMapList}
+                keyExtractor={item => item._id}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                ref={ref}
+                onViewableItemsChanged={onViewRef.current}
+                viewabilityConfig={viewConfigRef.current}
+              />
+            </View>
+          </View>
+          <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+            <PrimaryButton text="List View" onPress={() => setMapView(false)} />
+          </View>
+        </View>
       )}
       {!filterClicked &&
         focus.nearme.hasfocus &&
@@ -685,7 +870,7 @@ const SearchScreen = ({navigation}) => {
             <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
           </View>
         )}
-      {filterClicked && (
+      {filterClicked && !filterView ? (
         <View style={{flex: 1}}>
           <KeyboardAwareScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.filterTextContainer}>
@@ -1189,6 +1374,91 @@ const SearchScreen = ({navigation}) => {
               )}
             </TouchableOpacity>
           </KeyboardAwareScrollView>
+        </View>
+      ) : (
+        filterView &&
+        !filterClicked &&
+        !mapView && (
+          <View style={{flex: 1}}>
+            {filteredValue ? (
+              <>
+                <FlatList
+                  data={filteredValue}
+                  keyExtractor={item => item.id}
+                  renderItem={renderListSearch}
+                />
+
+                <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+                  <PrimaryButton
+                    text="Map View"
+                    onPress={() => setMapView(true)}
+                  />
+                </View>
+              </>
+            ) : (
+              <View style={{flex: 1, justifyContent: 'center'}}>
+                <Text
+                  style={{
+                    color: '#000000',
+                    fontFamily: 'Avenir Medium',
+                    fontSize: 20,
+                    fontWeight: '500',
+                    textAlign: 'center',
+                    marginBottom: 15,
+                  }}>
+                  No Results Found
+                </Text>
+              </View>
+            )}
+          </View>
+        )
+      )}
+      {filterView && !filterClicked && mapView && (
+        <View style={{flex: 1}}>
+          <View style={styles.mainContainer}>
+            <View style={[styles.mapContainer, {height: '100%'}]}>
+              {locationData.latitude && locationData.longitude !== '' ? (
+                <MapView
+                  style={styles.mapStyle}
+                  customMapStyle={mapStyle}
+                  ref={mapRef}>
+                  <Marker
+                    draggable
+                    coordinate={{
+                      latitude: locationData.latitude,
+                      longitude: locationData.longitude,
+                    }}
+                    onDragEnd={e =>
+                      alert(JSON.stringify(e.nativeEvent.coordinate))
+                    }
+                    title={'Test Marker'}
+                    description={'This is a description of the marker'}
+                  />
+                </MapView>
+              ) : null}
+            </View>
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderColor: 'red',
+              }}>
+              <FlatList
+                data={filteredValue}
+                renderItem={renderMapList}
+                keyExtractor={item => item._id}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                ref={ref}
+                onViewableItemsChanged={onViewRef.current}
+                viewabilityConfig={viewConfigRef.current}
+              />
+            </View>
+          </View>
+          <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+            <PrimaryButton text="List View" onPress={() => setMapView(false)} />
+          </View>
         </View>
       )}
     </View>
