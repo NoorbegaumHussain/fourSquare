@@ -29,6 +29,9 @@ import {isMap} from 'immer/dist/internal';
 import RestaurantDetailsModified from '../components/RestaurantDetailsModified';
 import {
   addOrRemoveFromFav,
+  getPlacesByType,
+  getPopular,
+  getTopPicks,
   restaurantsNearYou,
   searchByFilter,
   searchNearByCity,
@@ -40,37 +43,45 @@ import {useIsFocused} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import {addToFavourite, deleteFromFavourites} from '../redux/fourSquareSlice';
 import Card from '../components/Card';
-const DATA = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Second Item',
-  },
-];
+import uuid from 'react-native-uuid';
 const suggestionsData = [
   {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+    id: 1,
     title: 'Top pick',
   },
   {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
+    id: 2,
     title: 'Popular',
   },
+  {
+    id: 3,
+    title: 'Lunch',
+  },
+  {
+    id: 4,
+    title: 'Cafe',
+  },
 ];
-const SearchScreen = ({navigation}) => {
+const SearchScreen = ({navigation, route}) => {
+  console.log('route.....', route.params);
+  // isSet: false,
+  // mapView: false,
+  // filterClicked: true,
+  // filterView: false,
   const [currentLongitude, setCurrentLongitude] = useState('');
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
-  const [filterClicked, setFilterClicked] = useState(false);
+  const [filterClicked, setFilterClicked] = useState(
+    route?.params?.filterClicked ? route?.params?.filterClicked : false,
+  );
   const [radius, setRadius] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
   const locationData = useSelector(state => state.foursquaredata.locationData);
   const [text, setText] = useState('');
+  const [useCurrentLocation, setUseCurrentLoaction] = useState('');
+  console.log(text);
   // console.log('current lat ans long', currentLatitude, currentLongitude);
   const dispatch = useDispatch();
   const [focus, setFocus] = useState({
@@ -110,12 +121,77 @@ const SearchScreen = ({navigation}) => {
 
   const [mapView, setMapView] = useState(false);
   const [filterView, setFilterView] = useState(false);
-  // console.log(place.isSet, place.placeString);
+  const [topPicks, setTopPicks] = useState(false);
+  const [popular, setPopular] = useState(false);
   const [category, setCategory] = useState('');
+  const [lunch, setLunch] = useState('');
+  const [cafe, setCafe] = useState('');
+  const [city, setCity] = useState('');
+  const loadSuggestions = async data => {
+    if (data === 'Top pick') {
+      const response = await getPlacesByType(
+        locationData.latitude,
+        locationData.longitude,
+        'toppick',
+      );
+      if (response.status) {
+        setTopPicks(response?.data?.data);
+      } else {
+        console.log('Top pick response', response);
+      }
+    } else if (data === 'Popular') {
+      const response = await getPlacesByType(
+        locationData.latitude,
+        locationData.longitude,
+        'popular',
+      );
+      if (response.status) {
+        setPopular(response?.data?.data);
+      } else {
+        console.log(response);
+      }
+    } else if (data === 'Lunch') {
+      const response = await getPlacesByType(
+        locationData.latitude,
+        locationData.longitude,
+        'lunch',
+      );
+      if (response.status) {
+        setLunch(response?.data?.data);
+      } else {
+        console.log(response);
+      }
+    } else if (data === 'Cafe') {
+      const response = await getPlacesByType(
+        locationData.latitude,
+        locationData.longitude,
+        'cafe',
+      );
+      if (response.status) {
+        setCafe(response?.data?.data);
+      } else {
+        console.log(response);
+      }
+    } else if (data === 'udupi') {
+      const response = await searchRestaurants(data);
+      if (response.status) {
+        setCity(response?.data?.data);
+      } else {
+        console.info('Load Places', response.error);
+      }
+    } else if (data === 'Manipal') {
+      const response = await searchRestaurants(data);
+      if (response.status && response?.data?.data !== undefined) {
+        setCity(response?.data?.data);
+      } else {
+        console.info('Load Places', response.error);
+      }
+    }
+  };
+  console.log('category', category);
   const handleCardClick = data => {
-    setText(data);
-    console.log(text);
-    // loadPlaces();
+    setCategory(data);
+    loadSuggestions(data);
   };
 
   const getSortByValue = () => {
@@ -182,48 +258,60 @@ const SearchScreen = ({navigation}) => {
     for (var i = 0; i < viewableItems.viewableItems.length; i++) {
       Check.push(viewableItems.viewableItems[i].item);
     }
-    SetViewable(Check);
+    SetViewable(prev => (Check ? Check : prev));
   });
-  console.log('....viewable', Viewable[0]?.location?.coordinates);
-  const viewConfigRef = React.useRef({viewAreaCoveragePercentThreshold: 80});
+  console.info('....viewable', Viewable[0]);
 
+  const viewConfigRef = React.useRef({viewAreaCoveragePercentThreshold: 80});
   const mapRef = useRef(null);
   const focusonLoad = useIsFocused();
-  const onLoad = () => {
-    try {
-      if (Viewable[0]?.location?.coordinates[1] !== undefined) {
-        mapRef.current.animateToRegion(
-          {
-            latitude: Viewable[0]?.location?.coordinates[1],
-            longitude: Viewable[0]?.location?.coordinates[0],
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.2,
-          },
-          3 * 1000,
-        );
-      } else {
-        mapRef.current.animateToRegion(
-          {
-            latitude: locationData.latitude,
-            longitude: locationData.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.2,
-          },
-          3 * 1000,
-        );
-      }
+  // const onLoad = () => {
+  //   try {
+  //     if (Viewable[0]?.location?.coordinates[0] !== undefined) {
+  //       mapRef.current.animateToRegion(
+  //         {
+  //           latitude: Viewable[0]?.location?.coordinates[1]
+  //             ? Viewable[0]?.location?.coordinates[1]
+  //             : locationData.latitude,
+  //           longitude: Viewable[0]?.location?.coordinates[0]
+  //             ? Viewable[0]?.location?.coordinates[0]
+  //             : locationData.latitude,
+  //           latitudeDelta: 0.05,
+  //           longitudeDelta: 0.2,
+  //         },
+  //         4 * 1000,
+  //       );
+  //     } else {
+  //       mapRef.current.animateToRegion(
+  //         {
+  //           latitude: locationData.latitude,
+  //           longitude: locationData.longitude,
+  //           latitudeDelta: 0.05,
+  //           longitudeDelta: 0.2,
+  //         },
+  //         4 * 1000,
+  //       );
+  //     }
 
-      // setLoading(false);
-    } catch (error) {
-      console.log('Failed to animate direction');
-    }
-  };
+  //     // setLoading(false);
+  //   } catch (error) {
+  //     console.log(error);
+  //     console.log('Failed to animate direction');
+  //   }
+  // };
   useLayoutEffect(() => {
     if (focusonLoad === true) {
-      onLoad();
-      loadPlaces();
+      // onLoad();
     }
-  }, [mapView, focusonLoad, place.placeString, currentLongitude, mapRef,text]);
+  }, [
+    Viewable,
+    focusonLoad,
+    place.placeString,
+    currentLongitude,
+    mapRef,
+    text,
+    mapView,
+  ]);
 
   const [searchResult, setSearchResult] = useState('');
 
@@ -232,7 +320,7 @@ const SearchScreen = ({navigation}) => {
     if (response.status && response?.data?.data !== undefined) {
       setSearchResult(response?.data?.data);
     } else {
-      console.info(response.error);
+      console.info('Load Places', response.error);
     }
   };
 
@@ -390,30 +478,6 @@ const SearchScreen = ({navigation}) => {
 
   const [searchTimer, setSearchTimer] = useState(null);
   const [currentIndex, setCurrentIndex] = useState([]);
-  // const scrollX = useRef(new Animated.Value(0)).current;
-  // const viewableItemsChanged = useRef(({viewableItems}) => {
-  //   setCurrentIndex(viewableItems[0]?.index);
-  // }).current;
-  // const slidesRef = useRef(null);
-  // const viewConfig = useRef({
-  //   waitForInteraction: true,
-  //   viewAreaCoveragePercentThreshold: 0,
-  // }).current;
-
-  const DATA = [
-    {
-      id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-      title: 'First Item',
-    },
-    {
-      id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-      title: 'Second Item',
-    },
-    {
-      id: '58694a0f-3da1-471f-bd96-145571e29d72',
-      title: 'Third',
-    },
-  ];
   const renderMapList = ({item, index}) => {
     return (
       <RestaurantDetailsModified
@@ -654,7 +718,12 @@ const SearchScreen = ({navigation}) => {
       {!filterClicked &&
         focus.search.hasfocus &&
         place.placeString < 2 &&
-        nearme.nearmeString < 2 && (
+        nearme.nearmeString < 2 &&
+        !topPicks &&
+        !popular &&
+        !cafe &&
+        !city &&
+        !lunch && (
           <View>
             <View style={styles.nearbyPlacesContainer}>
               <Text style={styles.nearbyPlacesText}>Near by places</Text>
@@ -672,8 +741,482 @@ const SearchScreen = ({navigation}) => {
             <View>
               <FlatList
                 data={suggestionsData}
-                keyExtractor={item => item.id}
+                keyExtractor={item => item._id}
                 renderItem={renderSuggestions}
+              />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        topPicks &&
+        !popular &&
+        !mapView && (
+          <View
+            style={{
+              flex: 1,
+              shadowColor: '#171717',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.6,
+              shadowRadius: 2,
+              elevation: 5,
+            }}>
+            <FlatList
+              data={topPicks}
+              keyExtractor={item => item.id}
+              renderItem={renderListSearch}
+            />
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        topPicks &&
+        !popular &&
+        mapView && (
+          <View
+            style={{
+              flex: 1,
+              shadowColor: '#171717',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.6,
+              shadowRadius: 2,
+              elevation: 5,
+            }}>
+            <View style={styles.mainContainer}>
+              <View style={[styles.mapContainer, {height: '100%'}]}>
+                {Viewable[0]?.location?.coordinates[1] &&
+                Viewable[0]?.location?.coordinates[0] !== '' ? (
+                  <MapView
+                    style={styles.mapStyle}
+                    customMapStyle={mapStyle}
+                    // ref={mapRef}
+                    region={{
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
+                      latitudeDelta: 0.05,
+                      longitudeDelta: 0.05,
+                    }}>
+                    <Marker
+                      draggable
+                      coordinate={{
+                        latitude: Viewable[0]?.location?.coordinates[1],
+                        longitude: Viewable[0]?.location?.coordinates[0],
+                      }}
+                      onDragEnd={e =>
+                        alert(JSON.stringify(e.nativeEvent.coordinate))
+                      }
+                      title={'Test Marker'}
+                      description={'This is a description of the marker'}
+                    />
+                  </MapView>
+                ) : null}
+              </View>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderColor: 'red',
+                }}>
+                <FlatList
+                  data={topPicks}
+                  renderItem={renderMapList}
+                  keyExtractor={item => item._id}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  ref={ref}
+                  onViewableItemsChanged={onViewRef.current}
+                  viewabilityConfig={viewConfigRef.current}
+                />
+              </View>
+            </View>
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton
+                text="List View"
+                onPress={() => setMapView(false)}
+              />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        !topPicks &&
+        popular &&
+        !mapView && (
+          <View
+            style={{
+              flex: 1,
+              shadowColor: '#171717',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.6,
+              shadowRadius: 2,
+              elevation: 5,
+            }}>
+            <FlatList
+              data={popular}
+              keyExtractor={item => item.id}
+              renderItem={renderListSearch}
+            />
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        !topPicks &&
+        popular &&
+        mapView && (
+          <View style={{flex: 1}}>
+            <View style={styles.mainContainer}>
+              <View style={[styles.mapContainer, {height: '100%'}]}>
+                {Viewable[0]?.location?.coordinates[1] &&
+                Viewable[0]?.location?.coordinates[0] !== '' ? (
+                  <MapView
+                    style={styles.mapStyle}
+                    customMapStyle={mapStyle}
+                    region={{
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
+                      latitudeDelta: 0.05,
+                      longitudeDelta: 0.05,
+                    }}
+                    // ref={mapRef}
+                    >
+                    <Marker
+                      draggable
+                      coordinate={{
+                        latitude: Viewable[0]?.location?.coordinates[1],
+                        longitude: Viewable[0]?.location?.coordinates[0],
+                      }}
+                      onDragEnd={e =>
+                        alert(JSON.stringify(e.nativeEvent.coordinate))
+                      }
+                      title={'Test Marker'}
+                      description={'This is a description of the marker'}
+                    />
+                  </MapView>
+                ) : null}
+              </View>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderColor: 'red',
+                }}>
+                <FlatList
+                  data={popular}
+                  renderItem={renderMapList}
+                  keyExtractor={item => item._id}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  ref={ref}
+                  onViewableItemsChanged={onViewRef.current}
+                  viewabilityConfig={viewConfigRef.current}
+                />
+              </View>
+            </View>
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton
+                text="List View"
+                onPress={() => setMapView(false)}
+              />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        !topPicks &&
+        !popular &&
+        lunch &&
+        !mapView && (
+          <View
+            style={{
+              flex: 1,
+              shadowColor: '#171717',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.6,
+              shadowRadius: 2,
+              elevation: 5,
+            }}>
+            <FlatList
+              data={lunch}
+              keyExtractor={item => item.id}
+              renderItem={renderListSearch}
+            />
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        !topPicks &&
+        lunch &&
+        !popular &&
+        mapView && (
+          <View style={{flex: 1}}>
+            <View style={styles.mainContainer}>
+              <View style={[styles.mapContainer, {height: '100%'}]}>
+                {Viewable[0]?.location?.coordinates[1] &&
+                Viewable[0]?.location?.coordinates[0] !== '' ? (
+                  <MapView
+                    style={styles.mapStyle}
+                    customMapStyle={mapStyle}
+                    region={{
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
+                      latitudeDelta: 0.05,
+                      longitudeDelta: 0.05,
+                    }}
+                    // ref={mapRef}
+                    >
+                    <Marker
+                      draggable
+                      coordinate={{
+                        latitude: Viewable[0]?.location?.coordinates[1],
+                        longitude: Viewable[0]?.location?.coordinates[0],
+                      }}
+                      onDragEnd={e =>
+                        alert(JSON.stringify(e.nativeEvent.coordinate))
+                      }
+                      title={'Test Marker'}
+                      description={'This is a description of the marker'}
+                    />
+                  </MapView>
+                ) : null}
+              </View>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderColor: 'red',
+                }}>
+                <FlatList
+                  data={lunch}
+                  renderItem={renderMapList}
+                  keyExtractor={item => item._id}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  ref={ref}
+                  onViewableItemsChanged={onViewRef.current}
+                  viewabilityConfig={viewConfigRef.current}
+                />
+              </View>
+            </View>
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton
+                text="List View"
+                onPress={() => setMapView(false)}
+              />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        !topPicks &&
+        !popular &&
+        !lunch &&
+        cafe &&
+        !mapView && (
+          <View
+            style={{
+              flex: 1,
+              shadowColor: '#171717',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.6,
+              shadowRadius: 2,
+              elevation: 5,
+            }}>
+            <FlatList
+              data={cafe}
+              keyExtractor={item => item.id}
+              renderItem={renderListSearch}
+            />
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        !topPicks &&
+        !lunch &&
+        cafe &&
+        !popular &&
+        mapView && (
+          <View style={{flex: 1}}>
+            <View style={styles.mainContainer}>
+              <View style={[styles.mapContainer, {height: '100%'}]}>
+                {Viewable[0]?.location?.coordinates[1] &&
+                Viewable[0]?.location?.coordinates[0] !== '' ? (
+                  <MapView
+                    style={styles.mapStyle}
+                    customMapStyle={mapStyle}
+                    region={{
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
+                      latitudeDelta: 0.05,
+                      longitudeDelta: 0.05,
+                    }}
+                    // ref={mapRef}
+                    >
+                    <Marker
+                      draggable
+                      coordinate={{
+                        latitude: Viewable[0]?.location?.coordinates[1],
+                        longitude: Viewable[0]?.location?.coordinates[0],
+                      }}
+                      onDragEnd={e =>
+                        alert(JSON.stringify(e.nativeEvent.coordinate))
+                      }
+                      title={'Test Marker'}
+                      description={'This is a description of the marker'}
+                    />
+                  </MapView>
+                ) : null}
+              </View>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderColor: 'red',
+                }}>
+                <FlatList
+                  data={cafe}
+                  renderItem={renderMapList}
+                  keyExtractor={item => item._id}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  ref={ref}
+                  onViewableItemsChanged={onViewRef.current}
+                  viewabilityConfig={viewConfigRef.current}
+                />
+              </View>
+            </View>
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton
+                text="List View"
+                onPress={() => setMapView(false)}
+              />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        !topPicks &&
+        !popular &&
+        !lunch &&
+        !cafe &&
+        city &&
+        !mapView && (
+          <View
+            style={{
+              flex: 1,
+              shadowColor: '#171717',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.6,
+              shadowRadius: 2,
+              elevation: 5,
+            }}>
+            <FlatList
+              data={city}
+              keyExtractor={item => item.id}
+              renderItem={renderListSearch}
+            />
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.search.hasfocus &&
+        place.placeString < 2 &&
+        nearme.nearmeString < 2 &&
+        !topPicks &&
+        !lunch &&
+        !cafe &&
+        city &&
+        !popular &&
+        mapView && (
+          <View style={{flex: 1}}>
+            <View style={styles.mainContainer}>
+              <View style={[styles.mapContainer, {height: '100%'}]}>
+                {Viewable[0]?.location?.coordinates[1] &&
+                Viewable[0]?.location?.coordinates[0] !== '' ? (
+                  <MapView
+                    style={styles.mapStyle}
+                    customMapStyle={mapStyle}
+                    // ref={mapRef}
+                    region={{
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
+                      latitudeDelta: 0.05,
+                      longitudeDelta: 0.05,
+                    }}
+                    >
+                    <Marker
+                      draggable
+                      coordinate={{
+                        latitude: Viewable[0]?.location?.coordinates[1],
+                        longitude: Viewable[0]?.location?.coordinates[0],
+                      }}
+                      onDragEnd={e =>
+                        alert(JSON.stringify(e.nativeEvent.coordinate))
+                      }
+                      title={'Test Marker'}
+                      description={'This is a description of the marker'}
+                    />
+                  </MapView>
+                ) : null}
+              </View>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderColor: 'red',
+                }}>
+                <FlatList
+                  data={city}
+                  renderItem={renderMapList}
+                  keyExtractor={item => item._id}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  ref={ref}
+                  onViewableItemsChanged={onViewRef.current}
+                  viewabilityConfig={viewConfigRef.current}
+                />
+              </View>
+            </View>
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton
+                text="List View"
+                onPress={() => setMapView(false)}
               />
             </View>
           </View>
@@ -721,7 +1264,14 @@ const SearchScreen = ({navigation}) => {
                 <MapView
                   style={styles.mapStyle}
                   customMapStyle={mapStyle}
-                  ref={mapRef}>
+                  // ref={mapRef}
+                  region={{
+                    latitude: Viewable[0]?.location?.coordinates[1],
+                    longitude: Viewable[0]?.location?.coordinates[0],
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                  }}
+                  >
                   <Marker
                     draggable
                     coordinate={{
@@ -801,16 +1351,24 @@ const SearchScreen = ({navigation}) => {
         <View style={{flex: 1}}>
           <View style={styles.mainContainer}>
             <View style={[styles.mapContainer, {height: '100%'}]}>
-              {locationData.latitude && locationData.longitude !== '' ? (
+              {Viewable[0]?.location?.coordinates[1] &&
+              lViewable[0]?.location?.coordinates[0] !== '' ? (
                 <MapView
                   style={styles.mapStyle}
                   customMapStyle={mapStyle}
-                  ref={mapRef}>
+                  // ref={mapRef}
+                  region={{
+                    latitude: Viewable[0]?.location?.coordinates[1],
+                    longitude: Viewable[0]?.location?.coordinates[0],
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                  }}
+                  >
                   <Marker
                     draggable
                     coordinate={{
-                      latitude: locationData.latitude,
-                      longitude: locationData.longitude,
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
                     }}
                     onDragEnd={e =>
                       alert(JSON.stringify(e.nativeEvent.coordinate))
@@ -848,17 +1406,32 @@ const SearchScreen = ({navigation}) => {
       {!filterClicked &&
         focus.nearme.hasfocus &&
         nearme.nearmeString < 2 &&
-        place.placeString < 2 && (
+        place.placeString < 2 &&
+        !useCurrentLocation && (
           <View>
-            <View style={styles.nearmeListContainer}>
+            <TouchableOpacity
+              style={styles.nearmeListContainer}
+              onPress={async () => {
+                const response = await searchNearMe(
+                  locationData.latitude,
+                  locationData.longitude,
+                  ' ',
+                );
+                console.log('nearme response', response.data?.data);
+                if (response.status) {
+                  setUseCurrentLoaction(response?.data?.data);
+                } else {
+                  console.log(response);
+                }
+              }}>
               <Image
                 source={require('../../assets/images/location_icon.png')}
                 style={styles.locationIcon}
               />
               <Text style={styles.nearmeListText}>Use my current location</Text>
-            </View>
+            </TouchableOpacity>
             <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
-            <View style={styles.nearmeListContainer}>
+            <TouchableOpacity style={styles.nearmeListContainer}>
               <Image
                 source={require('../../assets/images/map_icon.png')}
                 style={styles.locationIcon}
@@ -866,8 +1439,97 @@ const SearchScreen = ({navigation}) => {
               <Text style={styles.nearmeListText}>
                 Select Search area on map
               </Text>
-            </View>
+            </TouchableOpacity>
             <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
+          </View>
+        )}
+      {!filterClicked &&
+        focus.nearme.hasfocus &&
+        nearme.nearmeString < 2 &&
+        place.placeString < 2 &&
+        useCurrentLocation &&
+        !mapView && (
+          <View
+            style={{
+              flex: 1,
+              shadowColor: '#171717',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.6,
+              shadowRadius: 2,
+              elevation: 5,
+            }}>
+            <FlatList
+              data={useCurrentLocation}
+              keyExtractor={item => item.id}
+              renderItem={renderListSearch}
+            />
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.nearme.hasfocus &&
+        nearme.nearmeString < 2 &&
+        place.placeString < 2 &&
+        useCurrentLocation &&
+        mapView && (
+          <View style={{flex: 1}}>
+            <View style={styles.mainContainer}>
+              <View style={[styles.mapContainer, {height: '100%'}]}>
+                {Viewable[0]?.location?.coordinates[1] &&
+                Viewable[0]?.location?.coordinates[0] !== '' ? (
+                  <MapView
+                    style={styles.mapStyle}
+                    customMapStyle={mapStyle}
+                    // ref={mapRef}
+                    region={{
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
+                      latitudeDelta: 0.05,
+                      longitudeDelta: 0.05,
+                    }}
+                    >
+                    <Marker
+                      draggable
+                      coordinate={{
+                        latitude: Viewable[0]?.location?.coordinates[1],
+                        longitude: Viewable[0]?.location?.coordinates[0],
+                      }}
+                      onDragEnd={e =>
+                        alert(JSON.stringify(e.nativeEvent.coordinate))
+                      }
+                      title={'Test Marker'}
+                      description={'This is a description of the marker'}
+                    />
+                  </MapView>
+                ) : null}
+              </View>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderColor: 'red',
+                }}>
+                <FlatList
+                  data={useCurrentLocation}
+                  renderItem={renderMapList}
+                  keyExtractor={item => item._id}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  ref={ref}
+                  onViewableItemsChanged={onViewRef.current}
+                  viewabilityConfig={viewConfigRef.current}
+                />
+              </View>
+            </View>
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton
+                text="List View"
+                onPress={() => setMapView(false)}
+              />
+            </View>
           </View>
         )}
       {filterClicked && !filterView ? (
@@ -1417,16 +2079,24 @@ const SearchScreen = ({navigation}) => {
         <View style={{flex: 1}}>
           <View style={styles.mainContainer}>
             <View style={[styles.mapContainer, {height: '100%'}]}>
-              {locationData.latitude && locationData.longitude !== '' ? (
+              {Viewable[0]?.location?.coordinates[1] &&
+              Viewable[0]?.location?.coordinates[0] ? (
                 <MapView
                   style={styles.mapStyle}
                   customMapStyle={mapStyle}
-                  ref={mapRef}>
+                  // ref={mapRef}
+                  region={{
+                    latitude: Viewable[0]?.location?.coordinates[1],
+                    longitude: Viewable[0]?.location?.coordinates[0],
+                    latitudeDelta: 0.05,
+                    longitudeDelta: 0.05,
+                  }}
+                  >
                   <Marker
                     draggable
                     coordinate={{
-                      latitude: locationData.latitude,
-                      longitude: locationData.longitude,
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
                     }}
                     onDragEnd={e =>
                       alert(JSON.stringify(e.nativeEvent.coordinate))

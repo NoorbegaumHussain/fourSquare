@@ -48,7 +48,20 @@ const HomeScreen = ({navigation}) => {
               style={[styles.logo, {width: width1, height: height1}]}
             />
             <View style={styles.rightHeaderContainer}>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.navigate('SearchScreen', {
+                    isSet: false,
+                    mapView: false,
+                    filterClicked: true,
+                    filterView: false,
+                  });
+                  // place.isSet && mapView &&
+                  // setPlace({isSet: false});
+                  // setMapView(false);
+                  // setFilterClicked(true);
+                  // setFilterView(false);
+                }}>
                 <Icon
                   name="filter"
                   size={25}

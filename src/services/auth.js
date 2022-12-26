@@ -475,3 +475,39 @@ export const uploadSingleImage = async formData => {
     return error;
   }
 };
+
+export const getTopPicks = async (latitude, longitude) => {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}api/place/top-picks?longitude=${longitude}&latitude=${latitude}`,
+      // {
+      //   headers: {
+      //     Authorization: BearerToken,
+      //   },
+      // },
+    );
+
+    return response;
+  } catch (error) {
+    return error.response;
+  }
+  // }
+};
+
+export const getPopular = async (latitude, longitude) => {
+  try {
+    var response = await axios.get(
+      `${BASE_URL}api/place/popular?longitude=${longitude}&latitude=${latitude}`,
+      // {
+      //   headers: {
+      //     Authorization: BearerToken,
+      //   },
+      // },
+    );
+
+    return response;
+  } catch (error) {
+    return error.response;
+  }
+  // }
+};

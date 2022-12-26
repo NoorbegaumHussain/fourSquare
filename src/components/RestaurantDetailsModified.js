@@ -28,7 +28,7 @@ const RestaurantDetailsModified = ({
   latitude,
   longitude,
   style = {},
-  ratingStyle={},
+  ratingStyle = {},
 }) => {
   const handleCardClick = () => {
     console.log('clicked', placeId, placeName);
@@ -63,8 +63,14 @@ const RestaurantDetailsModified = ({
         </View>
         <View style={styles.restaurantInfo}>
           <View>
-            <View style={styles.ratingBackground}>
-              <Text style={styles.ratingText}>{roundOff(rating, 1)}</Text>
+            <View
+              style={[
+                styles.ratingBackground,
+                {
+                  backgroundColor: +rating * 2 < 7 ? '#b0e034' : '#74d434',
+                },
+              ]}>
+              <Text style={styles.ratingText}>{roundOff(rating, 1) * 2}</Text>
             </View>
             <View style={styles.textContainer}>
               <Text style={styles.restaurantDetails}>{sector} </Text>
@@ -116,7 +122,6 @@ const styles = StyleSheet.create({
     width: 5,
   },
   ratingBackground: {
-    backgroundColor: '#74d434',
     width: 24,
     height: 24,
     borderRadius: 3,

@@ -9,6 +9,7 @@ import {
   Platform,
   TouchableOpacity,
   PermissionsAndroid,
+  Share,
 } from 'react-native';
 import React, {useLayoutEffect, useRef, useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
@@ -18,6 +19,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {Rating, AirbnbRating} from 'react-native-ratings';
 import CustomModal from '../components/CustomModal';
 import {
+  addOrRemoveFromFav,
   addRating,
   getParticularPlaceDetailsById,
   getPlacesById,
@@ -26,7 +28,8 @@ import Toast from 'react-native-simple-toast';
 import {useIsFocused} from '@react-navigation/native';
 import {roundOff} from '../utils/roundOffNumber';
 import Geolocation from '@react-native-community/geolocation';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import {addToFavourite, deleteFromFavourites} from '../redux/fourSquareSlice';
 
 const RestaurantDetailScreen = ({navigation, route}) => {
   const [modal, setModal] = useState(false);
@@ -36,6 +39,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
+  const dispatch = useDispatch();
   const mapRef = useRef(null);
   const [particularRestaurantData, setParticularRestaurantDetails] = useState(
     [],
@@ -97,6 +101,23 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   const ratingCompleted = rating => {
     setRating(rating);
   };
+
+  const onShare = async () => {
+    try {
+      const result = await Share.share({
+        message: 'details',
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+        } else {
+        }
+      } else if (result.action === Share.dismissedAction) {
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -122,13 +143,23 @@ const RestaurantDetailScreen = ({navigation, route}) => {
                 </TouchableOpacity>
                 <Text style={styles.text}>{route?.params?.placeName}</Text>
                 <View style={styles.rightHeader}>
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => onShare()}>
                     <Image
                       source={require('../../assets/images/share_icon.png')}
                       style={styles.shareIcon}
                     />
                   </TouchableOpacity>
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={async () => {
+                      const response = await addOrRemoveFromFav(
+                        route?.params?.placeId,
+                      );
+                      if (response?.data?.status) {
+                        dispatch(addToFavourite(route?.params?.placeId));
+                      } else {
+                        dispatch(deleteFromFavourites(route?.params?.placeId));
+                      }
+                    }}>
                     {favList !== undefined &&
                       (favList.includes(route?.params?.placeId) &&
                       favList.length > 0 ? (
@@ -235,7 +266,9 @@ const RestaurantDetailScreen = ({navigation, route}) => {
             }}>
             <View style={styles.maptextContainer}>
               <Text style={styles.mapText}>{route?.params?.city}</Text>
-              <Text style={styles.mapTextNumber}>{route?.params?.phone}</Text>
+              <Text style={styles.mapTextNumber}>
+                +91 {route?.params?.phone}
+              </Text>
               <Text style={styles.mapTextDistance}>{`Drive : ${roundOff(
                 route?.params?.distance,
                 1,

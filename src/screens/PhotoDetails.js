@@ -6,6 +6,7 @@ import {
   Image,
   Platform,
   useWindowDimensions,
+  Share,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -13,6 +14,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import LinearGradient from 'react-native-linear-gradient';
 import {getParticularImageDetailsById} from '../services/auth';
 import {useIsFocused} from '@react-navigation/native';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 const PhotoDetails = ({navigation, route}) => {
   const {width, height} = useWindowDimensions();
   const [date, setDate] = useState('');
@@ -34,6 +36,22 @@ const PhotoDetails = ({navigation, route}) => {
       loadImages();
     }
   }, [focus]);
+
+  const onShare = async () => {
+    try {
+      const result = await Share.share({
+        message: 'details',
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+        } else {
+        }
+      } else if (result.action === Share.dismissedAction) {
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -57,10 +75,12 @@ const PhotoDetails = ({navigation, route}) => {
                   onPress={() => navigation.goBack()}
                 />
                 <Text style={styles.text}>{route?.params?.placeName}</Text>
-                <Image
-                  source={require('../../assets/images/share_icon.png')}
-                  style={styles.shareIcon}
-                />
+                <TouchableOpacity onPress={() => onShare()}>
+                  <Image
+                    source={require('../../assets/images/share_icon.png')}
+                    style={styles.shareIcon}
+                  />
+                </TouchableOpacity>
               </View>
             </SafeAreaView>
           </View>

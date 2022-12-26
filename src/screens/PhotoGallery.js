@@ -24,7 +24,6 @@ const PhotoGallery = ({navigation, route}) => {
   const [imagedata, setImgData] = useState();
   const [load, setLoad] = useState(false);
   const [imageuri, setImageUri] = useState('');
-  console.log(imagedata);
   const handlePhotoClick = (image, imageId, name) => {
     navigation.navigate('PhotoDetails', {
       image: image,
@@ -59,9 +58,15 @@ const PhotoGallery = ({navigation, route}) => {
     };
     if (imagedata !== undefined) {
       const formData = createSingleImageFormData(obj);
-      console.log('......', formData);
+
       const response = await uploadSingleImage(formData);
-      console.log('response', response);
+      console.log('......', response);
+      setLoad(true);
+      if (response.status) {
+        setLoad(true);
+      } else {
+        console.log(response.message);
+      }
     }
   };
 
