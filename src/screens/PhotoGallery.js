@@ -36,7 +36,7 @@ const PhotoGallery = ({navigation, route}) => {
   const loadImages = async () => {
     const response = await getImagesById(route?.params?.placeId);
 
-    if (response.status && response?.data?.data !== undefined) {
+    if (response?.status && response?.data?.data !== undefined) {
       setMenuImages(restructureObject(response?.data?.data));
     } else {
       console.log(response);
@@ -62,7 +62,7 @@ const PhotoGallery = ({navigation, route}) => {
       const response = await uploadSingleImage(formData);
       console.log('......', response);
       setLoad(true);
-      if (response.status) {
+      if (response?.status) {
         setLoad(true);
       } else {
         console.log(response.message);

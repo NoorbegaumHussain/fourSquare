@@ -800,10 +800,23 @@ const SearchScreen = ({navigation, route}) => {
                     region={{
                       latitude: Viewable[0]?.location?.coordinates[1],
                       longitude: Viewable[0]?.location?.coordinates[0],
-                      latitudeDelta: 0.05,
-                      longitudeDelta: 0.05,
+                      latitudeDelta: 0.04,
+                      longitudeDelta: 0.1,
                     }}>
-                    <Marker
+                    {topPicks.map(markers => (
+                      <Marker
+                        draggable
+                        coordinate={{
+                          latitude: markers?.location?.coordinates[1],
+                          longitude: markers?.location?.coordinates[0],
+                        }}
+                        onDragEnd={e =>
+                          alert(JSON.stringify(e.nativeEvent.coordinate))
+                        }
+                        title={'Test Marker'}
+                      />
+                    ))}
+                    {/* <Marker
                       draggable
                       coordinate={{
                         latitude: Viewable[0]?.location?.coordinates[1],
@@ -814,7 +827,7 @@ const SearchScreen = ({navigation, route}) => {
                       }
                       title={'Test Marker'}
                       description={'This is a description of the marker'}
-                    />
+                    /> */}
                   </MapView>
                 ) : null}
               </View>
@@ -893,7 +906,7 @@ const SearchScreen = ({navigation, route}) => {
                       longitudeDelta: 0.05,
                     }}
                     // ref={mapRef}
-                    >
+                  >
                     <Marker
                       draggable
                       coordinate={{
@@ -986,7 +999,7 @@ const SearchScreen = ({navigation, route}) => {
                       longitudeDelta: 0.05,
                     }}
                     // ref={mapRef}
-                    >
+                  >
                     <Marker
                       draggable
                       coordinate={{
@@ -1081,7 +1094,7 @@ const SearchScreen = ({navigation, route}) => {
                       longitudeDelta: 0.05,
                     }}
                     // ref={mapRef}
-                    >
+                  >
                     <Marker
                       draggable
                       coordinate={{
@@ -1177,8 +1190,7 @@ const SearchScreen = ({navigation, route}) => {
                       longitude: Viewable[0]?.location?.coordinates[0],
                       latitudeDelta: 0.05,
                       longitudeDelta: 0.05,
-                    }}
-                    >
+                    }}>
                     <Marker
                       draggable
                       coordinate={{
@@ -1270,8 +1282,7 @@ const SearchScreen = ({navigation, route}) => {
                     longitude: Viewable[0]?.location?.coordinates[0],
                     latitudeDelta: 0.05,
                     longitudeDelta: 0.05,
-                  }}
-                  >
+                  }}>
                   <Marker
                     draggable
                     coordinate={{
@@ -1362,8 +1373,7 @@ const SearchScreen = ({navigation, route}) => {
                     longitude: Viewable[0]?.location?.coordinates[0],
                     latitudeDelta: 0.05,
                     longitudeDelta: 0.05,
-                  }}
-                  >
+                  }}>
                   <Marker
                     draggable
                     coordinate={{
@@ -1488,8 +1498,7 @@ const SearchScreen = ({navigation, route}) => {
                       longitude: Viewable[0]?.location?.coordinates[0],
                       latitudeDelta: 0.05,
                       longitudeDelta: 0.05,
-                    }}
-                    >
+                    }}>
                     <Marker
                       draggable
                       coordinate={{
@@ -2090,8 +2099,7 @@ const SearchScreen = ({navigation, route}) => {
                     longitude: Viewable[0]?.location?.coordinates[0],
                     latitudeDelta: 0.05,
                     longitudeDelta: 0.05,
-                  }}
-                  >
+                  }}>
                   <Marker
                     draggable
                     coordinate={{
