@@ -68,10 +68,10 @@ const Register = ({navigation}) => {
                 };
                 const response = await registerUser(obj);
                 if (response?.data?.status) {
-                  const headers = response.headers;
+                  // const headers = response.headers;
                   let stringifiedToken = JSON.stringify({
-                    accessToken: headers.authorization,
-                    refreshToken: headers['refresh-token'],
+                    accessToken: response.headers.authorization,
+                    refreshToken: response.headers['refresh-token'],
                   });
                   console.log(stringifiedToken);
                   try {

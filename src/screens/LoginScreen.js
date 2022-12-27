@@ -20,6 +20,7 @@ import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
 import {addUserToken} from '../redux/fourSquareSlice';
+import { testLogin } from '../utils/test';
 
 // const getData = async () => {
 //   try {
@@ -228,7 +229,7 @@ const LoginScreen = ({navigation}) => {
                       const response = await getOTP(values.email);
                       if (response.status) {
                         console.log('OTP successfullysent');
-                        console.log(response.data);
+                        // console.log(response.data);
                         navigation.navigate('ForgotPassword', {
                           email: values.email,
                         });

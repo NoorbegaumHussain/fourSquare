@@ -8,10 +8,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export const registerUser = async data => {
   try {
     const response = await axios.post(`${BASE_URL}/api/user/register`, data);
-    const headers = response.headers;
-    let stringifiedToken = JSON.stringify({
-      accessToken: headers.authorization,
-      refreshToken: headers['refresh-token'],
+    // const headers = response.headers;
+    const stringifiedToken = JSON.stringify({
+      accessToken: response.headers.authorization,
+      refreshToken: response.headers['refresh-token'],
     });
     try {
       await AsyncStorage.setItem('token', stringifiedToken);
@@ -29,15 +29,20 @@ export const registerUser = async data => {
 export const loginUser = async data => {
   try {
     const response = await axios.post(`${BASE_URL}/api/user/login`, data);
+    console.info('RESPONSEE', response);
+    if (response.status === 200) {
+      // const headers = response.headers;\
+      console.info('HEADERS', response.headers);
+      let stringifiedToken = JSON.stringify({
+        accessToken: response.headers.authorization,
+        refreshToken: response.headers['refresh-token'],
+      });
+      console.log('stringified Token', stringifiedToken);
+      await AsyncStorage.setItem('auth', stringifiedToken);
+      let newToken = await AsyncStorage.getItem('auth');
+      console.info(newToken);
+    }
 
-    // try {
-    //   await AsyncStorage.clear();
-    //   await AsyncStorage.setItem('token', stringifiedToken);
-    //   const temp = await AsyncStorage.getItem('token');
-    //   console.log('........', temp);
-    // } catch (e) {
-    //   console.log('error in storing data in async');
-    // }
     return response;
   } catch (error) {
     const {message: errorMessage} = errorHandler(error, 'login');
