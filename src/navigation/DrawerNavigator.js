@@ -9,7 +9,7 @@ import {Dimensions} from 'react-native';
 
 const Drawer = createDrawerNavigator();
 
-const DrawerNavigator = () => {
+const DrawerNavigator = ({route}) => {
   return (
     <Drawer.Navigator
       screenOptions={{
@@ -24,7 +24,9 @@ const DrawerNavigator = () => {
         // },
         drawerType: 'slide',
       }}
-      drawerContent={props => <DrawerContent {...props} />}>
+      drawerContent={props => (
+        <DrawerContent {...props} route={route?.params?.isSkip} />
+      )}>
       <Drawer.Screen name="AppStack" component={AppStack} />
       <Drawer.Screen name="Favourites" component={Favourites} />
       <Drawer.Screen name="Feedback" component={Feedback} />

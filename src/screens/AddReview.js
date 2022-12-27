@@ -8,6 +8,7 @@ import {
   TextInput,
   Platform,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState} from 'react';
 import {TouchableOpacity} from 'react-native-gesture-handler';
@@ -18,26 +19,28 @@ import ImagePickerComponent from '../components/ImagePickerComponent';
 import ImagePicker from 'react-native-image-crop-picker';
 import {createFormData} from '../utils/createFormData';
 import {addReview} from '../services/auth';
+import SimpleToast from 'react-native-simple-toast';
 
 const AddReview = ({navigation, route}) => {
   const [text, setText] = useState('');
   const [imagedata, setImgData] = useState([]);
   const [imageuri, setImageUri] = useState('');
-
+  const [isLoading, setIsLoading] = useState(false);
   const handleSubmit = async () => {
     const obj = createFormData({
       placeId: route?.params?.placeId,
       reviewMessage: text,
       image: imagedata,
     });
-    console.log(obj);
+    setIsLoading(true);
     const response = await addReview(obj);
+    setIsLoading(false);
     // console.log(response);
     if (response.status) {
-      console.log(response.message);
+      SimpleToast.show(response.message);
       navigation.goBack();
     } else {
-      console.log(response.message);
+      SimpleToast.show(response.message);
     }
   };
 
@@ -165,9 +168,15 @@ const AddReview = ({navigation, route}) => {
           {/* </View> */}
         </View>
       </View>
-      <View style={styles.primaryButtonContainer}>
-        <PrimaryButton text="Submit" onPress={handleSubmit} />
-      </View>
+      {isLoading ? (
+        <View style={styles.primaryButtonContainer}>
+          <ActivityIndicator size="large" color="#310D20" />
+        </View>
+      ) : (
+        <View style={styles.primaryButtonContainer}>
+          <PrimaryButton text="Submit" onPress={handleSubmit} />
+        </View>
+      )}
     </View>
   );
 };

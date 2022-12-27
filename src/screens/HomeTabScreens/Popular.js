@@ -21,6 +21,7 @@ import {
   deleteFromFavourites,
 } from '../../redux/fourSquareSlice';
 import {useDispatch} from 'react-redux';
+import {isLoggedIn} from '../../utils/isLoggedIn';
 
 const Popular = ({navigation}) => {
   const [currentLongitude, setCurrentLongitude] = useState('');
@@ -28,6 +29,8 @@ const Popular = ({navigation}) => {
   const [nearbyLocations, setNearbyLocations] = useState([]);
   const [placeId, setPlaceId] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
+  // const token = isLoggedIn();
+  const [token, setToken] = useState('');
   const dispatch = useDispatch();
   const getOneTimeLocation = () => {
     Geolocation.getCurrentPosition(position => {
@@ -40,6 +43,11 @@ const Popular = ({navigation}) => {
       setCurrentLatitude(currentLatitude);
     });
   };
+  const getToken = async () => {
+    var data = await isLoggedIn();
+    setToken(data);
+  };
+
   const loadPlaces = async () => {
     getOneTimeLocation();
     const response = await getPlacesByType(
@@ -47,7 +55,7 @@ const Popular = ({navigation}) => {
       currentLongitude,
       'popular',
     );
-    if (response.status) {
+    if (response?.status) {
       setNearbyLocations(response?.data?.data);
     } else {
       console.log(response);
@@ -59,7 +67,7 @@ const Popular = ({navigation}) => {
     if (focus === true) {
       loadPlaces();
     }
-  }, [focus, currentLatitude]);
+  }, [focus, currentLatitude,token]);
 
   const renderItem = ({item}) => {
     return (
@@ -86,11 +94,14 @@ const Popular = ({navigation}) => {
                 alignItems: 'center',
               }}
               onPress={async () => {
-                const response = await addOrRemoveFromFav(item?._id);
-                if (response?.data?.status) {
-                  dispatch(addToFavourite(item?._id));
-                } else {
-                  dispatch(deleteFromFavourites(item?._id));
+                getToken();
+                if (token) {
+                  const response = await addOrRemoveFromFav(item?._id);
+                  if (response?.data?.status) {
+                    dispatch(addToFavourite(item?._id));
+                  } else {
+                    dispatch(deleteFromFavourites(item?._id));
+                  }
                 }
               }}>
               {favList.includes(item?._id) ? (

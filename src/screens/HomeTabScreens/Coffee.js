@@ -20,6 +20,7 @@ import {
   deleteFromFavourites,
 } from '../../redux/fourSquareSlice';
 import {useDispatch, useSelector} from 'react-redux';
+import {isLoggedIn} from '../../utils/isLoggedIn';
 
 const Coffee = ({navigation}) => {
   const [currentLongitude, setCurrentLongitude] = useState('');
@@ -27,8 +28,10 @@ const Coffee = ({navigation}) => {
   const [nearbyLocations, setNearbyLocations] = useState([]);
   const [placeId, setPlaceId] = useState('');
   const dispatch = useDispatch();
+  // const token = isLoggedIn();
   const favList = useSelector(state => state.foursquaredata.favourite);
   // console.log('nearbyLocations', nearbyLocations);
+  const [token, setToken] = useState('');
   const getOneTimeLocation = () => {
     Geolocation.getCurrentPosition(position => {
       const currentLongitude = position.coords.longitude;
@@ -54,12 +57,17 @@ const Coffee = ({navigation}) => {
     }
   };
 
+  const getToken = async () => {
+    var data = await isLoggedIn();
+    setToken(data);
+  };
+
   const focus = useIsFocused();
   useLayoutEffect(() => {
     if (focus === true) {
       loadPlaces();
     }
-  }, [focus, currentLatitude]);
+  }, [focus, currentLatitude, token]);
 
   const renderItem = ({item}) => {
     return (
@@ -86,11 +94,14 @@ const Coffee = ({navigation}) => {
                 alignItems: 'center',
               }}
               onPress={async () => {
-                const response = await addOrRemoveFromFav(item?._id);
-                if (response?.data?.status) {
-                  dispatch(addToFavourite(item?._id));
-                } else {
-                  dispatch(deleteFromFavourites(item?._id));
+                getToken();
+                if (token) {
+                  const response = await addOrRemoveFromFav(item?._id);
+                  if (response?.data?.status) {
+                    dispatch(addToFavourite(item?._id));
+                  } else {
+                    dispatch(deleteFromFavourites(item?._id));
+                  }
                 }
               }}>
               {favList.includes(item?._id) ? (

@@ -24,6 +24,9 @@ export const FourSquareSlice = createSlice({
         console.log('after removing', state.favourite);
       }
     },
+    clearFavourites: (state, action) => {
+      state.favourite = [];
+    },
     addUserId: (state, action) => {
       state.userId = action.payload;
     },
@@ -53,6 +56,7 @@ export const {
   deleteLocation,
   addUserToken,
   deleteUserToken,
+  clearFavourites,
 } = FourSquareSlice.actions;
 
 export default FourSquareSlice.reducer;

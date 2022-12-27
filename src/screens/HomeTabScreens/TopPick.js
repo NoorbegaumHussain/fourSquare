@@ -24,6 +24,7 @@ import {
   deleteFromFavourites,
 } from '../../redux/fourSquareSlice';
 import {useDispatch, useSelector} from 'react-redux';
+import {isLoggedIn} from '../../utils/isLoggedIn';
 
 const TopPick = ({navigation}) => {
   const [currentLongitude, setCurrentLongitude] = useState('');
@@ -31,6 +32,8 @@ const TopPick = ({navigation}) => {
   const [nearbyLocations, setNearbyLocations] = useState([]);
   const [fav, setFav] = useState('');
   const [placeId, setPlaceId] = useState('');
+  // const token = isLoggedIn();
+  const [token, setToken] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
   const dispatch = useDispatch();
   const getOneTimeLocation = () => {
@@ -44,6 +47,12 @@ const TopPick = ({navigation}) => {
       setCurrentLatitude(currentLatitude);
     });
   };
+
+  const getToken = async () => {
+    var data = await isLoggedIn();
+    setToken(data);
+  };
+
   const loadPlaces = async () => {
     getOneTimeLocation();
     const response = await getPlacesByType(
@@ -51,22 +60,25 @@ const TopPick = ({navigation}) => {
       currentLongitude,
       'toppick',
     );
-    if (response.status) {
+    if (response?.status) {
       setNearbyLocations(response?.data?.data);
     } else {
       console.log(response);
     }
   };
   const loadFav = async () => {
-    const response = await getFavourites(
-      currentLatitude,
-      currentLongitude,
-      ' ',
-    );
-    if (response.status) {
-      setFav(response?.data?.data);
-    } else {
-      console.log(response);
+    getToken();
+    if (token) {
+      const response = await getFavourites(
+        currentLatitude,
+        currentLongitude,
+        ' ',
+      );
+      if (response?.status && token) {
+        setFav(response?.data?.data);
+      } else {
+        console.log(response);
+      }
     }
   };
 
@@ -76,7 +88,7 @@ const TopPick = ({navigation}) => {
       loadPlaces();
       loadFav();
     }
-  }, [focus, currentLatitude]);
+  }, [focus, currentLatitude, token]);
 
   const renderItem = ({item}) => {
     return (
@@ -103,11 +115,14 @@ const TopPick = ({navigation}) => {
                 alignItems: 'center',
               }}
               onPress={async () => {
-                const response = await addOrRemoveFromFav(item?._id);
-                if (response?.data?.status) {
-                  dispatch(addToFavourite(item?._id));
-                } else {
-                  dispatch(deleteFromFavourites(item?._id));
+                getToken();
+                if (token) {
+                  const response = await addOrRemoveFromFav(item?._id);
+                  if (response?.data?.status) {
+                    dispatch(addToFavourite(item?._id));
+                  } else {
+                    dispatch(deleteFromFavourites(item?._id));
+                  }
                 }
               }}>
               {favList.includes(item?._id) & (favList.length > 0) ? (

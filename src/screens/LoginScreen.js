@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   ImageBackground,
@@ -9,6 +9,7 @@ import {
   useWindowDimensions,
   View,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import {TextField} from 'rn-material-ui-textfield';
 import OutlinedButton from '../components/OutlinedButton';
@@ -20,7 +21,7 @@ import Toast from 'react-native-simple-toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch} from 'react-redux';
 import {addUserToken} from '../redux/fourSquareSlice';
-import { testLogin } from '../utils/test';
+import {testLogin} from '../utils/test';
 
 // const getData = async () => {
 //   try {
@@ -45,7 +46,7 @@ const LoginScreen = ({navigation}) => {
   };
   const data = getData();
   console.log(data);
-
+  const [isLoading, setIsLoading] = useState(false);
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
   const dispatch = useDispatch();
@@ -61,16 +62,14 @@ const LoginScreen = ({navigation}) => {
       .required('Password is required'),
   });
 
-  const handleForgotPasssword = () => {
-    navigation.navigate('ForgotPassword');
-  };
-
   const handleCreateAccount = () => {
     navigation.navigate('Register');
   };
 
   const handleSkip = () => {
-    navigation.navigate('DrawerNavigator');
+    navigation.navigate('DrawerNavigator', {
+      isSkip: true,
+    });
   };
   return (
     <View style={styles.container}>
@@ -88,15 +87,17 @@ const LoginScreen = ({navigation}) => {
                   email: values.email,
                   password: values.password,
                 };
+                setIsLoading(true);
                 const response = await loginUser(obj);
+                setIsLoading(false);
                 if (response?.data?.status) {
                   Toast.show(response?.data?.message);
-                  const headers = response.headers;
-                  let stringifiedToken = JSON.stringify({
-                    accessToken: headers.authorization,
-                    refreshToken: headers['refresh-token'],
-                  });
-                  dispatch(addUserToken(stringifiedToken));
+                  // const headers = response.headers;
+                  // let stringifiedToken = JSON.stringify({
+                  //   accessToken: headers.authorization,
+                  //   refreshToken: headers['refresh-token'],
+                  // });
+                  // // dispatch(addUserToken(stringifiedToken));
                   // try {
                   //   await AsyncStorage.setItem('token', stringifiedToken);
                   //   const temp = await AsyncStorage.getItem('token');
@@ -239,9 +240,16 @@ const LoginScreen = ({navigation}) => {
                     }}>
                     <Text style={styles.forgotPassText}>Forgot Password?</Text>
                   </TouchableOpacity>
-                  <View style={styles.loginButtonContainer}>
-                    <OutlinedButton text="Login" onPress={handleSubmit} />
-                  </View>
+                  {isLoading ? (
+                    <View style={styles.loginButtonContainer}>
+                      <ActivityIndicator size="large" color="#CCCCCC" />
+                    </View>
+                  ) : (
+                    <View style={styles.loginButtonContainer}>
+                      <OutlinedButton text="Login" onPress={handleSubmit} />
+                    </View>
+                  )}
+
                   <TouchableOpacity onPress={handleCreateAccount}>
                     <Text style={styles.createAccText}>Create Account</Text>
                   </TouchableOpacity>
@@ -282,11 +290,11 @@ const styles = StyleSheet.create({
   },
   skip: {
     fontFamily: 'Avenir Book',
-    fontSize: 22,
+    fontSize: 19,
     color: '#FFFFFF',
-    marginTop: 15,
     textAlign: 'right',
     marginRight: 28,
+    marginTop:10
   },
   logo: {
     marginTop: 70,

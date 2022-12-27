@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import {
@@ -17,18 +18,43 @@ import {useIsFocused} from '@react-navigation/native';
 import {getParticularUserDetails} from '../services/auth';
 import {useSelector} from 'react-redux';
 import {useDispatch} from 'react-redux';
-import {addUserId} from '../redux/fourSquareSlice';
+import {
+  addUserId,
+  clearFavourites,
+  deleteUserId,
+} from '../redux/fourSquareSlice';
+import SimpleToast from 'react-native-simple-toast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {isLoggedIn} from '../utils/isLoggedIn';
 const DrawerContent = props => {
   const [userData, setUserData] = useState();
-  const userId = useSelector(state => state.foursquaredata.userId);
-  console.log('UserId', userId);
+  const [token, setToken] = useState('');
+  const [logout, setLogout] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  // const token = isLoggedIn();
+  // const userId = useSelector(state => state.foursquaredata.userId);
+  // console.log('UserId', userId);
+
+  const getToken = async () => {
+    var data = await isLoggedIn();
+    setToken(data);
+  };
+
   const dispatch = useDispatch();
   const loadUserDetails = async () => {
-    const response = await getParticularUserDetails();
-    if (response.status === 200 && response?.data?.data !== undefined) {
-      setUserData(response?.data?.data);
-      dispatch(addUserId(response?.data?.data._id));
-      console.log('userDetails', response.data);
+    getToken();
+    if (token) {
+      setIsLoading(true);
+      const response = await getParticularUserDetails();
+      setIsLoading(false);
+      if (
+        response?.status === 200 &&
+        response?.data?.data !== undefined &&
+        !props?.route
+      ) {
+        setUserData(response?.data?.data);
+        dispatch(addUserId(response?.data?.data._id));
+      }
     }
   };
 
@@ -37,7 +63,7 @@ const DrawerContent = props => {
     if (focus === true) {
       loadUserDetails();
     }
-  }, [focus]);
+  }, [focus, logout, token]);
 
   return (
     <View style={styles.container}>
@@ -45,21 +71,31 @@ const DrawerContent = props => {
         source={require('../../assets/images/sidemenu_background.png')}
         style={{flex: 1}}>
         <DrawerContentScrollView {...props}>
-          {userId !== null ? (
-            <Image
-              source={{uri: userData?.profilePic?.url}}
-              style={styles.image}
-            />
+          {isLoading ? (
+            <View style={styles.image}>
+              <ActivityIndicator size="large" color="#CCCCCC" />
+            </View>
           ) : (
-            <Image
-              source={require('../../assets/images/defaultProfile.png')}
-              style={styles.image}
-            />
+            <>
+              {token && !props?.route ? (
+                <Image
+                  source={{uri: userData?.profilePic?.url}}
+                  style={styles.image}
+                />
+              ) : (
+                <Image
+                  source={require('../../assets/images/defaultProfile.png')}
+                  style={styles.defaultImage}
+                />
+              )}
+            </>
           )}
 
-          <Text style={styles.loginText}>{userData?.name}</Text>
+          <Text style={styles.loginText}>
+            {token && !props?.route ? userData?.name : ' '}
+          </Text>
           <View style={{marginTop: 40}}>
-            {userId !== null ? (
+            {token && !props?.route ? (
               <>
                 <TouchableOpacity
                   style={styles.drawerContentContainer}
@@ -85,14 +121,14 @@ const DrawerContent = props => {
                 <TouchableOpacity style={styles.drawerContentContainer}>
                   <Image
                     source={require('../../assets/images/favourite_icon_copy.png')}
-                    style={styles.drawerContentIconFav}
+                    style={styles.drawerContentIconFavHide}
                   />
                   <Text style={styles.drawerContentTextHide}>Favourites</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.drawerContentContainer}>
                   <Image
                     source={require('../../assets/images/feedback.png')}
-                    style={styles.drawerContentIcon}
+                    style={styles.drawerContentIconHide}
                   />
                   <Text style={styles.drawerContentTextHide}>Feedback</Text>
                 </TouchableOpacity>
@@ -108,15 +144,31 @@ const DrawerContent = props => {
               />
               <Text style={styles.drawerContentText}>AboutUs</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.drawerContentContainer}
-              onPress={() => props.navigation.navigate('AboutUs')}>
-              <Image
-                source={require('../../assets/images/logout.png')}
-                style={styles.drawerContentIcon}
-              />
-              <Text style={styles.drawerContentText}>Logout</Text>
-            </TouchableOpacity>
+            {token && !props?.route ? (
+              <TouchableOpacity
+                style={styles.drawerContentContainer}
+                onPress={async () => {
+                  await AsyncStorage.removeItem('auth');
+                  const afterDelete = await AsyncStorage.getItem('auth');
+                  console.log('after logging out data is async', afterDelete);
+                  setLogout(true);
+                  dispatch(clearFavourites());
+                }}>
+                <Image
+                  source={require('../../assets/images/logout.png')}
+                  style={styles.drawerContentIcon}
+                />
+                <Text style={styles.drawerContentText}>Logout</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.drawerContentContainer}>
+                <Image
+                  source={require('../../assets/images/logout.png')}
+                  style={styles.drawerContentIconHide}
+                />
+                <Text style={styles.drawerContentTextHide}>Logout</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </DrawerContentScrollView>
       </ImageBackground>
@@ -175,7 +227,26 @@ const styles = StyleSheet.create({
   drawerContentTextHide: {
     fontFamily: 'Avenir Medium',
     fontSize: 18,
-    color: '#CCCCCC',
+    color: '#474049',
     fontWeight: '500',
+  },
+  defaultImage: {
+    height: 120,
+    width: 120,
+    borderRadius: 50,
+    marginTop: 17,
+    alignSelf: 'center',
+  },
+  drawerContentIconFavHide: {
+    resizeMode: 'contain',
+    marginHorizontal: 20,
+    height: 22,
+    tintColor: '#474049',
+  },
+  drawerContentIconHide: {
+    resizeMode: 'contain',
+    marginHorizontal: 15,
+    height: 27,
+    tintColor: '#474049',
   },
 });

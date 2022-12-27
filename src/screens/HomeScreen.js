@@ -19,8 +19,8 @@ const HomeScreen = ({navigation}) => {
   const handleDrawer = () => {
     navigation.openDrawer();
   };
-  const userToken = useSelector(state => state.foursquaredata.userToken);
-  console.log('userToken', userToken);
+  // const userToken = useSelector(state => state.foursquaredata.userToken);
+  // console.log('userToken', userToken);
   return (
     <View style={styles.container}>
       <StatusBar

@@ -44,6 +44,7 @@ import {useSelector} from 'react-redux';
 import {addToFavourite, deleteFromFavourites} from '../redux/fourSquareSlice';
 import Card from '../components/Card';
 import uuid from 'react-native-uuid';
+import SimpleToast from 'react-native-simple-toast';
 const suggestionsData = [
   {
     id: 1,
@@ -81,6 +82,8 @@ const SearchScreen = ({navigation, route}) => {
   const locationData = useSelector(state => state.foursquaredata.locationData);
   const [text, setText] = useState('');
   const [useCurrentLocation, setUseCurrentLoaction] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState({});
+  const [nearbyLocations, setNearbyLocations] = useState('');
   console.log(text);
   // console.log('current lat ans long', currentLatitude, currentLongitude);
   const dispatch = useDispatch();
@@ -127,6 +130,7 @@ const SearchScreen = ({navigation, route}) => {
   const [lunch, setLunch] = useState('');
   const [cafe, setCafe] = useState('');
   const [city, setCity] = useState('');
+  const [selectSearchArea, setSelectSearchArea] = useState(false);
   const loadSuggestions = async data => {
     if (data === 'Top pick') {
       const response = await getPlacesByType(
@@ -175,6 +179,7 @@ const SearchScreen = ({navigation, route}) => {
     } else if (data === 'udupi') {
       const response = await searchRestaurants(data);
       if (response.status) {
+        console.log(response);
         setCity(response?.data?.data);
       } else {
         console.info('Load Places', response.error);
@@ -741,7 +746,7 @@ const SearchScreen = ({navigation, route}) => {
             <View>
               <FlatList
                 data={suggestionsData}
-                keyExtractor={item => item._id}
+                keyExtractor={item => item.id}
                 renderItem={renderSuggestions}
               />
             </View>
@@ -765,7 +770,7 @@ const SearchScreen = ({navigation, route}) => {
             }}>
             <FlatList
               data={topPicks}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item._id}
               renderItem={renderListSearch}
             />
             <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
@@ -883,7 +888,7 @@ const SearchScreen = ({navigation, route}) => {
             }}>
             <FlatList
               data={popular}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item._id}
               renderItem={renderListSearch}
             />
             <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
@@ -994,7 +999,7 @@ const SearchScreen = ({navigation, route}) => {
             }}>
             <FlatList
               data={lunch}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item._id}
               renderItem={renderListSearch}
             />
             <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
@@ -1107,7 +1112,7 @@ const SearchScreen = ({navigation, route}) => {
             }}>
             <FlatList
               data={cafe}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item._id}
               renderItem={renderListSearch}
             />
             <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
@@ -1222,7 +1227,7 @@ const SearchScreen = ({navigation, route}) => {
             }}>
             <FlatList
               data={city}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item._id}
               renderItem={renderListSearch}
             />
             <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
@@ -1322,7 +1327,7 @@ const SearchScreen = ({navigation, route}) => {
             <>
               <FlatList
                 data={searchResult}
-                keyExtractor={item => item.id}
+                keyExtractor={item => item._id}
                 renderItem={renderListSearch}
               />
 
@@ -1432,7 +1437,7 @@ const SearchScreen = ({navigation, route}) => {
               <>
                 <FlatList
                   data={searchNear}
-                  keyExtractor={item => item.id}
+                  keyExtractor={item => item._id}
                   renderItem={renderNearMeSearch}
                   showsVerticalScrollIndicator={false}
                 />
@@ -1538,7 +1543,8 @@ const SearchScreen = ({navigation, route}) => {
         focus.nearme.hasfocus &&
         nearme.nearmeString < 2 &&
         place.placeString < 2 &&
-        !useCurrentLocation && (
+        !useCurrentLocation &&
+        !selectSearchArea && (
           <View>
             <TouchableOpacity
               style={styles.nearmeListContainer}
@@ -1562,7 +1568,11 @@ const SearchScreen = ({navigation, route}) => {
               <Text style={styles.nearmeListText}>Use my current location</Text>
             </TouchableOpacity>
             <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
-            <TouchableOpacity style={styles.nearmeListContainer}>
+            <TouchableOpacity
+              style={styles.nearmeListContainer}
+              onPress={() => {
+                setSelectSearchArea(true);
+              }}>
               <Image
                 source={require('../../assets/images/map_icon.png')}
                 style={styles.locationIcon}
@@ -1572,6 +1582,155 @@ const SearchScreen = ({navigation, route}) => {
               </Text>
             </TouchableOpacity>
             <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
+          </View>
+        )}
+      {!filterClicked &&
+        focus.nearme.hasfocus &&
+        nearme.nearmeString < 2 &&
+        place.placeString < 2 &&
+        selectSearchArea &&
+        !nearbyLocations && (
+          <View style={styles.mainContainer}>
+            <View style={[styles.mapContainer, {height: '100%'}]}>
+              <MapView
+                style={styles.mapStyle}
+                customMapStyle={mapStyle}
+                // ref={mapRef}
+                region={{
+                  latitude: locationData.latitude,
+                  longitude: locationData.longitude,
+                  latitudeDelta: 0.05,
+                  longitudeDelta: 0.4,
+                }}
+                onPress={async e => {
+                  console.log('map pressed');
+                  setSelectedLocation(e.nativeEvent?.coordinate);
+                  const response = await restaurantsNearYou(
+                    e.nativeEvent?.coordinate?.latitude,
+                    e.nativeEvent?.coordinate?.longitude,
+                  );
+                  console.log(
+                    'response after pressing a location on map',
+                    response,
+                  );
+                  if (response.status) {
+                    setNearbyLocations(response?.data?.data);
+                  } else {
+                    SimpleToast.show(response.message);
+                  }
+                }}>
+                <Marker
+                  coordinate={{
+                    latitude: selectedLocation.latitude
+                      ? selectedLocation.latitude
+                      : locationData.latitude,
+                    longitude: selectedLocation.longitude
+                      ? selectedLocation.longitude
+                      : locationData.longitude,
+                  }}
+                />
+              </MapView>
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.nearme.hasfocus &&
+        nearme.nearmeString < 2 &&
+        place.placeString < 2 &&
+        selectSearchArea &&
+        nearbyLocations &&
+        !mapView && (
+          // <View>
+          //   <Text>Nearby Location List</Text>
+          // </View>
+          <View
+            style={{
+              flex: 1,
+              shadowColor: '#171717',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.6,
+              shadowRadius: 2,
+              elevation: 5,
+            }}>
+            <FlatList
+              data={nearbyLocations}
+              keyExtractor={item => item._id}
+              renderItem={renderListSearch}
+            />
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton text="Map View" onPress={() => setMapView(true)} />
+            </View>
+          </View>
+        )}
+      {!filterClicked &&
+        focus.nearme.hasfocus &&
+        nearme.nearmeString < 2 &&
+        place.placeString < 2 &&
+        selectSearchArea &&
+        nearbyLocations &&
+        mapView && (
+          <View style={{flex: 1}}>
+            <View style={styles.mainContainer}>
+              <View style={[styles.mapContainer, {height: '100%'}]}>
+                {Viewable[0]?.location?.coordinates[1] &&
+                Viewable[0]?.location?.coordinates[0] !== '' ? (
+                  <MapView
+                    style={styles.mapStyle}
+                    customMapStyle={mapStyle}
+                    // ref={mapRef}
+                    region={{
+                      latitude: Viewable[0]?.location?.coordinates[1],
+                      longitude: Viewable[0]?.location?.coordinates[0],
+                      latitudeDelta: 0.05,
+                      longitudeDelta: 0.05,
+                    }}>
+                    {nearbyLocations.map(markers => (
+                      <Marker
+                        draggable
+                        pinColor={
+                          Viewable[0]?.location?.coordinates[1] ===
+                          markers?.location?.coordinates[1]
+                            ? 'blue'
+                            : 'red'
+                        }
+                        coordinate={{
+                          latitude: markers?.location?.coordinates[1],
+                          longitude: markers?.location?.coordinates[0],
+                        }}
+                        onDragEnd={e =>
+                          alert(JSON.stringify(e.nativeEvent.coordinate))
+                        }
+                        title={markers.placeName}
+                      />
+                    ))}
+                  </MapView>
+                ) : null}
+              </View>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderColor: 'red',
+                }}>
+                <FlatList
+                  data={nearbyLocations}
+                  renderItem={renderMapList}
+                  keyExtractor={item => item._id}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  ref={ref}
+                  onViewableItemsChanged={onViewRef.current}
+                  viewabilityConfig={viewConfigRef.current}
+                />
+              </View>
+            </View>
+            <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+              <PrimaryButton
+                text="List View"
+                onPress={() => setMapView(false)}
+              />
+            </View>
           </View>
         )}
       {!filterClicked &&
@@ -1591,7 +1750,7 @@ const SearchScreen = ({navigation, route}) => {
             }}>
             <FlatList
               data={useCurrentLocation}
-              keyExtractor={item => item.id}
+              keyExtractor={item => item._id}
               renderItem={renderListSearch}
             />
             <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
@@ -2195,7 +2354,7 @@ const SearchScreen = ({navigation, route}) => {
               <>
                 <FlatList
                   data={filteredValue}
-                  keyExtractor={item => item.id}
+                  keyExtractor={item => item._id}
                   renderItem={renderListSearch}
                 />
 

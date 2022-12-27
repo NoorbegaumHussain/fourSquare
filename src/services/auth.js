@@ -9,16 +9,8 @@ export const registerUser = async data => {
   try {
     const response = await axios.post(`${BASE_URL}/api/user/register`, data);
     // const headers = response.headers;
-    const stringifiedToken = JSON.stringify({
-      accessToken: response.headers.authorization,
-      refreshToken: response.headers['refresh-token'],
-    });
-    try {
-      await AsyncStorage.setItem('token', stringifiedToken);
-      const temp = await AsyncStorage.getItem('token');
-      console.log('........', temp);
-    } catch (e) {
-      console.log('error in storing data in async');
+    if (response.status === 200) {
+      await AsyncStorage.setItem('auth', response?.data['Access-Token']);
     }
     return response;
   } catch (error) {
@@ -29,20 +21,10 @@ export const registerUser = async data => {
 export const loginUser = async data => {
   try {
     const response = await axios.post(`${BASE_URL}/api/user/login`, data);
-    console.info('RESPONSEE', response);
+    console.info('RESPONSEE', response.data);
     if (response.status === 200) {
-      // const headers = response.headers;\
-      console.info('HEADERS', response.headers);
-      let stringifiedToken = JSON.stringify({
-        accessToken: response.headers.authorization,
-        refreshToken: response.headers['refresh-token'],
-      });
-      console.log('stringified Token', stringifiedToken);
-      await AsyncStorage.setItem('auth', stringifiedToken);
-      let newToken = await AsyncStorage.getItem('auth');
-      console.info(newToken);
+      await AsyncStorage.setItem('auth', response?.data['Access-Token']);
     }
-
     return response;
   } catch (error) {
     const {message: errorMessage} = errorHandler(error, 'login');
@@ -51,8 +33,6 @@ export const loginUser = async data => {
 };
 
 export const restaurantsNearYou = async (latitude, longitude) => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
   try {
     const response = await axios.post(
       `${BASE_URL}api/place/find-nearby-location?longitude=${longitude}&latitude=${latitude}`,
@@ -63,12 +43,9 @@ export const restaurantsNearYou = async (latitude, longitude) => {
     // const {message: errorMessage} = errorHandler(error, 'login');
     return error.response.data;
   }
-  // }
 };
 
 export const getPlacesByType = async (latitude, longitude, type) => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
   try {
     if (type === 'toppick') {
       let response = await axios.get(
@@ -95,12 +72,9 @@ export const getPlacesByType = async (latitude, longitude, type) => {
     const {message: errorMessage} = errorHandler(error, `getting ${type} info`);
     return errorMessage;
   }
-  // }
 };
 
 export const getPlacesById = async placeId => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
   try {
     var response = await axios.get(
       `${BASE_URL}api/place/get-place-details?placeId=${placeId}`,
@@ -114,12 +88,9 @@ export const getPlacesById = async placeId => {
     );
     return errorMessage;
   }
-  // }
 };
 
 export const getImagesById = async placeId => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
   try {
     var response = await axios.get(
       `${BASE_URL}api/place/get-images?placeId=${placeId}`,
@@ -133,12 +104,9 @@ export const getImagesById = async placeId => {
     );
     return errorMessage;
   }
-  // }
 };
 
 export const getReviewsById = async placeId => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
   try {
     var response = await axios.get(
       `${BASE_URL}api/place/reviews?placeId=${placeId}`,
@@ -152,37 +120,33 @@ export const getReviewsById = async placeId => {
     );
     return errorMessage;
   }
-  // }
 };
 
 export const addRating = async data => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
-  // AsyncStorage.getItem(LOGIN_TOKEN);
-  try {
-    const response = await axios.post(
-      `https://four-square-lake.vercel.app/api/place/rating?placeId=${data.placeId}&star=${data.rating}`,
-      {},
-      {
-        headers: {
-          Authorization: BearerToken,
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    try {
+      const response = await axios.post(
+        `https://four-square-lake.vercel.app/api/place/rating?placeId=${data.placeId}&star=${data.rating}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      },
-    );
-    console.info('Response', response.data);
-    return response;
-  } catch (error) {
-    console.log('inside Try', error.response);
+      );
+      console.info('Response', response.data);
+      return response;
+    } catch (error) {
+      console.log('inside Try', error.response);
 
-    const {message: errorMessage} = errorHandler(error, 'login');
-    return errorMessage;
+      const {message: errorMessage} = errorHandler(error, 'login');
+      return errorMessage;
+    }
   }
-  // }
 };
 
 export const getParticularImageDetailsById = async imageId => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
   try {
     var response = await axios.get(
       `${BASE_URL}api/place/get-image-details?imageId=${imageId}`,
@@ -196,36 +160,33 @@ export const getParticularImageDetailsById = async imageId => {
     );
     return errorMessage;
   }
-  // }
 };
 
 export const addFeedback = async data => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
-  try {
-    const response = await axios.post(
-      `https://four-square-lake.vercel.app/api/application/add-feedback?feedback=${data}`,
-      {},
-      {
-        headers: {
-          Authorization: BearerToken,
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    try {
+      const response = await axios.post(
+        `https://four-square-lake.vercel.app/api/application/add-feedback?feedback=${data}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      },
-    );
-    console.info('Response', response.data);
-    return response;
-  } catch (error) {
-    console.log('inside Try', error.response);
+      );
+      console.info('Response', response.data);
+      return response;
+    } catch (error) {
+      console.log('inside Try', error.response);
 
-    const {message: errorMessage} = errorHandler(error, 'login');
-    return errorMessage;
+      const {message: errorMessage} = errorHandler(error, 'login');
+      return errorMessage;
+    }
   }
-  // }
 };
 
 export const getAbout = async () => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
   try {
     var response = await axios.get(`${BASE_URL}/api/application/aboutus`);
 
@@ -237,50 +198,49 @@ export const getAbout = async () => {
     );
     return errorMessage;
   }
-  // }
 };
 
 export const getOTP = async email => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
-  try {
-    var response = await axios.get(
-      `${BASE_URL}api/otp?email=${email}`,
-      {},
-      {
-        headers: {
-          Authorization: BearerToken,
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    try {
+      var response = await axios.get(
+        `${BASE_URL}api/otp?email=${email}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      },
-    );
+      );
 
-    return response;
-  } catch (error) {
-    const {message: errorMessage} = errorHandler(
-      error,
-      'getting review details',
-    );
-    return errorMessage;
+      return response;
+    } catch (error) {
+      const {message: errorMessage} = errorHandler(
+        error,
+        'getting review details',
+      );
+      return errorMessage;
+    }
   }
-  // }
 };
 
 export const verifyOTP = async data => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
-  try {
-    const response = await axios.post(`${BASE_URL}/api/otp`, data, {
-      headers: {
-        Authorization: BearerToken,
-      },
-    });
-    console.info('Response', response.data);
-    return response;
-  } catch (error) {
-    const {message: errorMessage} = errorHandler(error, 'login');
-    return errorMessage;
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    try {
+      const response = await axios.post(`${BASE_URL}/api/otp`, data, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      console.info('Response', response.data);
+      return response;
+    } catch (error) {
+      const {message: errorMessage} = errorHandler(error, 'login');
+      return errorMessage;
+    }
   }
-  // }
 };
 
 export const resetPassword = async (obj, token) => {
@@ -301,48 +261,49 @@ export const resetPassword = async (obj, token) => {
 };
 
 export const getFavourites = async (lat, long, text) => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
-  try {
-    var response = await axios.get(
-      `${BASE_URL}api/place/favourites?longitude=${long}&latitude=${lat}&text=${text}`,
-      {
-        headers: {
-          Authorization: BearerToken,
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    try {
+      var response = await axios.get(
+        `${BASE_URL}api/place/favourites?longitude=${long}&latitude=${lat}&text=${text}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      },
-    );
+      );
 
-    return response;
-  } catch (error) {
-    // const {message: errorMessage} = errorHandler(
-    //   error,
-    //   'getting review details',
-    // );
-    return error.response;
+      return response;
+    } catch (error) {
+      // const {message: errorMessage} = errorHandler(
+      //   error,
+      //   'getting review details',
+      // );
+      return error.response;
+    }
   }
-  // }
 };
 
 export const addOrRemoveFromFav = async placeId => {
-  // const tokendata = await getData();
-  // if (tokendata.accessToken !== null) {
-  console.log(placeId);
-  try {
-    const response = await axios.post(
-      `${BASE_URL}api/place/favourites?placeId=${placeId}`,
-      {},
-      {
-        headers: {
-          Authorization: BearerToken,
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    console.log(placeId);
+    try {
+      const response = await axios.post(
+        `${BASE_URL}api/place/favourites?placeId=${placeId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         },
-      },
-    );
-    console.info('Response', response.data);
-    return response;
-  } catch (error) {
-    // const {message: errorMessage} = errorHandler(error, 'login');
-    return error.response;
+      );
+      console.info('Response', response.data);
+      return response;
+    } catch (error) {
+      // const {message: errorMessage} = errorHandler(error, 'login');
+      return error.response;
+    }
   }
 };
 
@@ -360,7 +321,9 @@ export const getParticularPlaceDetailsById = async placeId => {
 
 export const searchRestaurants = async text => {
   try {
-    var response = await axios.get(`${BASE_URL}api/place/search?text=${text}`);
+    var response = await axios.get(
+      `${BASE_URL}api/place/search?text=${text}&longitude=74.7399110573&latitude=13.3792943665`,
+    );
 
     return response;
   } catch (error) {
@@ -415,18 +378,20 @@ export const searchNearMe = async (latitude, longitude, text) => {
 };
 
 export const getParticularUserDetails = async () => {
-  try {
-    var response = await axios.get(`${BASE_URL}api/user`, {
-      headers: {
-        Authorization: BearerToken,
-      },
-    });
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    try {
+      var response = await axios.get(`${BASE_URL}api/user`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
-    return response;
-  } catch (error) {
-    return error.response;
+      return response;
+    } catch (error) {
+      return error.response;
+    }
   }
-  // }
 };
 
 // export const uploadImages = async formData => {
@@ -436,7 +401,7 @@ export const getParticularUserDetails = async () => {
 //       formData,
 //       {
 //         headers: {
-//           Authorization: BearerToken,
+//           Authorization: `Bearer ${accessToken}`,
 //         },
 //       },
 //     );
@@ -450,34 +415,40 @@ export const getParticularUserDetails = async () => {
 // };
 
 export const addReview = async formData => {
-  try {
-    let res = await fetch(`${BASE_URL}api/place/reviews`, {
-      method: 'post',
-      body: formData,
-      headers: {
-        Authorization: BearerToken,
-      },
-    });
-    const jsonResponse = await res.json();
-    return jsonResponse;
-  } catch (error) {
-    return error;
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    try {
+      let res = await fetch(`${BASE_URL}api/place/reviews`, {
+        method: 'post',
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const jsonResponse = await res.json();
+      return jsonResponse;
+    } catch (error) {
+      return error;
+    }
   }
 };
 
 export const uploadSingleImage = async formData => {
-  try {
-    let res = await fetch(`${BASE_URL}api/place/upload-images`, {
-      method: 'post',
-      body: formData,
-      headers: {
-        Authorization: BearerToken,
-      },
-    });
-    const jsonResponse = await res.json();
-    return jsonResponse;
-  } catch (error) {
-    return error;
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    try {
+      let res = await fetch(`${BASE_URL}api/place/upload-images`, {
+        method: 'post',
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const jsonResponse = await res.json();
+      return jsonResponse;
+    } catch (error) {
+      return error;
+    }
   }
 };
 
@@ -487,7 +458,7 @@ export const getTopPicks = async (latitude, longitude) => {
       `${BASE_URL}api/place/top-picks?longitude=${longitude}&latitude=${latitude}`,
       // {
       //   headers: {
-      //     Authorization: BearerToken,
+      //     Authorization: `Bearer ${accessToken}`,
       //   },
       // },
     );
@@ -496,7 +467,6 @@ export const getTopPicks = async (latitude, longitude) => {
   } catch (error) {
     return error.response;
   }
-  // }
 };
 
 export const getPopular = async (latitude, longitude) => {
@@ -505,7 +475,7 @@ export const getPopular = async (latitude, longitude) => {
       `${BASE_URL}api/place/popular?longitude=${longitude}&latitude=${latitude}`,
       // {
       //   headers: {
-      //     Authorization: BearerToken,
+      //     Authorization: `Bearer ${accessToken}`,
       //   },
       // },
     );
@@ -514,5 +484,21 @@ export const getPopular = async (latitude, longitude) => {
   } catch (error) {
     return error.response;
   }
-  // }
 };
+
+// export const getPopular = async (latitude, longitude) => {
+//   try {
+//     var response = await axios.get(
+//       `${BASE_URL}api/place/popular?longitude=${longitude}&latitude=${latitude}`,
+//       // {
+//       //   headers: {
+//       //     Authorization: `Bearer ${accessToken}`,
+//       //   },
+//       // },
+//     );
+
+//     return response;
+//   } catch (error) {
+//     return error.response;
+//   }
+// };

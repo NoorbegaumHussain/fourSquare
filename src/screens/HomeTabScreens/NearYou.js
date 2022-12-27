@@ -9,10 +9,9 @@ import {
   Platform,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState, useEffect, useRef, useLayoutEffect} from 'react';
-
-import RestaurantDetails from '../../components/RestaurantDetails';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
 import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
@@ -30,6 +29,7 @@ import {
   deleteFromFavourites,
   storeLocation,
 } from '../../redux/fourSquareSlice';
+import {isLoggedIn} from '../../utils/isLoggedIn';
 
 const NearYou = ({navigation}) => {
   const {width, height} = useWindowDimensions();
@@ -38,19 +38,25 @@ const NearYou = ({navigation}) => {
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
   const [nearbyLocations, setNearbyLocations] = useState([]);
-  const [placeId, setPlaceId] = useState('');
+  const [token, setToken] = useState('');
   const [fav, setFav] = useState(false);
-  const [favId, setFavId] = useState('');
   const mapRef = useRef(null);
   const dispatch = useDispatch();
   const favList = useSelector(state => state.foursquaredata.favourite);
   const locationData = useSelector(state => state.foursquaredata.locationData);
+
+  const getToken = async () => {
+    var data = await isLoggedIn();
+    setToken(data);
+  };
+
   const loadPlaces = async () => {
+    getToken();
+
     const response = await restaurantsNearYou(
       currentLatitude,
       currentLongitude,
     );
-
     if (response.status) {
       setNearbyLocations(response?.data?.data);
     } else {
@@ -59,18 +65,20 @@ const NearYou = ({navigation}) => {
   };
 
   const loadFav = async () => {
-    const response = await getFavourites(
-      locationData.latitude,
-      locationData.longitude,
-      ' ',
-    );
-    if (response.status && response?.data?.data !== undefined) {
-      setFav(response?.data?.data);
-      response?.data?.data.map(item => {
-        dispatch(addToFavourite(item.placeId));
-      });
-    } else {
-      console.log(response);
+    if (token) {
+      const response = await getFavourites(
+        locationData.latitude,
+        locationData.longitude,
+        ' ',
+      );
+      if (response?.status && response?.data?.data !== undefined) {
+        setFav(response?.data?.data);
+        response?.data?.data.map(item => {
+          dispatch(addToFavourite(item.placeId));
+        });
+      } else {
+        console.log(response);
+      }
     }
   };
 
@@ -99,11 +107,11 @@ const NearYou = ({navigation}) => {
       }
     };
     if (focus === true && currentLatitude !== '') {
-      loadPlaces();
       loadFav();
+      loadPlaces();
     }
     requestLocationPermission();
-  }, [focus, currentLatitude, favList]);
+  }, [focus, currentLatitude, token]);
 
   const getOneTimeLocation = () => {
     setLocationStatus('Getting Location ...');
@@ -176,11 +184,13 @@ const NearYou = ({navigation}) => {
                 alignItems: 'center',
               }}
               onPress={async () => {
-                const response = await addOrRemoveFromFav(item?._id);
-                if (response?.data?.status) {
-                  dispatch(addToFavourite(item?._id));
-                } else {
-                  dispatch(deleteFromFavourites(item?._id));
+                if (token) {
+                  const response = await addOrRemoveFromFav(item?._id);
+                  if (response?.data?.status) {
+                    dispatch(addToFavourite(item?._id));
+                  } else {
+                    dispatch(deleteFromFavourites(item?._id));
+                  }
                 }
               }}>
               {item?._id !== undefined &&
@@ -217,8 +227,6 @@ const NearYou = ({navigation}) => {
                 longitude: currentLongitude,
               }}
               onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
-              title={'Test Marker'}
-              description={'This is a description of the marker'}
             />
           </MapView>
         ) : null}

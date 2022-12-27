@@ -1,5 +1,5 @@
 export const BearerToken =
-  'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2M2E0NGQzZDhjZTc5OWZiMGY3MzkwZjAiLCJlbWFpbCI6IjEybnVyaHVzc2FpbkBnbWFpbC5jb20iLCJpYXQiOjE2NzIwNTM1NzAsImV4cCI6MTY3MjA1NzE3MH0.v2kwUSMcoLKLl7XKCcZAesnI6Mb8z3IlomJ0W-WvY-Y';
+  'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2M2E5OWFjNWIyNmUyNzI3OTM0OWIyNTIiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJpYXQiOjE2NzIxMjE3MDksImV4cCI6MTY3MjEyNTMwOX0.OpVmiW08JsPBx6eF25TuJc9Miy_I-2jYqxwOVt-ilP4';
 
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
