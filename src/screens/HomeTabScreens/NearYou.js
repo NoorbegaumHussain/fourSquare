@@ -38,6 +38,7 @@ const NearYou = ({navigation}) => {
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [locationStatus, setLocationStatus] = useState('');
   const [nearbyLocations, setNearbyLocations] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [token, setToken] = useState('');
   const [fav, setFav] = useState(false);
   const mapRef = useRef(null);
@@ -52,11 +53,12 @@ const NearYou = ({navigation}) => {
 
   const loadPlaces = async () => {
     getToken();
-
+    setIsLoading(true);
     const response = await restaurantsNearYou(
       currentLatitude,
       currentLongitude,
     );
+    setIsLoading(false);
     if (response.status) {
       setNearbyLocations(response?.data?.data);
     } else {
@@ -65,6 +67,7 @@ const NearYou = ({navigation}) => {
   };
 
   const loadFav = async () => {
+    loadPlaces();
     if (token) {
       const response = await getFavourites(
         locationData.latitude,
@@ -108,7 +111,7 @@ const NearYou = ({navigation}) => {
     };
     if (focus === true && currentLatitude !== '') {
       loadFav();
-      loadPlaces();
+      // loadPlaces();
     }
     requestLocationPermission();
   }, [focus, currentLatitude, token]);
@@ -191,6 +194,8 @@ const NearYou = ({navigation}) => {
                   } else {
                     dispatch(deleteFromFavourites(item?._id));
                   }
+                } else {
+                  Toast.show('Please login to continue');
                 }
               }}>
               {item?._id !== undefined &&
@@ -230,6 +235,11 @@ const NearYou = ({navigation}) => {
             />
           </MapView>
         ) : null}
+        {isLoading && (
+          <View style={{marginTop: 15}}>
+            <ActivityIndicator size="large" color="#310D20" />
+          </View>
+        )}
       </View>
       <FlatList
         data={nearbyLocations}
@@ -461,7 +471,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#E5E5E5',
-    marginBottom: 20,
+    marginBottom: Platform.OS === 'ios' ? 20 : 0,
   },
   mapContainer: {
     // position: 'absolute',
@@ -486,9 +496,9 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   favIcon: {
-    height: 25,
+    height: 23,
     resizeMode: 'contain',
-    width: 25,
+    width: 23,
     marginTop: 15,
   },
 

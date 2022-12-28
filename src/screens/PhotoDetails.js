@@ -7,6 +7,7 @@ import {
   Platform,
   useWindowDimensions,
   Share,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -15,16 +16,22 @@ import LinearGradient from 'react-native-linear-gradient';
 import {getParticularImageDetailsById} from '../services/auth';
 import {useIsFocused} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import {formatISODate} from '../utils/formatISODate';
 const PhotoDetails = ({navigation, route}) => {
   const {width, height} = useWindowDimensions();
-  const [date, setDate] = useState('');
+  const [data, setData] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  console.log('data', data);
+  
   const loadImages = async () => {
+    setIsLoading(true);
     const response = await getParticularImageDetailsById(
       route?.params?.imageId,
     );
+    setIsLoading(false);
+    console.log('.............', response.data.data.uploadedImages[0]);
     if (response.status) {
-      console.log('.............', response.data.data);
-      setDate(response?.data);
+      setData(response?.data?.data?.uploadedImages[0]);
     } else {
       console.log(response);
     }
@@ -89,13 +96,22 @@ const PhotoDetails = ({navigation, route}) => {
               styles.uploaderDetailsContainer,
               {flex: width > height ? 0.2 : 0.12},
             ]}>
-            <Image
-              source={require('../../assets/images/profile1.png')}
-              style={styles.profile}
-            />
+            {isLoading ? (
+              <View style={styles.activityIndicator}>
+                <ActivityIndicator size="large" color="#CCCCCC" />
+              </View>
+            ) : (
+              <Image
+                source={{uri: data?.userPic?.url}}
+                style={styles.profile}
+              />
+            )}
+
             <View style={styles.textContainer}>
               <Text style={styles.name}>{route?.params?.name}</Text>
-              <Text style={styles.date}>Added May 12,2016</Text>
+              <Text style={styles.date}>{`Added ${formatISODate(
+                data?.createdAt,
+              )}`}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -143,7 +159,13 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     height: 60,
     width: 60,
-    alignSelf: 'center',
+    marginTop: 14,
+  },
+  activityIndicator: {
+    borderRadius: 50,
+    height: 60,
+    width: 60,
+    marginTop: 27,
   },
   name: {
     fontFamily: 'Avenir Medium',
@@ -158,7 +180,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   textContainer: {
-    marginTop: 10,
+    marginTop: 14,
     marginLeft: 26,
   },
 });

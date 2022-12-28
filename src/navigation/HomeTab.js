@@ -43,7 +43,7 @@ const HomeTab = () => {
       <Tab.Screen name="Toppick" component={TopPick} />
       <Tab.Screen name="Popular" component={Popular} />
       <Tab.Screen name="Lunch" component={Lunch} />
-      <Tab.Screen name="Coffee" component={Coffee} />
+      <Tab.Screen name="Cafe" component={Coffee} />
     </Tab.Navigator>
   );
 };

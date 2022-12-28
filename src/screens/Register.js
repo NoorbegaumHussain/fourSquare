@@ -6,18 +6,21 @@ import {
   Image,
   Text,
   useWindowDimensions,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {TextField} from 'rn-material-ui-textfield';
 import {Formik} from 'formik';
 import * as yup from 'yup';
 import OutlinedButton from '../components/OutlinedButton';
 import {registerUser} from '../services/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import SimpleToast from 'react-native-simple-toast';
 
 const Register = ({navigation}) => {
   const {width, height} = useWindowDimensions();
+  const [isLoading, setIsLoading] = useState(false);
   const width1 = width < height ? 11.5 : 20;
   const phoneRegExp =
     /^((\\+[1-9]{1,4}[ \\-]*)|(\\([0-9]{2,3}\\)[ \\-]*)|([0-9]{2,4})[ \\-]*)*?[0-9]{3,4}?[ \\-]*[0-9]{3,4}?$/;
@@ -66,22 +69,14 @@ const Register = ({navigation}) => {
                   phone: values.mobileNo,
                   password: values.password,
                 };
+                setIsLoading(true);
                 const response = await registerUser(obj);
-                if (response?.data?.status) {
-                  // const headers = response.headers;
-                  let stringifiedToken = JSON.stringify({
-                    accessToken: response.headers.authorization,
-                    refreshToken: response.headers['refresh-token'],
-                  });
-                  console.log(stringifiedToken);
-                  try {
-                    await AsyncStorage.setItem('token', stringifiedToken);
-                  } catch (e) {
-                    console.log('error in storing data in async');
-                  }
-                  navigation.navigate('DrawerNavigator');
+                setIsLoading(false);
+                if (response?.status) {
+                  SimpleToast.show('Successfully registered');
+                  navigation.navigate('LoginScreen');
                 } else {
-                  console.log(response);
+                  SimpleToast.show(response);
                 }
               }}>
               {({
@@ -119,7 +114,7 @@ const Register = ({navigation}) => {
                         autoCorrect={false}
                         style={{
                           fontFamily: 'Avenir Book',
-                          fontSize: 16,
+                          fontSize: 18,
                           marginBottom: 5,
                           textAlign: 'center',
                           marginTop: 10,
@@ -164,7 +159,7 @@ const Register = ({navigation}) => {
                         autoCorrect={false}
                         style={{
                           fontFamily: 'Avenir Book',
-                          fontSize: 16,
+                          fontSize: 18,
                           marginBottom: 5,
                           textAlign: 'center',
                           marginTop: 10,
@@ -177,12 +172,6 @@ const Register = ({navigation}) => {
                           height: 50,
                           paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
                         }}
-                        containerStyle={
-                          {
-                            // height:200,
-                            // borderWidth:1,
-                          }
-                        }
                       />
                       {errors.email && touched.email && (
                         <Text style={styles.errorText}>{errors.email}</Text>
@@ -209,7 +198,7 @@ const Register = ({navigation}) => {
                         autoCorrect={false}
                         style={{
                           fontFamily: 'Avenir Book',
-                          fontSize: 16,
+                          fontSize: 18,
                           marginBottom: 5,
                           textAlign: 'center',
                           marginTop: 10,
@@ -222,12 +211,6 @@ const Register = ({navigation}) => {
                           height: 50,
                           paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
                         }}
-                        containerStyle={
-                          {
-                            // height:200,
-                            // borderWidth:1,
-                          }
-                        }
                       />
                       {errors.mobileNo && touched.mobileNo && (
                         <Text style={styles.errorText}>{errors.mobileNo}</Text>
@@ -255,7 +238,7 @@ const Register = ({navigation}) => {
                         autoCorrect={false}
                         style={{
                           fontFamily: 'Avenir Book',
-                          fontSize: 16,
+                          fontSize: 18,
                           marginBottom: 5,
                           textAlign: 'center',
                           marginTop: 10,
@@ -268,12 +251,6 @@ const Register = ({navigation}) => {
                           height: 50,
                           paddingTop: Platform.OS === 'ios' ? 2 : 2.6,
                         }}
-                        containerStyle={
-                          {
-                            // height:200,
-                            // borderWidth:1,
-                          }
-                        }
                       />
                       {errors.password && touched.password && (
                         <Text style={styles.errorText}>{errors.password}</Text>
@@ -301,7 +278,7 @@ const Register = ({navigation}) => {
                         autoCorrect={false}
                         style={{
                           fontFamily: 'Avenir Book',
-                          fontSize: 16,
+                          fontSize: 18,
                           marginBottom: 5,
                           textAlign: 'center',
                           marginTop: 10,
@@ -314,12 +291,6 @@ const Register = ({navigation}) => {
                           height: 50,
                           paddingTop: Platform.OS === 'ios' ? 2 : 4.5,
                         }}
-                        containerStyle={
-                          {
-                            // height:200,
-                            // borderWidth:1,
-                          }
-                        }
                       />
                       {errors.confirmPassword && touched.confirmPassword && (
                         <Text style={styles.errorText}>
@@ -328,9 +299,15 @@ const Register = ({navigation}) => {
                       )}
                     </View>
                   </View>
-                  <View style={styles.submitButton}>
-                    <OutlinedButton text="Login" onPress={handleSubmit} />
-                  </View>
+                  {isLoading ? (
+                    <View style={styles.submitButton}>
+                      <ActivityIndicator size="large" color="#CCCCCC" />
+                    </View>
+                  ) : (
+                    <View style={styles.submitButton}>
+                      <OutlinedButton text="Login" onPress={handleSubmit} />
+                    </View>
+                  )}
                 </>
               )}
             </Formik>

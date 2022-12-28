@@ -5,11 +5,11 @@ import {
   StyleSheet,
   useWindowDimensions,
   Pressable,
+  TouchableOpacity,
 } from 'react-native';
 import React from 'react';
 import {convertPriceRange} from '../utils/convertPriceRange';
 import {roundOff} from '../utils/roundOffNumber';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 
 const RestaurantDetailsModified = ({
   placeId,
@@ -49,7 +49,9 @@ const RestaurantDetailsModified = ({
     });
   };
   return (
-    <Pressable style={[styles.container, {...style}]} onPress={handleCardClick}>
+    <Pressable
+      style={[styles.container, {...style}]}
+      onPress={() => handleCardClick()}>
       <Image
         source={{
           uri: url,
@@ -95,7 +97,7 @@ const RestaurantDetailsModified = ({
 export default RestaurantDetailsModified;
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     flexDirection: 'row',
     backgroundColor: 'white',
     width: '100%',

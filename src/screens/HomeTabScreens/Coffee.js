@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Pressable,
   Image,
+  Platform,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
@@ -102,6 +103,8 @@ const Coffee = ({navigation}) => {
                   } else {
                     dispatch(deleteFromFavourites(item?._id));
                   }
+                } else {
+                  Toast.show('Please login to continue');
                 }
               }}>
               {favList.includes(item?._id) ? (
@@ -139,7 +142,7 @@ export default Coffee;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 20,
+    marginBottom: Platform.OS === 'ios' ? 20 : 0,
   },
   cardContainer: {
     shadowColor: '#171717',

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Pressable,
   Image,
+  Platform,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
@@ -67,7 +68,7 @@ const Popular = ({navigation}) => {
     if (focus === true) {
       loadPlaces();
     }
-  }, [focus, currentLatitude,token]);
+  }, [focus, currentLatitude, token]);
 
   const renderItem = ({item}) => {
     return (
@@ -102,6 +103,8 @@ const Popular = ({navigation}) => {
                   } else {
                     dispatch(deleteFromFavourites(item?._id));
                   }
+                } else {
+                  Toast.show('Please login to continue');
                 }
               }}>
               {favList.includes(item?._id) ? (
@@ -139,7 +142,7 @@ export default Popular;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 20,
+    marginBottom: Platform.OS === 'ios' ? 20 : 0,
   },
   cardContainer: {
     shadowColor: '#171717',

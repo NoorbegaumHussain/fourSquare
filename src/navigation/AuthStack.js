@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   createStackNavigator,
   CardStyleInterpolators,
@@ -12,44 +12,59 @@ import Register from '../screens/Register';
 import HomeScreen from '../screens/HomeScreen';
 import AppStack from './AppStack';
 import DrawerNavigator from './DrawerNavigator';
+import {isLoggedIn} from '../utils/isLoggedIn';
 const Stack = createStackNavigator();
 
 const AuthStack = () => {
+  const [token, setToken] = useState();
+  const getToken = async () => {
+    var data = await isLoggedIn();
+    console.log(data);
+    setToken(data);
+  };
+  useEffect(() => {
+    getToken();
+  }, []);
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen
-          name="LoginScreen"
-          component={LoginScreen}
-          options={{
-            headerShown: false,
-            // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          }}
-        />
-        <Stack.Screen
-          name="ForgotPassword"
-          component={ForgotPassword}
-          options={{
-            headerShown: false,
-            // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          }}
-        />
-        <Stack.Screen
-          name="ConfirmPassword"
-          component={ConfirmPassword}
-          options={{
-            headerShown: false,
-            // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          }}
-        />
-        <Stack.Screen
-          name="Register"
-          component={Register}
-          options={{
-            headerShown: false,
-            // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-          }}
-        />
+        {!token && (
+          <>
+            <Stack.Screen
+              name="LoginScreen"
+              component={LoginScreen}
+              options={{
+                headerShown: false,
+                // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+              }}
+            />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPassword}
+              options={{
+                headerShown: false,
+                // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+              }}
+            />
+            <Stack.Screen
+              name="ConfirmPassword"
+              component={ConfirmPassword}
+              options={{
+                headerShown: false,
+                // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+              }}
+            />
+            <Stack.Screen
+              name="Register"
+              component={Register}
+              options={{
+                headerShown: false,
+                // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+              }}
+            />
+          </>
+        )}
+
         <Stack.Screen
           name="DrawerNavigator"
           component={DrawerNavigator}

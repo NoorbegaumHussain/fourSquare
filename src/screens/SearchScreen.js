@@ -13,6 +13,7 @@ import {
   Platform,
   PermissionsAndroid,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import Icon from 'react-native-vector-icons/Feather';
@@ -26,6 +27,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
 import {isMap} from 'immer/dist/internal';
+import uuid from 'react-native-uuid';
 import RestaurantDetailsModified from '../components/RestaurantDetailsModified';
 import {
   addOrRemoveFromFav,
@@ -43,7 +45,6 @@ import {useIsFocused} from '@react-navigation/native';
 import {useSelector} from 'react-redux';
 import {addToFavourite, deleteFromFavourites} from '../redux/fourSquareSlice';
 import Card from '../components/Card';
-import uuid from 'react-native-uuid';
 import SimpleToast from 'react-native-simple-toast';
 const suggestionsData = [
   {
@@ -84,6 +85,7 @@ const SearchScreen = ({navigation, route}) => {
   const [useCurrentLocation, setUseCurrentLoaction] = useState('');
   const [selectedLocation, setSelectedLocation] = useState({});
   const [nearbyLocations, setNearbyLocations] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   console.log(text);
   // console.log('current lat ans long', currentLatitude, currentLongitude);
   const dispatch = useDispatch();
@@ -270,40 +272,6 @@ const SearchScreen = ({navigation, route}) => {
   const viewConfigRef = React.useRef({viewAreaCoveragePercentThreshold: 80});
   const mapRef = useRef(null);
   const focusonLoad = useIsFocused();
-  // const onLoad = () => {
-  //   try {
-  //     if (Viewable[0]?.location?.coordinates[0] !== undefined) {
-  //       mapRef.current.animateToRegion(
-  //         {
-  //           latitude: Viewable[0]?.location?.coordinates[1]
-  //             ? Viewable[0]?.location?.coordinates[1]
-  //             : locationData.latitude,
-  //           longitude: Viewable[0]?.location?.coordinates[0]
-  //             ? Viewable[0]?.location?.coordinates[0]
-  //             : locationData.latitude,
-  //           latitudeDelta: 0.05,
-  //           longitudeDelta: 0.2,
-  //         },
-  //         4 * 1000,
-  //       );
-  //     } else {
-  //       mapRef.current.animateToRegion(
-  //         {
-  //           latitude: locationData.latitude,
-  //           longitude: locationData.longitude,
-  //           latitudeDelta: 0.05,
-  //           longitudeDelta: 0.2,
-  //         },
-  //         4 * 1000,
-  //       );
-  //     }
-
-  //     // setLoading(false);
-  //   } catch (error) {
-  //     console.log(error);
-  //     console.log('Failed to animate direction');
-  //   }
-  // };
   useLayoutEffect(() => {
     if (focusonLoad === true) {
       // onLoad();
@@ -809,36 +777,26 @@ const SearchScreen = ({navigation, route}) => {
                       longitudeDelta: 0.1,
                     }}>
                     {topPicks.map(markers => (
-                      <Marker
-                        draggable
-                        pinColor={
-                          Viewable[0]?.location?.coordinates[1] ===
-                          markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
-                        }
-                        coordinate={{
-                          latitude: markers?.location?.coordinates[1],
-                          longitude: markers?.location?.coordinates[0],
-                        }}
-                        onDragEnd={e =>
-                          alert(JSON.stringify(e.nativeEvent.coordinate))
-                        }
-                        title={markers.placeName}
-                      />
+                      <View key={uuid.v4()}>
+                        <Marker
+                          draggable
+                          pinColor={
+                            Viewable[0]?.location?.coordinates[1] ===
+                            markers?.location?.coordinates[1]
+                              ? 'blue'
+                              : 'red'
+                          }
+                          coordinate={{
+                            latitude: markers?.location?.coordinates[1],
+                            longitude: markers?.location?.coordinates[0],
+                          }}
+                          onDragEnd={e =>
+                            alert(JSON.stringify(e.nativeEvent.coordinate))
+                          }
+                          title={markers.placeName}
+                        />
+                      </View>
                     ))}
-                    {/* <Marker
-                      draggable
-                      coordinate={{
-                        latitude: Viewable[0]?.location?.coordinates[1],
-                        longitude: Viewable[0]?.location?.coordinates[0],
-                      }}
-                      onDragEnd={e =>
-                        alert(JSON.stringify(e.nativeEvent.coordinate))
-                      }
-                      title={'Test Marker'}
-                      description={'This is a description of the marker'}
-                    /> */}
                   </MapView>
                 ) : null}
               </View>
@@ -920,36 +878,26 @@ const SearchScreen = ({navigation, route}) => {
                     // ref={mapRef}
                   >
                     {popular.map(markers => (
-                      <Marker
-                        draggable
-                        pinColor={
-                          Viewable[0]?.location?.coordinates[1] ===
-                          markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
-                        }
-                        coordinate={{
-                          latitude: markers?.location?.coordinates[1],
-                          longitude: markers?.location?.coordinates[0],
-                        }}
-                        onDragEnd={e =>
-                          alert(JSON.stringify(e.nativeEvent.coordinate))
-                        }
-                        title={markers.placeName}
-                      />
+                      <View key={uuid.v4()}>
+                        <Marker
+                          draggable
+                          pinColor={
+                            Viewable[0]?.location?.coordinates[1] ===
+                            markers?.location?.coordinates[1]
+                              ? 'blue'
+                              : 'red'
+                          }
+                          coordinate={{
+                            latitude: markers?.location?.coordinates[1],
+                            longitude: markers?.location?.coordinates[0],
+                          }}
+                          onDragEnd={e =>
+                            alert(JSON.stringify(e.nativeEvent.coordinate))
+                          }
+                          title={markers.placeName}
+                        />
+                      </View>
                     ))}
-                    {/* <Marker
-                      draggable
-                      coordinate={{
-                        latitude: Viewable[0]?.location?.coordinates[1],
-                        longitude: Viewable[0]?.location?.coordinates[0],
-                      }}
-                      onDragEnd={e =>
-                        alert(JSON.stringify(e.nativeEvent.coordinate))
-                      }
-                      title={'Test Marker'}
-                      description={'This is a description of the marker'}
-                    /> */}
                   </MapView>
                 ) : null}
               </View>
@@ -1032,36 +980,26 @@ const SearchScreen = ({navigation, route}) => {
                     // ref={mapRef}
                   >
                     {lunch.map(markers => (
-                      <Marker
-                        draggable
-                        pinColor={
-                          Viewable[0]?.location?.coordinates[1] ===
-                          markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
-                        }
-                        coordinate={{
-                          latitude: markers?.location?.coordinates[1],
-                          longitude: markers?.location?.coordinates[0],
-                        }}
-                        onDragEnd={e =>
-                          alert(JSON.stringify(e.nativeEvent.coordinate))
-                        }
-                        title={markers.placeName}
-                      />
+                      <View key={uuid.v4()}>
+                        <Marker
+                          draggable
+                          pinColor={
+                            Viewable[0]?.location?.coordinates[1] ===
+                            markers?.location?.coordinates[1]
+                              ? 'blue'
+                              : 'red'
+                          }
+                          coordinate={{
+                            latitude: markers?.location?.coordinates[1],
+                            longitude: markers?.location?.coordinates[0],
+                          }}
+                          onDragEnd={e =>
+                            alert(JSON.stringify(e.nativeEvent.coordinate))
+                          }
+                          title={markers.placeName}
+                        />
+                      </View>
                     ))}
-                    {/* <Marker
-                      draggable
-                      coordinate={{
-                        latitude: Viewable[0]?.location?.coordinates[1],
-                        longitude: Viewable[0]?.location?.coordinates[0],
-                      }}
-                      onDragEnd={e =>
-                        alert(JSON.stringify(e.nativeEvent.coordinate))
-                      }
-                      title={'Test Marker'}
-                      description={'This is a description of the marker'}
-                    /> */}
                   </MapView>
                 ) : null}
               </View>
@@ -1146,36 +1084,26 @@ const SearchScreen = ({navigation, route}) => {
                     // ref={mapRef}
                   >
                     {cafe.map(markers => (
-                      <Marker
-                        draggable
-                        pinColor={
-                          Viewable[0]?.location?.coordinates[1] ===
-                          markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
-                        }
-                        coordinate={{
-                          latitude: markers?.location?.coordinates[1],
-                          longitude: markers?.location?.coordinates[0],
-                        }}
-                        onDragEnd={e =>
-                          alert(JSON.stringify(e.nativeEvent.coordinate))
-                        }
-                        title={markers.placeName}
-                      />
+                      <View key={uuid.v4()}>
+                        <Marker
+                          draggable
+                          pinColor={
+                            Viewable[0]?.location?.coordinates[1] ===
+                            markers?.location?.coordinates[1]
+                              ? 'blue'
+                              : 'red'
+                          }
+                          coordinate={{
+                            latitude: markers?.location?.coordinates[1],
+                            longitude: markers?.location?.coordinates[0],
+                          }}
+                          onDragEnd={e =>
+                            alert(JSON.stringify(e.nativeEvent.coordinate))
+                          }
+                          title={markers.placeName}
+                        />
+                      </View>
                     ))}
-                    {/* <Marker
-                      draggable
-                      coordinate={{
-                        latitude: Viewable[0]?.location?.coordinates[1],
-                        longitude: Viewable[0]?.location?.coordinates[0],
-                      }}
-                      onDragEnd={e =>
-                        alert(JSON.stringify(e.nativeEvent.coordinate))
-                      }
-                      title={'Test Marker'}
-                      description={'This is a description of the marker'}
-                    /> */}
                   </MapView>
                 ) : null}
               </View>
@@ -1261,36 +1189,26 @@ const SearchScreen = ({navigation, route}) => {
                       longitudeDelta: 0.05,
                     }}>
                     {city.map(markers => (
-                      <Marker
-                        draggable
-                        pinColor={
-                          Viewable[0]?.location?.coordinates[1] ===
-                          markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
-                        }
-                        coordinate={{
-                          latitude: markers?.location?.coordinates[1],
-                          longitude: markers?.location?.coordinates[0],
-                        }}
-                        onDragEnd={e =>
-                          alert(JSON.stringify(e.nativeEvent.coordinate))
-                        }
-                        title={markers.placeName}
-                      />
+                      <View key={uuid.v4()}>
+                        <Marker
+                          draggable
+                          pinColor={
+                            Viewable[0]?.location?.coordinates[1] ===
+                            markers?.location?.coordinates[1]
+                              ? 'blue'
+                              : 'red'
+                          }
+                          coordinate={{
+                            latitude: markers?.location?.coordinates[1],
+                            longitude: markers?.location?.coordinates[0],
+                          }}
+                          onDragEnd={e =>
+                            alert(JSON.stringify(e.nativeEvent.coordinate))
+                          }
+                          title={markers.placeName}
+                        />
+                      </View>
                     ))}
-                    {/* <Marker
-                      draggable
-                      coordinate={{
-                        latitude: Viewable[0]?.location?.coordinates[1],
-                        longitude: Viewable[0]?.location?.coordinates[0],
-                      }}
-                      onDragEnd={e =>
-                        alert(JSON.stringify(e.nativeEvent.coordinate))
-                      }
-                      title={'Test Marker'}
-                      description={'This is a description of the marker'}
-                    /> */}
                   </MapView>
                 ) : null}
               </View>
@@ -1372,36 +1290,26 @@ const SearchScreen = ({navigation, route}) => {
                     longitudeDelta: 0.05,
                   }}>
                   {searchResult.map(markers => (
-                    <Marker
-                      draggable
-                      pinColor={
-                        Viewable[0]?.location?.coordinates[1] ===
-                        markers?.location?.coordinates[1]
-                          ? 'blue'
-                          : 'red'
-                      }
-                      coordinate={{
-                        latitude: markers?.location?.coordinates[1],
-                        longitude: markers?.location?.coordinates[0],
-                      }}
-                      onDragEnd={e =>
-                        alert(JSON.stringify(e.nativeEvent.coordinate))
-                      }
-                      title={markers.placeName}
-                    />
+                    <View key={uuid.v4()}>
+                      <Marker
+                        draggable
+                        pinColor={
+                          Viewable[0]?.location?.coordinates[1] ===
+                          markers?.location?.coordinates[1]
+                            ? 'blue'
+                            : 'red'
+                        }
+                        coordinate={{
+                          latitude: markers?.location?.coordinates[1],
+                          longitude: markers?.location?.coordinates[0],
+                        }}
+                        onDragEnd={e =>
+                          alert(JSON.stringify(e.nativeEvent.coordinate))
+                        }
+                        title={markers.placeName}
+                      />
+                    </View>
                   ))}
-                  {/* <Marker
-                    draggable
-                    coordinate={{
-                      latitude: Viewable[0]?.location?.coordinates[1],
-                      longitude: Viewable[0]?.location?.coordinates[0],
-                    }}
-                    onDragEnd={e =>
-                      alert(JSON.stringify(e.nativeEvent.coordinate))
-                    }
-                    title={'Test Marker'}
-                    description={'This is a description of the marker'}
-                  /> */}
                 </MapView>
               ) : null}
             </View>
@@ -1482,36 +1390,26 @@ const SearchScreen = ({navigation, route}) => {
                     longitudeDelta: 0.05,
                   }}>
                   {searchNear.map(markers => (
-                    <Marker
-                      draggable
-                      pinColor={
-                        Viewable[0]?.location?.coordinates[1] ===
-                        markers?.location?.coordinates[1]
-                          ? 'blue'
-                          : 'red'
-                      }
-                      coordinate={{
-                        latitude: markers?.location?.coordinates[1],
-                        longitude: markers?.location?.coordinates[0],
-                      }}
-                      onDragEnd={e =>
-                        alert(JSON.stringify(e.nativeEvent.coordinate))
-                      }
-                      title={markers.placeName}
-                    />
+                    <View key={uuid.v4()}>
+                      <Marker
+                        draggable
+                        pinColor={
+                          Viewable[0]?.location?.coordinates[1] ===
+                          markers?.location?.coordinates[1]
+                            ? 'blue'
+                            : 'red'
+                        }
+                        coordinate={{
+                          latitude: markers?.location?.coordinates[1],
+                          longitude: markers?.location?.coordinates[0],
+                        }}
+                        onDragEnd={e =>
+                          alert(JSON.stringify(e.nativeEvent.coordinate))
+                        }
+                        title={markers.placeName}
+                      />
+                    </View>
                   ))}
-                  {/* <Marker
-                    draggable
-                    coordinate={{
-                      latitude: Viewable[0]?.location?.coordinates[1],
-                      longitude: Viewable[0]?.location?.coordinates[0],
-                    }}
-                    onDragEnd={e =>
-                      alert(JSON.stringify(e.nativeEvent.coordinate))
-                    }
-                    title={'Test Marker'}
-                    description={'This is a description of the marker'}
-                  /> */}
                 </MapView>
               ) : null}
             </View>
@@ -1605,10 +1503,12 @@ const SearchScreen = ({navigation, route}) => {
                 onPress={async e => {
                   console.log('map pressed');
                   setSelectedLocation(e.nativeEvent?.coordinate);
+                  setIsLoading(true);
                   const response = await restaurantsNearYou(
                     e.nativeEvent?.coordinate?.latitude,
                     e.nativeEvent?.coordinate?.longitude,
                   );
+                  setIsLoading(false);
                   console.log(
                     'response after pressing a location on map',
                     response,
@@ -1631,6 +1531,11 @@ const SearchScreen = ({navigation, route}) => {
                 />
               </MapView>
             </View>
+            {isLoading && (
+              <View style={{marginTop: 15}}>
+                <ActivityIndicator size="large" color="#310D20" />
+              </View>
+            )}
           </View>
         )}
       {!filterClicked &&
@@ -1685,23 +1590,25 @@ const SearchScreen = ({navigation, route}) => {
                       longitudeDelta: 0.05,
                     }}>
                     {nearbyLocations.map(markers => (
-                      <Marker
-                        draggable
-                        pinColor={
-                          Viewable[0]?.location?.coordinates[1] ===
-                          markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
-                        }
-                        coordinate={{
-                          latitude: markers?.location?.coordinates[1],
-                          longitude: markers?.location?.coordinates[0],
-                        }}
-                        onDragEnd={e =>
-                          alert(JSON.stringify(e.nativeEvent.coordinate))
-                        }
-                        title={markers.placeName}
-                      />
+                      <View key={uuid.v4()}>
+                        <Marker
+                          draggable
+                          pinColor={
+                            Viewable[0]?.location?.coordinates[1] ===
+                            markers?.location?.coordinates[1]
+                              ? 'blue'
+                              : 'red'
+                          }
+                          coordinate={{
+                            latitude: markers?.location?.coordinates[1],
+                            longitude: markers?.location?.coordinates[0],
+                          }}
+                          onDragEnd={e =>
+                            alert(JSON.stringify(e.nativeEvent.coordinate))
+                          }
+                          title={markers.placeName}
+                        />
+                      </View>
                     ))}
                   </MapView>
                 ) : null}
@@ -1780,36 +1687,26 @@ const SearchScreen = ({navigation, route}) => {
                       longitudeDelta: 0.05,
                     }}>
                     {useCurrentLocation.map(markers => (
-                      <Marker
-                        draggable
-                        pinColor={
-                          Viewable[0]?.location?.coordinates[1] ===
-                          markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
-                        }
-                        coordinate={{
-                          latitude: markers?.location?.coordinates[1],
-                          longitude: markers?.location?.coordinates[0],
-                        }}
-                        onDragEnd={e =>
-                          alert(JSON.stringify(e.nativeEvent.coordinate))
-                        }
-                        title={markers.placeName}
-                      />
+                      <View key={uuid.v4()}>
+                        <Marker
+                          draggable
+                          pinColor={
+                            Viewable[0]?.location?.coordinates[1] ===
+                            markers?.location?.coordinates[1]
+                              ? 'blue'
+                              : 'red'
+                          }
+                          coordinate={{
+                            latitude: markers?.location?.coordinates[1],
+                            longitude: markers?.location?.coordinates[0],
+                          }}
+                          onDragEnd={e =>
+                            alert(JSON.stringify(e.nativeEvent.coordinate))
+                          }
+                          title={markers.placeName}
+                        />
+                      </View>
                     ))}
-                    {/* <Marker
-                      draggable
-                      coordinate={{
-                        latitude: Viewable[0]?.location?.coordinates[1],
-                        longitude: Viewable[0]?.location?.coordinates[0],
-                      }}
-                      onDragEnd={e =>
-                        alert(JSON.stringify(e.nativeEvent.coordinate))
-                      }
-                      title={'Test Marker'}
-                      description={'This is a description of the marker'}
-                    /> */}
                   </MapView>
                 ) : null}
               </View>
@@ -1855,6 +1752,8 @@ const SearchScreen = ({navigation, route}) => {
                     backgroundColor: sortbyClicked.popular.isClicked
                       ? '#351347'
                       : '#FFFFFF',
+                    borderRightWidth: 1,
+                    borderColor: '#351347',
                   },
                 ]}
                 onPress={() =>
@@ -1883,6 +1782,8 @@ const SearchScreen = ({navigation, route}) => {
                     backgroundColor: sortbyClicked.distance.isClicked
                       ? '#351347'
                       : '#FFFFFF',
+                    borderRightWidth: 1,
+                    borderColor: '#351347',
                   },
                 ]}
                 onPress={() =>
@@ -1981,6 +1882,8 @@ const SearchScreen = ({navigation, route}) => {
                       backgroundColor: filterbyClicked.onerupee.isClicked
                         ? '#351347'
                         : '#FFFFFF',
+                      borderRightWidth: 1,
+                      borderColor: '#351347',
                     },
                   ]}
                   onPress={() =>
@@ -2012,6 +1915,8 @@ const SearchScreen = ({navigation, route}) => {
                       backgroundColor: filterbyClicked.tworupee.isClicked
                         ? '#351347'
                         : '#FFFFFF',
+                      borderRightWidth: 1,
+                      borderColor: '#351347',
                     },
                   ]}
                   onPress={() =>
@@ -2043,6 +1948,8 @@ const SearchScreen = ({navigation, route}) => {
                       backgroundColor: filterbyClicked.threerupee.isClicked
                         ? '#351347'
                         : '#FFFFFF',
+                      borderRightWidth: 1,
+                      borderColor: '#351347',
                     },
                   ]}
                   onPress={() =>
@@ -2400,36 +2307,26 @@ const SearchScreen = ({navigation, route}) => {
                     longitudeDelta: 0.05,
                   }}>
                   {filteredValue.map(markers => (
-                    <Marker
-                      draggable
-                      pinColor={
-                        Viewable[0]?.location?.coordinates[1] ===
-                        markers?.location?.coordinates[1]
-                          ? 'blue'
-                          : 'red'
-                      }
-                      coordinate={{
-                        latitude: markers?.location?.coordinates[1],
-                        longitude: markers?.location?.coordinates[0],
-                      }}
-                      onDragEnd={e =>
-                        alert(JSON.stringify(e.nativeEvent.coordinate))
-                      }
-                      title={markers.placeName}
-                    />
+                    <View key={uuid.v4()}>
+                      <Marker
+                        draggable
+                        pinColor={
+                          Viewable[0]?.location?.coordinates[1] ===
+                          markers?.location?.coordinates[1]
+                            ? 'blue'
+                            : 'red'
+                        }
+                        coordinate={{
+                          latitude: markers?.location?.coordinates[1],
+                          longitude: markers?.location?.coordinates[0],
+                        }}
+                        onDragEnd={e =>
+                          alert(JSON.stringify(e.nativeEvent.coordinate))
+                        }
+                        title={markers.placeName}
+                      />
+                    </View>
                   ))}
-                  {/* <Marker
-                    draggable
-                    coordinate={{
-                      latitude: Viewable[0]?.location?.coordinates[1],
-                      longitude: Viewable[0]?.location?.coordinates[0],
-                    }}
-                    onDragEnd={e =>
-                      alert(JSON.stringify(e.nativeEvent.coordinate))
-                    }
-                    title={'Test Marker'}
-                    description={'This is a description of the marker'}
-                  /> */}
                 </MapView>
               ) : null}
             </View>
@@ -2808,6 +2705,7 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     alignItems: 'center',
     height: 54,
+    backgroundColor: '#F0F0F0',
   },
   buttonText: {
     fontFamily: 'Avenir Medium',

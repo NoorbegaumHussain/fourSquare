@@ -6,8 +6,9 @@ import {
   Image,
   Text,
   useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {TextField} from 'rn-material-ui-textfield';
 import {Formik} from 'formik';
@@ -18,7 +19,7 @@ import {resetPassword} from '../services/auth';
 const ConfirmPassword = ({navigation, route}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
-
+  const [isLoading, setIsLoading] = useState(false);
   const loginValidationSchema = yup.object().shape({
     password: yup
       .string()
@@ -46,10 +47,12 @@ const ConfirmPassword = ({navigation, route}) => {
                   email: route?.params?.email,
                   password: values.password,
                 };
+                setIsLoading(true);
                 const response = await resetPassword(obj, route?.params?.token);
+                setIsLoading(false);
                 console.log(response);
                 if (response.status) {
-                  navigation.navigate('DrawerNavigator');
+                  navigation.navigate('LoginScreen');
                 } else {
                   console.log('Password verification failed');
                 }
@@ -162,9 +165,15 @@ const ConfirmPassword = ({navigation, route}) => {
                       </Text>
                     )}
                   </View>
-                  <View style={styles.submitButton}>
-                    <OutlinedButton text="Submit" onPress={handleSubmit} />
-                  </View>
+                  {isLoading ? (
+                    <View style={styles.submitButton}>
+                      <ActivityIndicator size="large" color="#CCCCCC" />
+                    </View>
+                  ) : (
+                    <View style={styles.submitButton}>
+                      <OutlinedButton text="Submit" onPress={handleSubmit} />
+                    </View>
+                  )}
                 </>
               )}
             </Formik>

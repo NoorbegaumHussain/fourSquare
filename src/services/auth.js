@@ -1,21 +1,19 @@
 import {BASE_URL} from '../utils/constants';
-import {BearerToken} from '../utils/BearerToken';
 import axios from 'axios';
 import {errorHandler} from '../utils/errorHandler';
-import {getData} from '../utils/BearerToken';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const registerUser = async data => {
+  console.log(data);
   try {
-    const response = await axios.post(`${BASE_URL}/api/user/register`, data);
-    // const headers = response.headers;
-    if (response.status === 200) {
-      await AsyncStorage.setItem('auth', response?.data['Access-Token']);
-    }
+    const response = await axios.post(`${BASE_URL}api/user/register`, data);
+    console.info('RESPONSEE', response?.data);
     return response;
   } catch (error) {
-    const {message: errorMessage} = errorHandler(error, 'register');
-    return errorMessage;
+    console.log(error?.response?.data);
+    return error?.response?.data?.errorMessage
+      ? error?.response?.data?.errorMessage
+      : error?.response?.data?.message;
   }
 };
 export const loginUser = async data => {
@@ -202,44 +200,40 @@ export const getAbout = async () => {
 
 export const getOTP = async email => {
   let accessToken = await AsyncStorage.getItem('auth');
-  if (accessToken !== null) {
-    try {
-      var response = await axios.get(
-        `${BASE_URL}api/otp?email=${email}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+  try {
+    var response = await axios.get(
+      `${BASE_URL}api/otp?email=${email}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
         },
-      );
+      },
+    );
 
-      return response;
-    } catch (error) {
-      const {message: errorMessage} = errorHandler(
-        error,
-        'getting review details',
-      );
-      return errorMessage;
-    }
+    return response;
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(
+      error,
+      'getting review details',
+    );
+    return errorMessage;
   }
 };
 
 export const verifyOTP = async data => {
   let accessToken = await AsyncStorage.getItem('auth');
-  if (accessToken !== null) {
-    try {
-      const response = await axios.post(`${BASE_URL}/api/otp`, data, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      console.info('Response', response.data);
-      return response;
-    } catch (error) {
-      const {message: errorMessage} = errorHandler(error, 'login');
-      return errorMessage;
-    }
+  try {
+    const response = await axios.post(`${BASE_URL}/api/otp`, data, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    console.info('Response', response.data);
+    return response;
+  } catch (error) {
+    const {message: errorMessage} = errorHandler(error, 'login');
+    return errorMessage;
   }
 };
 
@@ -486,19 +480,24 @@ export const getPopular = async (latitude, longitude) => {
   }
 };
 
-// export const getPopular = async (latitude, longitude) => {
-//   try {
-//     var response = await axios.get(
-//       `${BASE_URL}api/place/popular?longitude=${longitude}&latitude=${latitude}`,
-//       // {
-//       //   headers: {
-//       //     Authorization: `Bearer ${accessToken}`,
-//       //   },
-//       // },
-//     );
-
-//     return response;
-//   } catch (error) {
-//     return error.response;
-//   }
-// };
+export const filterFavourite = async data => {
+  let accessToken = await AsyncStorage.getItem('auth');
+  if (accessToken !== null) {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}api/place/filter-favourites`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      console.info('Response', response.data);
+      return response;
+    } catch (error) {
+      // const {message: errorMessage} = errorHandler(error, 'login');
+      return error.response.message;
+    }
+  }
+};

@@ -6,6 +6,8 @@ import {
   StatusBar,
   FlatList,
   Pressable,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import CustomAppBar from '../components/CustomAppBar';
@@ -14,6 +16,8 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import {useIsFocused} from '@react-navigation/native';
 import {getReviewsById} from '../services/auth';
 import {formatISODate} from '../utils/formatISODate';
+import {isLoggedIn} from '../utils/isLoggedIn';
+import SimpleToast from 'react-native-simple-toast';
 
 const DATA = [
   {
@@ -75,6 +79,11 @@ const DATA = [
 
 const ReviewList = ({navigation, route}) => {
   const [reviews, setReviews] = useState('');
+  const [token, setToken] = useState('');
+  const getToken = async () => {
+    var data = await isLoggedIn();
+    setToken(data);
+  };
   const renderItem = ({item}) => {
     return (
       <ReviewCard
@@ -99,6 +108,7 @@ const ReviewList = ({navigation, route}) => {
   useLayoutEffect(() => {
     if (focus === true) {
       loadList();
+      getToken();
     }
   }, [focus]);
 
@@ -115,16 +125,35 @@ const ReviewList = ({navigation, route}) => {
             navigation={navigation}
             name="Atil"
             rightIcon={
-              <Icon
-                name="addfile"
-                size={24}
-                color="#FFFFFF"
-                onPress={() =>
-                  navigation.navigate('AddReview', {
-                    placeId: route?.params?.placeId,
-                  })
-                }
-              />
+              // <Icon
+              //   name="addfile"
+              //   size={24}
+              //   color="#FFFFFF"
+              //   onPress={() => {
+              //     if (token) {
+              //       navigation.navigate('AddReview', {
+              //         placeId: route?.params?.placeId,
+              //       });
+              //     } else {
+              //       SimpleToast.show('Please Login to continue');
+              //     }
+              //   }}
+              // />
+              <TouchableOpacity
+                onPress={() => {
+                  if (token) {
+                    navigation.navigate('AddReview', {
+                      placeId: route?.params?.placeId,
+                    });
+                  } else {
+                    SimpleToast.show('Please Login to continue');
+                  }
+                }}>
+                <Image
+                  source={require('../../assets/images/add_review2.png')}
+                  style={{width: 20, height: 25, tintColor: '#FFFFFF'}}
+                />
+              </TouchableOpacity>
             }
           />
         </SafeAreaView>

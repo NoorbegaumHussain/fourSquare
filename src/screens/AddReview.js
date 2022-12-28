@@ -20,6 +20,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import {createFormData} from '../utils/createFormData';
 import {addReview} from '../services/auth';
 import SimpleToast from 'react-native-simple-toast';
+import uuid from 'react-native-uuid';
 
 const AddReview = ({navigation, route}) => {
   const [text, setText] = useState('');
@@ -131,29 +132,22 @@ const AddReview = ({navigation, route}) => {
               }}>
               {imagedata?.map(item => (
                 <Image
+                  key={uuid.v4()}
                   source={{uri: item?.image?.path}}
                   style={{
-                    height: 70,
-                    width: 70,
-                    borderRadius: 10,
-                    marginRight: 10,
+                    height: 65,
+                    width: 65,
+                    borderRadius: 5,
+                    marginRight: 23,
                     marginTop: 10,
                   }}
                 />
               ))}
-              <View
-                style={{
-                  height: 70,
-                  width: 70,
-                  borderRadius: 10,
-                  alignContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: '#cccccc',
-                  marginBottom: 80,
-                  marginTop: 10,
-                  marginRight: 10,
+              <TouchableOpacity
+                onPress={() => {
+                  createThreeButtonAlert();
                 }}>
-                <Icon
+                {/* <Icon
                   name="camera-plus-outline"
                   size={40}
                   color="#301934"
@@ -161,8 +155,17 @@ const AddReview = ({navigation, route}) => {
                   onPress={() => {
                     createThreeButtonAlert();
                   }}
+                /> */}
+                <Image
+                  source={require('../../assets/images/addphotowithback.png')}
+                  style={{
+                    height: 65,
+                    width: 65,
+                    alignSelf: 'center',
+                    marginTop: 10,
+                  }}
                 />
-              </View>
+              </TouchableOpacity>
             </View>
           </KeyboardAwareScrollView>
           {/* </View> */}

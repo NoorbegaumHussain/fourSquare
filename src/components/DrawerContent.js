@@ -90,10 +90,15 @@ const DrawerContent = props => {
               )}
             </>
           )}
+          {token && !props?.route ? (
+            <Text style={styles.loginText}>{userData?.name}</Text>
+          ) : (
+            <TouchableOpacity
+              onPress={() => props.navigation.navigate('LoginScreen')}>
+              <Text style={styles.loginText}>Login</Text>
+            </TouchableOpacity>
+          )}
 
-          <Text style={styles.loginText}>
-            {token && !props?.route ? userData?.name : ' '}
-          </Text>
           <View style={{marginTop: 40}}>
             {token && !props?.route ? (
               <>

@@ -6,34 +6,50 @@ import {
   SafeAreaView,
   Image,
   useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState} from 'react';
 import {TextField} from 'rn-material-ui-textfield';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import OutlinedButton from '../components/OutlinedButton';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {verifyOTP} from '../services/auth';
+import {getOTP, verifyOTP} from '../services/auth';
+import SimpleToast from 'react-native-simple-toast';
 
 const ForgotPassword = ({navigation, route}) => {
   const {width, height} = useWindowDimensions();
   const width1 = width < height ? 11.5 : 20;
   const [otp, setOtp] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const handleGetIn = async () => {
     if (otp !== '') {
       const obj = {
         email: route?.params?.email,
         token: otp,
       };
+      setIsLoading(true);
       const response = await verifyOTP(obj);
-      console.log(response.data.isValid);
+      setIsLoading(false);
+      console.log('get in response', response);
       if (response?.data?.status) {
         navigation.navigate('ConfirmPassword', {
           token: response?.headers['otp-verification-token'],
           email: route?.params?.email,
         });
+      } else {
+        SimpleToast.show(response);
       }
     } else {
-      console.log('Otp could not be verified');
+      SimpleToast.show('Otp could not be verified');
+    }
+  };
+
+  const handleResendOtp = async () => {
+    const response = await getOTP(route?.params?.email);
+    if (response?.status) {
+      SimpleToast.show('OTP successfullysent');
+    } else {
+      SimpleToast.show('Something went wrong, please try again');
     }
   };
 
@@ -96,12 +112,18 @@ const ForgotPassword = ({navigation, route}) => {
                         <Text style={styles.errorText}>{errors.password}</Text>
                       )} */}
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleResendOtp}>
               <Text style={styles.resendOTP}>Resend OTP</Text>
             </TouchableOpacity>
-            <View style={styles.buttonContainer}>
-              <OutlinedButton text="Get in !" onPress={handleGetIn} />
-            </View>
+            {isLoading ? (
+              <View style={styles.buttonContainer}>
+                <ActivityIndicator size="large" color="#CCCCCC" />
+              </View>
+            ) : (
+              <View style={styles.buttonContainer}>
+                <OutlinedButton text="Get in !" onPress={handleGetIn} />
+              </View>
+            )}
           </KeyboardAwareScrollView>
         </SafeAreaView>
       </ImageBackground>

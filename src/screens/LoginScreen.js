@@ -151,7 +151,7 @@ const LoginScreen = ({navigation}) => {
                         autoCorrect={false}
                         style={{
                           fontFamily: 'Avenir Book',
-                          fontSize: 16,
+                          fontSize: 18,
                           marginBottom: 5,
                           textAlign: 'center',
                           marginTop: 10,
@@ -200,7 +200,7 @@ const LoginScreen = ({navigation}) => {
                         autoCorrect={false}
                         style={{
                           fontFamily: 'Avenir Book',
-                          fontSize: 16,
+                          fontSize: 18,
                           marginBottom: 5,
                           textAlign: 'center',
                           marginTop: 10,
@@ -227,15 +227,19 @@ const LoginScreen = ({navigation}) => {
                   </View>
                   <TouchableOpacity
                     onPress={async () => {
-                      const response = await getOTP(values.email);
-                      if (response.status) {
-                        console.log('OTP successfullysent');
-                        // console.log(response.data);
-                        navigation.navigate('ForgotPassword', {
-                          email: values.email,
-                        });
+                      if (values.email) {
+                        const response = await getOTP(values.email);
+                        if (response?.status) {
+                          Toast.show('OTP successfullysent');
+                          // console.log(response.data);
+                          navigation.navigate('ForgotPassword', {
+                            email: values.email,
+                          });
+                        } else {
+                          Toast.show('Something went wrong, please try again');
+                        }
                       } else {
-                        console.log('please try again');
+                        Toast.show('Please enter email  !!');
                       }
                     }}>
                     <Text style={styles.forgotPassText}>Forgot Password?</Text>
@@ -294,7 +298,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     textAlign: 'right',
     marginRight: 28,
-    marginTop:10
+    marginTop: 10,
   },
   logo: {
     marginTop: 70,

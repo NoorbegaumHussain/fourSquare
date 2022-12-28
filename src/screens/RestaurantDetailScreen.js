@@ -35,15 +35,9 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   const [modal, setModal] = useState(false);
   const [visible, setVisible] = useState(false);
   const [rating, setRating] = useState(0);
-  const [currentLongitude, setCurrentLongitude] = useState('');
-  const [currentLatitude, setCurrentLatitude] = useState('');
-  const [locationStatus, setLocationStatus] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
   const dispatch = useDispatch();
   const mapRef = useRef(null);
-  const [particularRestaurantData, setParticularRestaurantDetails] = useState(
-    [],
-  );
   const {width, height} = useWindowDimensions();
   const handleRatingPress = () => {
     setVisible(true);
@@ -64,7 +58,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   const handleSubmit = async () => {
     const obj = {
       placeId: route?.params?.placeId,
-      rating: rating,
+      rating: rating * 2,
     };
     const response = await addRating(obj);
     if (response.status) {
@@ -80,26 +74,27 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   useLayoutEffect(() => {
     if (focus === true) {
       loadParticularPlaces();
-      setTimeout(() => {
-        try {
-          mapRef.current.animateToRegion(
-            {
-              latitude: route?.params?.latitude,
-              longitude: route?.params?.longitude,
-              latitudeDelta: 0.05,
-              longitudeDelta: 0.1,
-            },
-            3 * 1000,
-          );
-        } catch (error) {
-          Toast.show('Failed to animate direction');
-        }
-      }, 500);
     }
+    setTimeout(() => {
+      try {
+        mapRef.current.animateToRegion(
+          {
+            latitude: route?.params?.latitude,
+            longitude: route?.params?.longitude,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.2,
+          },
+          3 * 1000,
+        );
+        // setLoading(false);
+      } catch (error) {
+        console.log('Failed to animate direction');
+      }
+    }, 500);
   }, [focus]);
 
-  const ratingCompleted = rating => {
-    setRating(rating);
+  const ratingCompleted = ratings => {
+    setRating(ratings);
   };
 
   const onShare = async () => {
@@ -252,7 +247,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
                 }}
                 onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
                 title={'Test Marker'}
-                description={'This is a description of the marker'}
+                description={route?.params?.city}
               />
             </MapView>
           ) : null}
@@ -265,7 +260,12 @@ const RestaurantDetailScreen = ({navigation, route}) => {
               height: Platform.OS === 'ios' ? 161 : 150,
             }}>
             <View style={styles.maptextContainer}>
-              <Text style={styles.mapText}>{route?.params?.city}</Text>
+              <Text
+                style={styles.mapText}
+                ellipsizeMode="tail"
+                numberOfLines={2}>
+                {route?.params?.city}
+              </Text>
               <Text style={styles.mapTextNumber}>
                 +91 {route?.params?.phone}
               </Text>
@@ -322,7 +322,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
                 justifyContent: 'space-around',
                 marginTop: 40,
               }}
-              onFinishRating={rating => ratingCompleted(rating)}
+              onFinishRating={ratings => ratingCompleted(ratings)}
             />
             <TouchableOpacity
               style={styles.submitButton}

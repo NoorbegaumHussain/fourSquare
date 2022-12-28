@@ -6,6 +6,8 @@ import {
   StatusBar,
   Image,
   Alert,
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import CustomAppBar from '../components/CustomAppBar';
@@ -23,7 +25,7 @@ const PhotoGallery = ({navigation, route}) => {
   const [menuImages, setMenuImages] = useState([]);
   const [imagedata, setImgData] = useState();
   const [load, setLoad] = useState(false);
-  const [imageuri, setImageUri] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const handlePhotoClick = (image, imageId, name) => {
     navigation.navigate('PhotoDetails', {
       image: image,
@@ -34,12 +36,31 @@ const PhotoGallery = ({navigation, route}) => {
   };
 
   const loadImages = async () => {
+    setIsLoading(true);
     const response = await getImagesById(route?.params?.placeId);
-
+    setIsLoading(false);
     if (response?.status && response?.data?.data !== undefined) {
       setMenuImages(restructureObject(response?.data?.data));
     } else {
       console.log(response);
+    }
+  };
+
+  const uploadImage = async () => {
+    const obj = {
+      placeId: route?.params?.placeId,
+      image: imagedata,
+    };
+    if (imagedata) {
+      const formData = createSingleImageFormData(obj);
+      const response = await uploadSingleImage(formData);
+      console.log('......', response);
+      if (response?.status) {
+        setLoad(true);
+        setImgData(null);
+      } else {
+        console.log(response.message);
+      }
     }
   };
 
@@ -49,34 +70,15 @@ const PhotoGallery = ({navigation, route}) => {
       loadImages();
       uploadImage();
     }
-  }, [focus, imagedata, load]);
-
-  const uploadImage = async () => {
-    const obj = {
-      placeId: route?.params?.placeId,
-      image: imagedata,
-    };
-    if (imagedata !== undefined) {
-      const formData = createSingleImageFormData(obj);
-
-      const response = await uploadSingleImage(formData);
-      console.log('......', response);
-      setLoad(true);
-      if (response?.status) {
-        setLoad(true);
-      } else {
-        console.log(response.message);
-      }
-    }
-  };
+  }, [focus, imagedata]);
 
   const getImageFromCamera = async () => {
     await ImagePicker.openCamera({
-      width: 104,
-      height: 104,
+      width: 500,
+      height: 1000,
       cropping: true,
     }).then(image => {
-      setImageUri(`file://${image.path}`);
+      // setImageUri(`file://${image.path}`);
       const {path, filename, mime} = image;
       setImgData({path, filename, mime});
     });
@@ -84,12 +86,12 @@ const PhotoGallery = ({navigation, route}) => {
 
   const getImageFromGallary = async () => {
     await ImagePicker.openPicker({
-      width: 104,
-      height: 104,
+      width: 500,
+      height: 1000,
       cropping: true,
       includeBase64: true,
     }).then(image => {
-      setImageUri(`file://${image.path}`);
+      // setImageUri(`file://${image.path}`);
       const {path, filename, mime} = image;
       setImgData({path, filename, mime});
     });
@@ -125,28 +127,39 @@ const PhotoGallery = ({navigation, route}) => {
             navigation={navigation}
             name={route?.params?.placeName}
             rightIcon={
-              <Icon
-                name="camera-plus-outline"
-                size={29}
-                color="#FFFFFF"
-                borderRadius={5}
-                onPress={() => createThreeButtonAlert()}
-              />
+              <TouchableOpacity onPress={() => createThreeButtonAlert()}>
+                <Image
+                  source={require('../../assets/images/addpic.png')}
+                  style={{width: 30, height: 20}}
+                />
+              </TouchableOpacity>
             }
           />
         </SafeAreaView>
       </View>
-      <View style={styles.imageContainer}>
-        {menuImages.map(image => (
-          <TouchableOpacity
-            key={image.tempId}
-            onPress={() =>
-              handlePhotoClick(image?.url, image?._id, image?.name)
-            }>
-            <Image source={{uri: image?.url}} style={styles.image} />
-          </TouchableOpacity>
-        ))}
-      </View>
+      <>
+        {isLoading && (
+          <View style={{marginTop: 15}}>
+            <ActivityIndicator size="large" color="#CCCCCC" />
+          </View>
+        )}
+
+        {/* <View style={styles.imageContainer}> */}
+        <ScrollView
+          contentContainerStyle={styles.imageContainer}
+          showsVerticalScrollIndicator={false}>
+          {menuImages.map(image => (
+            <TouchableOpacity
+              key={image.tempId}
+              onPress={() =>
+                handlePhotoClick(image?.url, image?._id, image?.name)
+              }>
+              <Image source={{uri: image?.url}} style={styles.image} />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        {/* </View> */}
+      </>
     </View>
   );
 };
