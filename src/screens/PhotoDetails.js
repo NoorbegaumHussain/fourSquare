@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   Share,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -15,14 +16,14 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import LinearGradient from 'react-native-linear-gradient';
 import {getParticularImageDetailsById} from '../services/auth';
 import {useIsFocused} from '@react-navigation/native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+// import {TouchableOpacity} from 'react-native-gesture-handler';
 import {formatISODate} from '../utils/formatISODate';
 const PhotoDetails = ({navigation, route}) => {
   const {width, height} = useWindowDimensions();
   const [data, setData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   console.log('data', data);
-  
+
   const loadImages = async () => {
     setIsLoading(true);
     const response = await getParticularImageDetailsById(

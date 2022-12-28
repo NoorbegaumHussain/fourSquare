@@ -7,9 +7,10 @@ import {
   Pressable,
   Image,
   Platform,
+  RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
 import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
 import getCurrentLatLong from '../../utils/getCurrentLatLong';
@@ -70,6 +71,7 @@ const TopPick = ({navigation}) => {
     }
   };
   const loadFav = async () => {
+    loadPlaces();
     getToken();
     if (token) {
       const response = await getFavourites(
@@ -85,13 +87,13 @@ const TopPick = ({navigation}) => {
     }
   };
 
-  const focus = useIsFocused();
-  useLayoutEffect(() => {
-    if (focus === true) {
-      loadPlaces();
-      loadFav();
-    }
-  }, [focus, currentLatitude, token]);
+  // const focus = useIsFocused();
+  useEffect(() => {
+    // if (focus === true) {
+
+    loadFav();
+    // }
+  }, [currentLatitude, token]);
 
   const renderItem = ({item}) => {
     return (
@@ -155,8 +157,10 @@ const TopPick = ({navigation}) => {
         keyExtractor={item => item._id}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={loadPlaces} />
+        }
       />
-
     </View>
   );
 };

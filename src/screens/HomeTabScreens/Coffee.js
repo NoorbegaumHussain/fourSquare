@@ -7,8 +7,10 @@ import {
   Pressable,
   Image,
   Platform,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
 import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
 import getCurrentLatLong from '../../utils/getCurrentLatLong';
@@ -28,6 +30,7 @@ const Coffee = ({navigation}) => {
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [nearbyLocations, setNearbyLocations] = useState([]);
   const [placeId, setPlaceId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   // const token = isLoggedIn();
   const favList = useSelector(state => state.foursquaredata.favourite);
@@ -46,11 +49,13 @@ const Coffee = ({navigation}) => {
   };
   const loadPlaces = async () => {
     getOneTimeLocation();
+    setIsLoading(true);
     const response = await getPlacesByType(
       currentLatitude,
       currentLongitude,
       'cafe',
     );
+    setIsLoading(false);
     if (response.status) {
       setNearbyLocations(response?.data?.data);
     } else {
@@ -63,12 +68,10 @@ const Coffee = ({navigation}) => {
     setToken(data);
   };
 
-  const focus = useIsFocused();
-  useLayoutEffect(() => {
-    if (focus === true) {
-      loadPlaces();
-    }
-  }, [focus, currentLatitude, token]);
+  // const focus = useIsFocused();
+  useEffect(() => {
+    loadPlaces();
+  }, [currentLatitude, token]);
 
   const renderItem = ({item}) => {
     return (
@@ -127,11 +130,19 @@ const Coffee = ({navigation}) => {
 
   return (
     <View style={styles.container}>
+      {isLoading && (
+        <View style={{marginTop: 15}}>
+          <ActivityIndicator size="large" color="#310D20" />
+        </View>
+      )}
       <FlatList
         data={nearbyLocations}
         keyExtractor={item => item._id}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={loadPlaces} />
+        }
       />
     </View>
   );

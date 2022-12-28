@@ -561,6 +561,8 @@ const SearchScreen = ({navigation, route}) => {
                     if (searchTimer) {
                       clearTimeout(searchTimer);
                     }
+                    setUseCurrentLoaction('');
+                    setSelectSearchArea(false);
                     setFilterView(false);
                     setFocus(prev => ({
                       nearme: {hasfocus: false},
@@ -620,6 +622,8 @@ const SearchScreen = ({navigation, route}) => {
                   placeholder="Near Me"
                   placeholderTextColor="#CCCCCC"
                   onFocus={() => {
+                    setUseCurrentLoaction('');
+                    setSelectSearchArea(false);
                     setFilterView(false);
                     setFocus(prev => ({
                       search: {hasfocus: false},
@@ -1239,7 +1243,7 @@ const SearchScreen = ({navigation, route}) => {
             </View>
           </View>
         )}
-      {place.isSet && !mapView && place.placeString > nearme.nearmeString && (
+      {place.isSet && !mapView && (
         <View style={{flex: 1}}>
           {searchResult ? (
             <>
@@ -1337,42 +1341,40 @@ const SearchScreen = ({navigation, route}) => {
           </View>
         </View>
       )}
-      {nearme.isNearme &&
-        !mapView &&
-        place.placeString < nearme.nearmeString && (
-          <View style={{flex: 1}}>
-            {nearme ? (
-              <>
-                <FlatList
-                  data={searchNear}
-                  keyExtractor={item => item._id}
-                  renderItem={renderNearMeSearch}
-                  showsVerticalScrollIndicator={false}
+      {nearme.isNearme && !mapView && (
+        <View style={{flex: 1}}>
+          {nearme ? (
+            <>
+              <FlatList
+                data={searchNear}
+                keyExtractor={item => item._id}
+                renderItem={renderNearMeSearch}
+                showsVerticalScrollIndicator={false}
+              />
+              <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+                <PrimaryButton
+                  text="Map View"
+                  onPress={() => setMapView(true)}
                 />
-                <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
-                  <PrimaryButton
-                    text="Map View"
-                    onPress={() => setMapView(true)}
-                  />
-                </View>
-              </>
-            ) : (
-              <View style={{flex: 1, justifyContent: 'center'}}>
-                <Text
-                  style={{
-                    color: '#000000',
-                    fontFamily: 'Avenir Medium',
-                    fontSize: 20,
-                    fontWeight: '500',
-                    textAlign: 'center',
-                    marginBottom: 15,
-                  }}>
-                  No Results Found
-                </Text>
               </View>
-            )}
-          </View>
-        )}
+            </>
+          ) : (
+            <View style={{flex: 1, justifyContent: 'center'}}>
+              <Text
+                style={{
+                  color: '#000000',
+                  fontFamily: 'Avenir Medium',
+                  fontSize: 20,
+                  fontWeight: '500',
+                  textAlign: 'center',
+                  marginBottom: 15,
+                }}>
+                No Results Found
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
       {nearme.isNearme && mapView && (
         <View style={{flex: 1}}>
           <View style={styles.mainContainer}>

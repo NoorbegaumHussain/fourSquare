@@ -5,10 +5,11 @@ import {
   Image,
   StatusBar,
   useWindowDimensions,
+  TouchableOpacity,
 } from 'react-native';
 import React from 'react';
 import Icon from 'react-native-vector-icons/Feather';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+// import {TouchableOpacity} from 'react-native-gesture-handler';
 import HomeTab from '../navigation/HomeTab';
 import {useSelector} from 'react-redux';
 const HomeScreen = ({navigation}) => {

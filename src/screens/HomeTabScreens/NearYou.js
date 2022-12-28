@@ -114,7 +114,7 @@ const NearYou = ({navigation}) => {
       // loadPlaces();
     }
     requestLocationPermission();
-  }, [focus, currentLatitude, token]);
+  }, [currentLatitude, token]);
 
   const getOneTimeLocation = () => {
     setLocationStatus('Getting Location ...');

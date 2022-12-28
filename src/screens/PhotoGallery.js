@@ -8,11 +8,12 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import CustomAppBar from '../components/CustomAppBar';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+// import {TouchableOpacity} from 'react-native-gesture-handler';
 import {getImagesById, uploadSingleImage} from '../services/auth';
 import {useIsFocused} from '@react-navigation/native';
 import {restructureObject} from '../utils/restructureObject';

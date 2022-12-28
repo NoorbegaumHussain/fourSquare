@@ -9,10 +9,11 @@ import {
   Platform,
   TouchableOpacity,
   PermissionsAndroid,
+  ScrollView,
   Share,
 } from 'react-native';
 import React, {useLayoutEffect, useRef, useState} from 'react';
-import {ScrollView} from 'react-native-gesture-handler';
+// import {ScrollView} from 'react-native-gesture-handler';
 import MapView, {Marker} from 'react-native-maps';
 import PrimaryButton from '../components/PrimaryButton';
 import LinearGradient from 'react-native-linear-gradient';
@@ -699,7 +700,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: 54,
-    marginTop: 64,
+    marginTop: 69,
+    // position: 'absolute',
+    // top: 0,
   },
   submitText: {
     fontFamily: 'Avenir Medium',

@@ -7,8 +7,9 @@ import {
   Pressable,
   Image,
   Platform,
+  RefreshControl,
 } from 'react-native';
-import React, {useLayoutEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useState} from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
 import RestaurantDetailsModified from '../../components/RestaurantDetailsModified';
 import getCurrentLatLong from '../../utils/getCurrentLatLong';
@@ -27,6 +28,7 @@ const Lunch = ({navigation}) => {
   const [currentLongitude, setCurrentLongitude] = useState('');
   const [currentLatitude, setCurrentLatitude] = useState('');
   const [nearbyLocations, setNearbyLocations] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [placeId, setPlaceId] = useState('');
   const dispatch = useDispatch();
   const favList = useSelector(state => state.foursquaredata.favourite);
@@ -63,12 +65,9 @@ const Lunch = ({navigation}) => {
     }
   };
 
-  const focus = useIsFocused();
-  useLayoutEffect(() => {
-    if (focus === true) {
-      loadPlaces();
-    }
-  }, [focus, currentLatitude, token]);
+  useEffect(() => {
+    loadPlaces();
+  }, [currentLatitude, token]);
 
   const renderItem = ({item}) => {
     return (
@@ -132,6 +131,9 @@ const Lunch = ({navigation}) => {
         keyExtractor={item => item._id}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={loadPlaces} />
+        }
       />
     </View>
   );
