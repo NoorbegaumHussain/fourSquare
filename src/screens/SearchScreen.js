@@ -694,8 +694,6 @@ const SearchScreen = ({navigation, route}) => {
       </View>
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         !topPicks &&
         !popular &&
         !cafe &&
@@ -726,8 +724,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         topPicks &&
         !popular &&
         !mapView && (
@@ -752,8 +748,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         topPicks &&
         !popular &&
         mapView && (
@@ -834,8 +828,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         !topPicks &&
         popular &&
         !mapView && (
@@ -860,8 +852,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         !topPicks &&
         popular &&
         mapView && (
@@ -934,8 +924,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         !topPicks &&
         !popular &&
         lunch &&
@@ -961,8 +949,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         !topPicks &&
         lunch &&
         !popular &&
@@ -1036,8 +1022,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         !topPicks &&
         !popular &&
         !lunch &&
@@ -1064,8 +1048,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         !topPicks &&
         !lunch &&
         cafe &&
@@ -1140,8 +1122,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         !topPicks &&
         !popular &&
         !lunch &&
@@ -1169,8 +1149,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
-        place.placeString < 2 &&
-        nearme.nearmeString < 2 &&
         !topPicks &&
         !lunch &&
         !cafe &&
@@ -1441,8 +1419,6 @@ const SearchScreen = ({navigation, route}) => {
       )}
       {!filterClicked &&
         focus.nearme.hasfocus &&
-        nearme.nearmeString < 2 &&
-        place.placeString < 2 &&
         !useCurrentLocation &&
         !selectSearchArea && (
           <View>
@@ -1486,8 +1462,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.nearme.hasfocus &&
-        nearme.nearmeString < 2 &&
-        place.placeString < 2 &&
         selectSearchArea &&
         !nearbyLocations && (
           <View style={styles.mainContainer}>
@@ -1542,8 +1516,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.nearme.hasfocus &&
-        nearme.nearmeString < 2 &&
-        place.placeString < 2 &&
         selectSearchArea &&
         nearbyLocations &&
         !mapView && (
@@ -1571,8 +1543,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.nearme.hasfocus &&
-        nearme.nearmeString < 2 &&
-        place.placeString < 2 &&
         selectSearchArea &&
         nearbyLocations &&
         mapView && (
@@ -1644,8 +1614,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.nearme.hasfocus &&
-        nearme.nearmeString < 2 &&
-        place.placeString < 2 &&
         useCurrentLocation &&
         !mapView && (
           <View
@@ -1669,8 +1637,6 @@ const SearchScreen = ({navigation, route}) => {
         )}
       {!filterClicked &&
         focus.nearme.hasfocus &&
-        nearme.nearmeString < 2 &&
-        place.placeString < 2 &&
         useCurrentLocation &&
         mapView && (
           <View style={{flex: 1}}>
