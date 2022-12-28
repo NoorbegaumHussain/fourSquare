@@ -14,6 +14,9 @@ import {
   PermissionsAndroid,
   Animated,
   ActivityIndicator,
+  TouchableWithoutFeedback,
+  ScrollView,
+  Keyboard,
 } from 'react-native';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import Icon from 'react-native-vector-icons/Feather';
@@ -23,7 +26,6 @@ import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import RestaurantDetails from '../components/RestaurantDetails';
 import OutlinedButton from '../components/OutlinedButton';
 import PrimaryButton from '../components/PrimaryButton';
-import {ScrollView} from 'react-native-gesture-handler';
 import Geolocation from '@react-native-community/geolocation';
 import MapView, {Marker} from 'react-native-maps';
 import {isMap} from 'immer/dist/internal';
@@ -699,7 +701,7 @@ const SearchScreen = ({navigation, route}) => {
         !cafe &&
         !city &&
         !lunch && (
-          <View>
+          <ScrollView keyboardShouldPersistTaps="handled">
             <View style={styles.nearbyPlacesContainer}>
               <Text style={styles.nearbyPlacesText}>Near by places</Text>
             </View>
@@ -720,7 +722,7 @@ const SearchScreen = ({navigation, route}) => {
                 renderItem={renderSuggestions}
               />
             </View>
-          </View>
+            </ScrollView>
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
@@ -1421,7 +1423,7 @@ const SearchScreen = ({navigation, route}) => {
         focus.nearme.hasfocus &&
         !useCurrentLocation &&
         !selectSearchArea && (
-          <View>
+          <ScrollView keyboardShouldPersistTaps="handled">
             <TouchableOpacity
               style={styles.nearmeListContainer}
               onPress={async () => {
@@ -1458,7 +1460,7 @@ const SearchScreen = ({navigation, route}) => {
               </Text>
             </TouchableOpacity>
             <View style={[styles.line, {backgroundColor: '#8D8D8d'}]} />
-          </View>
+          </ScrollView>
         )}
       {!filterClicked &&
         focus.nearme.hasfocus &&
