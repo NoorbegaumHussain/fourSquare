@@ -87,13 +87,12 @@ const TopPick = ({navigation}) => {
     }
   };
 
-  // const focus = useIsFocused();
-  useEffect(() => {
-    // if (focus === true) {
-
-    loadFav();
-    // }
-  }, [currentLatitude, token]);
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus) {
+      loadFav();
+    }
+  }, [focus, currentLatitude, token]);
 
   const renderItem = ({item}) => {
     return (

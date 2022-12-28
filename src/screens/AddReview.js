@@ -177,9 +177,20 @@ const AddReview = ({navigation, route}) => {
           <ActivityIndicator size="large" color="#310D20" />
         </View>
       ) : (
-        <View style={styles.primaryButtonContainer}>
-          <PrimaryButton text="Submit" onPress={handleSubmit} />
-        </View>
+        <>
+          {text !== '' ? (
+            <View style={styles.primaryButtonContainer}>
+              <PrimaryButton text="Submit" onPress={handleSubmit} />
+            </View>
+          ) : (
+            <View style={styles.primaryButtonContainer}>
+              <PrimaryButton
+                text="Submit"
+                onPress={() => SimpleToast.show('Review cannot be empty')}
+              />
+            </View>
+          )}
+        </>
       )}
     </View>
   );

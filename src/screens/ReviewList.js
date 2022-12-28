@@ -8,6 +8,7 @@ import {
   Pressable,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import CustomAppBar from '../components/CustomAppBar';
@@ -80,6 +81,7 @@ const DATA = [
 const ReviewList = ({navigation, route}) => {
   const [reviews, setReviews] = useState('');
   const [token, setToken] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const getToken = async () => {
     var data = await isLoggedIn();
     setToken(data);
@@ -96,7 +98,9 @@ const ReviewList = ({navigation, route}) => {
   };
 
   const loadList = async () => {
+    setIsLoading(true);
     const response = await getReviewsById(route?.params?.placeId);
+    setIsLoading(false);
     if (response.status) {
       setReviews(response?.data?.data);
     } else {
@@ -158,6 +162,11 @@ const ReviewList = ({navigation, route}) => {
           />
         </SafeAreaView>
       </View>
+      {isLoading && (
+        <View style={{marginTop: 15}}>
+          <ActivityIndicator size="large" color="#310D20" />
+        </View>
+      )}
       <FlatList
         data={reviews}
         keyExtractor={item => item._id}

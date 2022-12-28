@@ -6,6 +6,7 @@ import Favourites from '../screens/Favourites';
 import Feedback from '../screens/Feedback';
 import AppStack from './AppStack';
 import {Dimensions} from 'react-native';
+import FavouritesStack from './FavouritesStack';
 
 const Drawer = createDrawerNavigator();
 
@@ -28,7 +29,7 @@ const DrawerNavigator = ({route}) => {
         <DrawerContent {...props} route={route?.params?.isSkip} />
       )}>
       <Drawer.Screen name="AppStack" component={AppStack} />
-      <Drawer.Screen name="Favourites" component={Favourites} />
+      <Drawer.Screen name="FavouritesStack" component={FavouritesStack} />
       <Drawer.Screen name="Feedback" component={Feedback} />
       <Drawer.Screen name="AboutUs" component={AboutUs} />
     </Drawer.Navigator>

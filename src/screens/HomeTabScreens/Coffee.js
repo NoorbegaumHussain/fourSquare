@@ -49,13 +49,11 @@ const Coffee = ({navigation}) => {
   };
   const loadPlaces = async () => {
     getOneTimeLocation();
-    setIsLoading(true);
     const response = await getPlacesByType(
       currentLatitude,
       currentLongitude,
       'cafe',
     );
-    setIsLoading(false);
     if (response.status) {
       setNearbyLocations(response?.data?.data);
     } else {
@@ -68,10 +66,12 @@ const Coffee = ({navigation}) => {
     setToken(data);
   };
 
-  // const focus = useIsFocused();
-  useEffect(() => {
-    loadPlaces();
-  }, [currentLatitude, token]);
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus) {
+      loadPlaces();
+    }
+  }, [focus, currentLatitude, token]);
 
   const renderItem = ({item}) => {
     return (

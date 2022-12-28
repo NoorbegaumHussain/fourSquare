@@ -8,6 +8,7 @@ import {
   TextInput,
   Platform,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useState} from 'react';
 // import {TouchableOpacity} from 'react-native-gesture-handler';
@@ -17,14 +18,20 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ImagePickerComponent from '../components/ImagePickerComponent';
 import {SafeAreaInsetsContext} from 'react-native-safe-area-context';
 import {addFeedback} from '../services/auth';
+import SimpleToast from 'react-native-simple-toast';
 const Feedback = ({navigation}) => {
   const [text, setText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async () => {
+    setIsLoading(true);
     const response = await addFeedback(text);
+    setIsLoading(false);
     if (response.status) {
-      console.log('success');
+      SimpleToast.show('success');
+      navigation.goBack();
     } else {
-      console.log(response);
+      SimpleToast.show(`${response}, since feedback is empty`);
     }
     // navigation.navigate('');
     // navigation.navigate('');
@@ -64,9 +71,15 @@ const Feedback = ({navigation}) => {
           </KeyboardAwareScrollView>
         </View>
       </View>
-      <View style={styles.primaryButtonContainer}>
-        <PrimaryButton text="Submit" onPress={handleSubmit} />
-      </View>
+      {isLoading ? (
+        <View style={styles.primaryButtonContainer}>
+          <ActivityIndicator size="large" color="#310D20" />
+        </View>
+      ) : (
+        <View style={styles.primaryButtonContainer}>
+          <PrimaryButton text="Submit" onPress={handleSubmit} />
+        </View>
+      )}
     </View>
   );
 };

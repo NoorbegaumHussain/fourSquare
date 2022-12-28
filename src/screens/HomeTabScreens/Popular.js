@@ -65,9 +65,12 @@ const Popular = ({navigation}) => {
     }
   };
 
-  useEffect(() => {
-    loadPlaces();
-  }, [currentLatitude, token]);
+  const focus = useIsFocused();
+  useLayoutEffect(() => {
+    if (focus) {
+      loadPlaces();
+    }
+  }, [focus, currentLatitude, token]);
 
   const renderItem = ({item}) => {
     return (

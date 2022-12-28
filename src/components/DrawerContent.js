@@ -104,7 +104,7 @@ const DrawerContent = props => {
               <>
                 <TouchableOpacity
                   style={styles.drawerContentContainer}
-                  onPress={() => props.navigation.navigate('Favourites')}>
+                  onPress={() => props.navigation.navigate('FavouritesStack')}>
                   <Image
                     source={require('../../assets/images/favourite_icon_copy.png')}
                     style={styles.drawerContentIconFav}

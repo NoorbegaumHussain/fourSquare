@@ -229,7 +229,11 @@ const RestaurantDetailScreen = ({navigation, route}) => {
         </View>
 
         <View style={styles.line} />
-        <View style={styles.overViewContainer}>
+        <View
+          style={[
+            styles.overViewContainer,
+            {height: route?.params?.overview ? '20%' : 170},
+          ]}>
           <Text style={styles.overViewText}>Overview</Text>
           <Text style={styles.overViewDetails}>{route?.params?.overview}</Text>
         </View>
@@ -619,7 +623,6 @@ const styles = StyleSheet.create({
   },
   overViewContainer: {
     marginHorizontal: 20,
-    height: '20.5%',
     flex: 1,
   },
   overViewText: {
