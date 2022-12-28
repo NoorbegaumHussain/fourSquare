@@ -15,16 +15,7 @@ import DrawerNavigator from './DrawerNavigator';
 import {isLoggedIn} from '../utils/isLoggedIn';
 const Stack = createStackNavigator();
 
-const AuthStack = () => {
-  const [token, setToken] = useState();
-  const getToken = async () => {
-    var data = await isLoggedIn();
-    console.log(data);
-    setToken(data);
-  };
-  useEffect(() => {
-    getToken();
-  }, []);
+const AuthStack = ({token = null}) => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
@@ -35,7 +26,7 @@ const AuthStack = () => {
               component={LoginScreen}
               options={{
                 headerShown: false,
-                // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+                cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
               }}
             />
             <Stack.Screen
@@ -43,7 +34,7 @@ const AuthStack = () => {
               component={ForgotPassword}
               options={{
                 headerShown: false,
-                // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+                cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
               }}
             />
             <Stack.Screen
@@ -51,7 +42,7 @@ const AuthStack = () => {
               component={ConfirmPassword}
               options={{
                 headerShown: false,
-                // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+                cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
               }}
             />
             <Stack.Screen
@@ -59,7 +50,7 @@ const AuthStack = () => {
               component={Register}
               options={{
                 headerShown: false,
-                // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+                cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
               }}
             />
           </>
@@ -70,7 +61,7 @@ const AuthStack = () => {
           component={DrawerNavigator}
           options={{
             headerShown: false,
-            // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+            cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
           }}
         />
       </Stack.Navigator>

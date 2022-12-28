@@ -21,7 +21,7 @@ const AppStack = () => {
         component={HomeScreen}
         options={{
           headerShown: false,
-          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
       <Stack.Screen
@@ -29,7 +29,7 @@ const AppStack = () => {
         component={RestaurantDetailScreen}
         options={{
           headerShown: false,
-          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
       <Stack.Screen
@@ -37,7 +37,7 @@ const AppStack = () => {
         component={ReviewList}
         options={{
           headerShown: false,
-          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
       <Stack.Screen
@@ -45,7 +45,7 @@ const AppStack = () => {
         component={PhotoGallery}
         options={{
           headerShown: false,
-          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
       <Stack.Screen
@@ -53,7 +53,7 @@ const AppStack = () => {
         component={PhotoDetails}
         options={{
           headerShown: false,
-          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
       <Stack.Screen
@@ -61,7 +61,7 @@ const AppStack = () => {
         component={AddReview}
         options={{
           headerShown: false,
-          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
       <Stack.Screen
@@ -69,7 +69,7 @@ const AppStack = () => {
         component={SearchScreen}
         options={{
           headerShown: false,
-          // cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
         }}
       />
     </Stack.Navigator>
