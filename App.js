@@ -7,10 +7,11 @@ import {persistStore} from 'redux-persist';
 import 'react-native-gesture-handler';
 import {isLoggedIn} from './src/utils/isLoggedIn';
 import SplashScreen from 'react-native-splash-screen';
-
+import {LogBox} from 'react-native';
 let persistor = persistStore(store);
 
 const App = () => {
+  LogBox.ignoreAllLogs();
   const [token, setToken] = useState();
   const getToken = async () => {
     var data = await isLoggedIn();
