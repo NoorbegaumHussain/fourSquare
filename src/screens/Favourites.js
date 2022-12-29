@@ -129,6 +129,7 @@ const Favourites = ({navigation}) => {
   useLayoutEffect(() => {
     if (focus === true) {
       loadPlaces();
+      handleFilter();
     }
   }, [focus, text, favList]);
 
@@ -157,7 +158,7 @@ const Favourites = ({navigation}) => {
                 alignItems: 'center',
               }}
               onPress={async () => {
-                console.info(item._id, favList);
+                console.info(item.placeId, favList);
                 const response = await addOrRemoveFromFav(item?.placeId);
                 console.log('fav resppppppp', response.data);
                 if (response?.data?.status) {
