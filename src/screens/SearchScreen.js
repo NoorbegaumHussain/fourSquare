@@ -473,7 +473,7 @@ const SearchScreen = ({navigation, route}) => {
           width: width - 10,
           flexDirection: 'row',
           backgroundColor: 'white',
-          borderRightColor: 'red',
+          borderRightColor: 'green',
           marginRight: 5,
           alignItems: 'center',
           height: 135,
@@ -790,8 +790,8 @@ const SearchScreen = ({navigation, route}) => {
                           pinColor={
                             Viewable[0]?.location?.coordinates[1] ===
                             markers?.location?.coordinates[1]
-                              ? 'blue'
-                              : 'red'
+                              ? 'orange'
+                              : 'green'
                           }
                           coordinate={{
                             latitude: markers?.location?.coordinates[1],
@@ -811,7 +811,7 @@ const SearchScreen = ({navigation, route}) => {
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderColor: 'red',
+                  borderColor: 'green',
                 }}>
                 <FlatList
                   data={topPicks}
@@ -887,8 +887,8 @@ const SearchScreen = ({navigation, route}) => {
                           pinColor={
                             Viewable[0]?.location?.coordinates[1] ===
                             markers?.location?.coordinates[1]
-                              ? 'blue'
-                              : 'red'
+                              ? 'orange'
+                              : 'green'
                           }
                           coordinate={{
                             latitude: markers?.location?.coordinates[1],
@@ -908,7 +908,7 @@ const SearchScreen = ({navigation, route}) => {
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderColor: 'red',
+                  borderColor: 'green',
                 }}>
                 <FlatList
                   data={popular}
@@ -985,8 +985,8 @@ const SearchScreen = ({navigation, route}) => {
                           pinColor={
                             Viewable[0]?.location?.coordinates[1] ===
                             markers?.location?.coordinates[1]
-                              ? 'blue'
-                              : 'red'
+                              ? 'orange'
+                              : 'green'
                           }
                           coordinate={{
                             latitude: markers?.location?.coordinates[1],
@@ -1006,7 +1006,7 @@ const SearchScreen = ({navigation, route}) => {
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderColor: 'red',
+                  borderColor: 'green',
                 }}>
                 <FlatList
                   data={lunch}
@@ -1085,8 +1085,8 @@ const SearchScreen = ({navigation, route}) => {
                           pinColor={
                             Viewable[0]?.location?.coordinates[1] ===
                             markers?.location?.coordinates[1]
-                              ? 'blue'
-                              : 'red'
+                              ? 'orange'
+                              : 'green'
                           }
                           coordinate={{
                             latitude: markers?.location?.coordinates[1],
@@ -1106,7 +1106,7 @@ const SearchScreen = ({navigation, route}) => {
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderColor: 'red',
+                  borderColor: 'green',
                 }}>
                 <FlatList
                   data={cafe}
@@ -1186,8 +1186,8 @@ const SearchScreen = ({navigation, route}) => {
                           pinColor={
                             Viewable[0]?.location?.coordinates[1] ===
                             markers?.location?.coordinates[1]
-                              ? 'blue'
-                              : 'red'
+                              ? 'orange'
+                              : 'green'
                           }
                           coordinate={{
                             latitude: markers?.location?.coordinates[1],
@@ -1207,7 +1207,7 @@ const SearchScreen = ({navigation, route}) => {
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderColor: 'red',
+                  borderColor: 'green',
                 }}>
                 <FlatList
                   data={city}
@@ -1292,8 +1292,8 @@ const SearchScreen = ({navigation, route}) => {
                         pinColor={
                           Viewable[0]?.location?.coordinates[1] ===
                           markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
+                            ? 'orange'
+                            : 'green'
                         }
                         coordinate={{
                           latitude: markers?.location?.coordinates[1],
@@ -1313,7 +1313,7 @@ const SearchScreen = ({navigation, route}) => {
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
-                borderColor: 'red',
+                borderColor: 'green',
               }}>
               <FlatList
                 data={searchResult}
@@ -1390,8 +1390,8 @@ const SearchScreen = ({navigation, route}) => {
                         pinColor={
                           Viewable[0]?.location?.coordinates[1] ===
                           markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
+                            ? 'orange'
+                            : 'green'
                         }
                         coordinate={{
                           latitude: markers?.location?.coordinates[1],
@@ -1411,7 +1411,7 @@ const SearchScreen = ({navigation, route}) => {
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
-                borderColor: 'red',
+                borderColor: 'green',
               }}>
               <FlatList
                 data={searchNear}
@@ -1585,8 +1585,8 @@ const SearchScreen = ({navigation, route}) => {
                           pinColor={
                             Viewable[0]?.location?.coordinates[1] ===
                             markers?.location?.coordinates[1]
-                              ? 'blue'
-                              : 'red'
+                              ? 'orange'
+                              : 'green'
                           }
                           coordinate={{
                             latitude: markers?.location?.coordinates[1],
@@ -1606,7 +1606,7 @@ const SearchScreen = ({navigation, route}) => {
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderColor: 'red',
+                  borderColor: 'green',
                 }}>
                 <FlatList
                   data={nearbyLocations}
@@ -1678,8 +1678,8 @@ const SearchScreen = ({navigation, route}) => {
                           pinColor={
                             Viewable[0]?.location?.coordinates[1] ===
                             markers?.location?.coordinates[1]
-                              ? 'blue'
-                              : 'red'
+                              ? 'orange'
+                              : 'green'
                           }
                           coordinate={{
                             latitude: markers?.location?.coordinates[1],
@@ -1699,7 +1699,7 @@ const SearchScreen = ({navigation, route}) => {
                 style={{
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderColor: 'red',
+                  borderColor: 'green',
                 }}>
                 <FlatList
                   data={useCurrentLocation}
@@ -2298,8 +2298,8 @@ const SearchScreen = ({navigation, route}) => {
                         pinColor={
                           Viewable[0]?.location?.coordinates[1] ===
                           markers?.location?.coordinates[1]
-                            ? 'blue'
-                            : 'red'
+                            ? 'orange'
+                            : 'green'
                         }
                         coordinate={{
                           latitude: markers?.location?.coordinates[1],
@@ -2319,7 +2319,7 @@ const SearchScreen = ({navigation, route}) => {
               style={{
                 justifyContent: 'center',
                 alignItems: 'center',
-                borderColor: 'red',
+                borderColor: 'green',
               }}>
               <FlatList
                 data={filteredValue}
