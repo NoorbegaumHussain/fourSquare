@@ -700,6 +700,8 @@ const SearchScreen = ({navigation, route}) => {
       </View>
       {!filterClicked &&
         !filterView &&
+        !place.placeString &&
+        !nearme.nearmeString &&
         focus.search.hasfocus &&
         !topPicks &&
         !popular &&
@@ -1228,40 +1230,45 @@ const SearchScreen = ({navigation, route}) => {
             </View>
           </View>
         )}
-      {place.isSet && !mapView && !useCurrentLocation && !selectSearchArea && (
-        <View style={{flex: 1}}>
-          {searchResult ? (
-            <>
-              <FlatList
-                data={searchResult}
-                keyExtractor={item => item._id}
-                renderItem={renderListSearch}
-              />
-
-              <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
-                <PrimaryButton
-                  text="Map View"
-                  onPress={() => setMapView(true)}
+      {place.isSet &&
+        !mapView &&
+        !useCurrentLocation &&
+        !selectSearchArea &&
+        !nearme.isNearme && (
+          <View style={{flex: 1}}>
+            {searchResult ? (
+              <>
+                <FlatList
+                  data={searchResult}
+                  keyExtractor={item => item._id}
+                  renderItem={renderListSearch}
+                  showsVerticalScrollIndicator={false}
                 />
+
+                <View style={{marginBottom: Platform.OS === 'ios' ? 13 : 0}}>
+                  <PrimaryButton
+                    text="Map View"
+                    onPress={() => setMapView(true)}
+                  />
+                </View>
+              </>
+            ) : (
+              <View style={{flex: 1, justifyContent: 'center'}}>
+                <Text
+                  style={{
+                    color: '#000000',
+                    fontFamily: 'Avenir Medium',
+                    fontSize: 20,
+                    fontWeight: '500',
+                    textAlign: 'center',
+                    marginBottom: 15,
+                  }}>
+                  No Results Found
+                </Text>
               </View>
-            </>
-          ) : (
-            <View style={{flex: 1, justifyContent: 'center'}}>
-              <Text
-                style={{
-                  color: '#000000',
-                  fontFamily: 'Avenir Medium',
-                  fontSize: 20,
-                  fontWeight: '500',
-                  textAlign: 'center',
-                  marginBottom: 15,
-                }}>
-                No Results Found
-              </Text>
-            </View>
-          )}
-        </View>
-      )}
+            )}
+          </View>
+        )}
       {place.isSet && mapView && !useCurrentLocation && !selectSearchArea && (
         <View style={{flex: 1}}>
           <View style={styles.mainContainer}>
@@ -1360,7 +1367,7 @@ const SearchScreen = ({navigation, route}) => {
           )}
         </View>
       )}
-      {nearme.isNearme && mapView && (
+      {nearme.isNearme && mapView && !place.isSet && (
         <View style={{flex: 1}}>
           <View style={styles.mainContainer}>
             <View style={[styles.mapContainer, {height: '100%'}]}>
@@ -1426,6 +1433,8 @@ const SearchScreen = ({navigation, route}) => {
       )}
       {!filterClicked &&
         focus.nearme.hasfocus &&
+        !place.placeString &&
+        !nearme.nearmeString &&
         !useCurrentLocation &&
         !selectSearchArea &&
         !filterView && (
@@ -2629,6 +2638,7 @@ const styles = StyleSheet.create({
     color: '#000000',
     marginLeft: 30,
     textAlign: 'center',
+    textTransform: 'capitalize',
   },
   cardContainer: {
     backgroundColor: '#FFFFFF',
