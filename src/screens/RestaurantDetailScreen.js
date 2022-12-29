@@ -31,18 +31,30 @@ import {roundOff} from '../utils/roundOffNumber';
 import Geolocation from '@react-native-community/geolocation';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToFavourite, deleteFromFavourites} from '../redux/fourSquareSlice';
+import {isLoggedIn} from '../utils/isLoggedIn';
+import SimpleToast from 'react-native-simple-toast';
 
 const RestaurantDetailScreen = ({navigation, route}) => {
   const [modal, setModal] = useState(false);
   const [visible, setVisible] = useState(false);
   const [rating, setRating] = useState(0);
+  const [token, setToken] = useState('');
   const favList = useSelector(state => state.foursquaredata.favourite);
   const dispatch = useDispatch();
   const mapRef = useRef(null);
   const {width, height} = useWindowDimensions();
   const handleRatingPress = () => {
-    setVisible(true);
-    setModal(true);
+    if (token) {
+      setVisible(true);
+      setModal(true);
+    } else {
+      SimpleToast.show('Please login to continue');
+    }
+  };
+
+  const getToken = async () => {
+    var data = await isLoggedIn();
+    setToken(data);
   };
 
   const loadParticularPlaces = async () => {
@@ -75,6 +87,7 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   useLayoutEffect(() => {
     if (focus === true) {
       loadParticularPlaces();
+      getToken();
     }
     setTimeout(() => {
       try {
@@ -101,7 +114,12 @@ const RestaurantDetailScreen = ({navigation, route}) => {
   const onShare = async () => {
     try {
       const result = await Share.share({
-        message: 'details',
+        url: 'https' + route?.params?.url.substring(4),
+        message: `Place Name:${route?.params?.placeName}${'\n'}Address:${
+          route?.params?.city
+        }Phone No:${route?.params?.phone}${'\n'}Rating:${
+          route?.params?.rating
+        }${'\n'}`,
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {

@@ -695,6 +695,7 @@ const SearchScreen = ({navigation, route}) => {
         </SafeAreaView>
       </View>
       {!filterClicked &&
+        !filterView &&
         focus.search.hasfocus &&
         !topPicks &&
         !popular &&
@@ -722,7 +723,7 @@ const SearchScreen = ({navigation, route}) => {
                 renderItem={renderSuggestions}
               />
             </View>
-            </ScrollView>
+          </ScrollView>
         )}
       {!filterClicked &&
         focus.search.hasfocus &&
@@ -1422,7 +1423,8 @@ const SearchScreen = ({navigation, route}) => {
       {!filterClicked &&
         focus.nearme.hasfocus &&
         !useCurrentLocation &&
-        !selectSearchArea && (
+        !selectSearchArea &&
+        !filterView && (
           <ScrollView keyboardShouldPersistTaps="handled">
             <TouchableOpacity
               style={styles.nearmeListContainer}

@@ -21,12 +21,15 @@ import {createFormData} from '../utils/createFormData';
 import ImagePickerComponent from '../components/ImagePickerComponent';
 import ImagePicker from 'react-native-image-crop-picker';
 import {createSingleImageFormData} from '../utils/createSingleImageFormData';
+import {isLoggedIn} from '../utils/isLoggedIn';
+import SimpleToast from 'react-native-simple-toast';
 
 const PhotoGallery = ({navigation, route}) => {
   const [menuImages, setMenuImages] = useState([]);
   const [imagedata, setImgData] = useState();
   const [load, setLoad] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [token, setToken] = useState('');
   const handlePhotoClick = (image, imageId, name) => {
     navigation.navigate('PhotoDetails', {
       image: image,
@@ -36,7 +39,13 @@ const PhotoGallery = ({navigation, route}) => {
     });
   };
 
+  const getToken = async () => {
+    var data = await isLoggedIn();
+    setToken(data);
+  };
+
   const loadImages = async () => {
+    getToken();
     setIsLoading(true);
     const response = await getImagesById(route?.params?.placeId);
     setIsLoading(false);
@@ -128,12 +137,22 @@ const PhotoGallery = ({navigation, route}) => {
             navigation={navigation}
             name={route?.params?.placeName}
             rightIcon={
-              <TouchableOpacity onPress={() => createThreeButtonAlert()}>
-                <Image
-                  source={require('../../assets/images/addpic.png')}
-                  style={{width: 30, height: 20}}
-                />
-              </TouchableOpacity>
+              token ? (
+                <TouchableOpacity onPress={() => createThreeButtonAlert()}>
+                  <Image
+                    source={require('../../assets/images/addpic.png')}
+                    style={{width: 30, height: 20}}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => SimpleToast.show('Please login to continue')}>
+                  <Image
+                    source={require('../../assets/images/addpic.png')}
+                    style={{width: 30, height: 20}}
+                  />
+                </TouchableOpacity>
+              )
             }
           />
         </SafeAreaView>

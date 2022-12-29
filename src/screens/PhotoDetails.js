@@ -48,7 +48,8 @@ const PhotoDetails = ({navigation, route}) => {
   const onShare = async () => {
     try {
       const result = await Share.share({
-        message: 'details',
+        url: 'https' + route?.params?.image.substring(4),
+        message: `Place Name:${route?.params?.placeName}${'\n'}${'\n'}`,
       });
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
@@ -60,7 +61,6 @@ const PhotoDetails = ({navigation, route}) => {
       alert(error.message);
     }
   };
-
   return (
     <View style={styles.container}>
       <ImageBackground
