@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
+  useWindowDimensions,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import CustomAppBar from '../components/CustomAppBar';
@@ -28,6 +29,7 @@ const PhotoGallery = ({navigation, route}) => {
   const [menuImages, setMenuImages] = useState([]);
   const [imagedata, setImgData] = useState();
   const [load, setLoad] = useState(false);
+  const {width} = useWindowDimensions();
   const [isLoading, setIsLoading] = useState(false);
   const [token, setToken] = useState('');
   const handlePhotoClick = (image, imageId, name) => {
@@ -85,7 +87,7 @@ const PhotoGallery = ({navigation, route}) => {
   const getImageFromCamera = async () => {
     await ImagePicker.openCamera({
       width: 500,
-      height: 1000,
+      height: 500,
       cropping: true,
     }).then(image => {
       // setImageUri(`file://${image.path}`);
@@ -97,7 +99,7 @@ const PhotoGallery = ({navigation, route}) => {
   const getImageFromGallary = async () => {
     await ImagePicker.openPicker({
       width: 500,
-      height: 1000,
+      height: 500,
       cropping: true,
       includeBase64: true,
     }).then(image => {
@@ -146,7 +148,19 @@ const PhotoGallery = ({navigation, route}) => {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  onPress={() => SimpleToast.show('Please login to continue')}>
+                  onPress={() => {
+                    Alert.alert('Login to continue', '', [
+                      {
+                        text: 'Login',
+                        onPress: () => navigation.navigate('LoginScreen'),
+                      },
+                      {
+                        text: 'Cancel',
+                        onPress: () => null,
+                        style: 'cancel',
+                      },
+                    ]);
+                  }}>
                   <Image
                     source={require('../../assets/images/addpic.png')}
                     style={{width: 30, height: 20}}
@@ -174,7 +188,10 @@ const PhotoGallery = ({navigation, route}) => {
               onPress={() =>
                 handlePhotoClick(image?.url, image?._id, image?.name)
               }>
-              <Image source={{uri: image?.url}} style={styles.image} />
+              <Image
+                source={{uri: image?.url}}
+                style={[styles.image, {width: width / 3 - 5}]}
+              />
             </TouchableOpacity>
           ))}
         </ScrollView>

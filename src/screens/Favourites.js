@@ -100,7 +100,7 @@ const Favourites = ({navigation}) => {
   const [filteredValue, setFilteredValue] = useState('');
   const handleFilter = async () => {
     const response = await filterFavourite(obj);
-    console.log('obj.....', obj);
+    console.log('obj.....', response.data.data);
     if (response?.status && response?.data?.data !== undefined) {
       setFilterClicked(false);
       setFilterView(true);
@@ -157,7 +157,7 @@ const Favourites = ({navigation}) => {
                 alignItems: 'center',
               }}
               onPress={async () => {
-                console.info(item._id);
+                console.info(item._id, favList);
                 const response = await addOrRemoveFromFav(item?.placeId);
                 console.log('fav resppppppp', response.data);
                 if (response?.data?.status) {
@@ -175,55 +175,6 @@ const Favourites = ({navigation}) => {
           }
         />
       </View>
-    );
-  };
-
-  const renderListSearch = ({item}) => {
-    return (
-      <RestaurantDetailsModified
-        navigation={navigation}
-        placeId={item?._id}
-        placeName={item?.placeName}
-        url={item.image?.url}
-        sector={item?.sector}
-        city={item?.city}
-        rating={item?.totalrating}
-        priceRange={item?.priceRange}
-        distance={item?.dist?.calculated}
-        overview={item?.overview}
-        phone={item?.phone}
-        latitude={item?.location?.coordinates[1]}
-        longitude={item?.location?.coordinates[0]}
-        image={
-          <TouchableOpacity
-            style={{
-              height: 50,
-              width: 50,
-              alignItems: 'center',
-            }}
-            ratingStyle={{}}
-            onPress={async () => {
-              const response = await addOrRemoveFromFav(item?._id);
-              if (response?.data?.status) {
-                dispatch(addToFavourite(item?._id));
-              } else {
-                dispatch(deleteFromFavourites(item?._id));
-              }
-            }}>
-            {favList.includes(item?._id) && favList.length > 0 ? (
-              <Image
-                source={require('../../assets/images/favourite_icon.png')}
-                style={styles.favIcon}
-              />
-            ) : (
-              <Image
-                source={require('../../assets/images/favourite_icon_selected.png')}
-                style={styles.favIcon}
-              />
-            )}
-          </TouchableOpacity>
-        }
-      />
     );
   };
   return (
@@ -246,6 +197,7 @@ const Favourites = ({navigation}) => {
               onPress={() => {
                 navigation.goBack();
                 setFilterView(false);
+                setFilterClicked(false);
               }}
               style={styles.backIcon}>
               <View style={styles.backIconContainer}>
@@ -855,7 +807,7 @@ const Favourites = ({navigation}) => {
             <FlatList
               data={filteredValue}
               keyExtractor={item => item._id}
-              renderItem={renderListSearch}
+              renderItem={renderItem}
             />
           ) : (
             <View style={{flex: 1, justifyContent: 'center'}}>

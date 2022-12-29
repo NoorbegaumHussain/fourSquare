@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import React, {useLayoutEffect, useState} from 'react';
 import CustomAppBar from '../components/CustomAppBar';
@@ -150,7 +151,17 @@ const ReviewList = ({navigation, route}) => {
                       placeId: route?.params?.placeId,
                     });
                   } else {
-                    SimpleToast.show('Please Login to continue');
+                    Alert.alert('Login to continue', '', [
+                      {
+                        text: 'Login',
+                        onPress: () => navigation.navigate('LoginScreen'),
+                      },
+                      {
+                        text: 'Cancel',
+                        onPress: () => null,
+                        style: 'cancel',
+                      },
+                    ]);
                   }
                 }}>
                 <Image

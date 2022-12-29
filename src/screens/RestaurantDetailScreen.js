@@ -11,6 +11,7 @@ import {
   PermissionsAndroid,
   ScrollView,
   Share,
+  Alert,
 } from 'react-native';
 import React, {useLayoutEffect, useRef, useState} from 'react';
 // import {ScrollView} from 'react-native-gesture-handler';
@@ -48,7 +49,17 @@ const RestaurantDetailScreen = ({navigation, route}) => {
       setVisible(true);
       setModal(true);
     } else {
-      SimpleToast.show('Please login to continue');
+      Alert.alert('Login to continue', '', [
+        {
+          text: 'Login',
+          onPress: () => navigation.navigate('LoginScreen'),
+        },
+        {
+          text: 'Cancel',
+          onPress: () => null,
+          style: 'cancel',
+        },
+      ]);
     }
   };
 
@@ -269,7 +280,6 @@ const RestaurantDetailScreen = ({navigation, route}) => {
                   longitude: route?.params?.longitude,
                 }}
                 onDragEnd={e => alert(JSON.stringify(e.nativeEvent.coordinate))}
-                title={'Test Marker'}
                 description={route?.params?.city}
               />
             </MapView>

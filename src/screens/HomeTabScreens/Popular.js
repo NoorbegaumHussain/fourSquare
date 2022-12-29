@@ -8,6 +8,7 @@ import {
   Image,
   Platform,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useLayoutEffect, useState} from 'react';
 import RestaurantDetails from '../../components/RestaurantDetails';
@@ -106,7 +107,17 @@ const Popular = ({navigation}) => {
                     dispatch(deleteFromFavourites(item?._id));
                   }
                 } else {
-                  Toast.show('Please login to continue');
+                  Alert.alert('Login to continue', '', [
+                    {
+                      text: 'Login',
+                      onPress: () => navigation.navigate('LoginScreen'),
+                    },
+                    {
+                      text: 'Cancel',
+                      onPress: () => null,
+                      style: 'cancel',
+                    },
+                  ]);
                 }
               }}>
               {favList.includes(item?._id) ? (

@@ -10,6 +10,7 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import React, {useState, useEffect, useRef, useLayoutEffect} from 'react';
 import Geolocation from '@react-native-community/geolocation';
@@ -195,7 +196,17 @@ const NearYou = ({navigation}) => {
                     dispatch(deleteFromFavourites(item?._id));
                   }
                 } else {
-                  Toast.show('Please login to continue');
+                  Alert.alert('Login to continue', '', [
+                    {
+                      text: 'Login',
+                      onPress: () => navigation.navigate('LoginScreen'),
+                    },
+                    {
+                      text: 'Cancel',
+                      onPress: () => null,
+                      style: 'cancel',
+                    },
+                  ]);
                 }
               }}>
               {item?._id !== undefined &&

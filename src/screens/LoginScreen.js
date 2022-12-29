@@ -120,7 +120,7 @@ const LoginScreen = ({navigation}) => {
                 touched,
               }) => (
                 <>
-                  <TouchableOpacity onPress={handleSkip}>
+                  <TouchableOpacity onPress={handleSkip}> 
                     <Text style={styles.skip}>Skip ></Text>
                   </TouchableOpacity>
                   <View>
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   },
   skip: {
     fontFamily: 'Avenir Book',
-    fontSize: 19,
+    fontSize: 22,
     color: '#FFFFFF',
     textAlign: 'right',
     marginRight: 28,

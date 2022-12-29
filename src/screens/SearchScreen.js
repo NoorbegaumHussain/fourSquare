@@ -626,6 +626,10 @@ const SearchScreen = ({navigation, route}) => {
                   onFocus={() => {
                     setUseCurrentLoaction('');
                     setSelectSearchArea(false);
+                    setPlace(() => ({
+                      isSet: false,
+                      placeString: '',
+                    }));
                     setFilterView(false);
                     setFocus(prev => ({
                       search: {hasfocus: false},
@@ -1224,7 +1228,7 @@ const SearchScreen = ({navigation, route}) => {
             </View>
           </View>
         )}
-      {place.isSet && !mapView && (
+      {place.isSet && !mapView && !useCurrentLocation && !selectSearchArea && (
         <View style={{flex: 1}}>
           {searchResult ? (
             <>
@@ -1258,7 +1262,7 @@ const SearchScreen = ({navigation, route}) => {
           )}
         </View>
       )}
-      {place.isSet && mapView && (
+      {place.isSet && mapView && !useCurrentLocation && !selectSearchArea && (
         <View style={{flex: 1}}>
           <View style={styles.mainContainer}>
             <View style={[styles.mapContainer, {height: '100%'}]}>
